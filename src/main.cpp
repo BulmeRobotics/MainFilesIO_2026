@@ -16,9 +16,12 @@
   #pragma region Includes //-------------------------------------------
 #endif
 
-//INcludes
+//Includes
 #include <Arduino.h>
 #include <Wire.h>
+
+#include <CustomDatatypes.h>
+
 
 
 #ifdef VISUAL_STUDIO
@@ -35,6 +38,7 @@
 #endif
 
 //Variables
+RobotState currentMenuState;
 
 #ifdef VISUAL_STUDIO
   #pragma endregion Variables
@@ -42,6 +46,8 @@
 #endif
 
   //FUNKTIONEN
+  void cyclicMainTask();
+  void cyclicRunTask();
 
 
 #ifdef VISUAL_STUDIO
@@ -50,22 +56,45 @@
 #endif
 
 int main(void) {
+  currentMenuState = RobotState::BOOT;
+
   Serial.begin(BAUD_RATE);
   Wire.begin(I2C_CLOCK);
   Wire1.begin();
-  
+
 
 
 #ifdef VISUAL_STUDIO
   #pragma endregion Initialization
   #pragma region Cyclic //----------------------------------------
 #endif
+currentMenuState = RobotState::SETTINGS;
+while(true){
+  cyclicMainTask();
 
+  if(currentMenuState == RobotState::RUN){
+    cyclicRunTask();
 
+  } else if(currentMenuState == RobotState::SETTINGS){
+    //Settings Task
+  } else if(currentMenuState == RobotState::INFO_SENSOR){
 
-}
+  } else if(currentMenuState == RobotState::INFO_VISUAL){
+
+  } else if(currentMenuState == RobotState::CALIBRATION){
+
+  } else if(currentMenuState == RobotState::BT){
+
+  }
+} return 0;}
 #ifdef VISUAL_STUDIO
   #pragma endregion Cyclic
   #pragma region Functions //------------------------------------
 #endif
 
+void cyclicMainTask(){
+  //Main cyclic tasks
+}
+void cyclicRunTask(){
+  //Cyclic tasks when in RUN state
+}
