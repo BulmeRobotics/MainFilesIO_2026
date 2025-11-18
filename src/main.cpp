@@ -19,6 +19,7 @@
 //INcludes
 #include <Arduino.h>
 #include <Wire.h>
+#include "src/SerialSetup.h"
 
 
 #ifdef VISUAL_STUDIO
