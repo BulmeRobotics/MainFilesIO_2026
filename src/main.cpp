@@ -19,9 +19,12 @@
 //Includes
 #include <Arduino.h>
 #include <Wire.h>
-#include "src/SerialSetup.h"
 
+  //Custom Includes - General
+#include <SerialSetup.h>
 #include <CustomDatatypes.h>
+
+  //Custom Includes - Modules
 
 
 
