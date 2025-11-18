@@ -1,9 +1,9 @@
-// author: Vincent Rohkamm
+// author: Vincent Rohkamm, Florian Wiesner
 // date: 18.11.2025
 // description: Main Program file for Robot
 
 #ifdef VISUAL_STUDIO
-  #pragma region Defines //--------------------------------------------
+  #pragma region Defines //------------------------------------------------------------------------
 #endif
 
   #define BAUD_RATE 115200
@@ -13,10 +13,10 @@
 
 #ifdef VISUAL_STUDIO
   #pragma endregion Defines
-  #pragma region Includes //-------------------------------------------
+  #pragma region Includes //-----------------------------------------------------------------------
 #endif
 
-//INcludes
+//Includes
 #include <Arduino.h>
 #include <Wire.h>
 #include "src/SerialSetup.h"
@@ -24,7 +24,7 @@
 
 #ifdef VISUAL_STUDIO
   #pragma endregion Includes
-  #pragma region Objects //--------------------------------------
+  #pragma region Objects //------------------------------------------------------------------------
 #endif
 
 //Objects
@@ -32,14 +32,14 @@
 
 #ifdef VISUAL_STUDIO
   #pragma endregion Objects
-  #pragma region Variables //------------------------------------
+  #pragma region Variables //----------------------------------------------------------------------
 #endif
 
 //Variables
 
 #ifdef VISUAL_STUDIO
   #pragma endregion Variables
-  #pragma region Prototypes //------------------------------------
+  #pragma region Prototypes //----------------------------------------------------------------------
 #endif
 
   //FUNKTIONEN
@@ -47,7 +47,7 @@
 
 #ifdef VISUAL_STUDIO
   #pragma endregion Functions
-  #pragma region Initialization //--------------------------------
+  #pragma region Initialization //-----------------------------------------------------------------
 #endif
 
 int main(void) {
@@ -59,7 +59,7 @@ int main(void) {
 
 #ifdef VISUAL_STUDIO
   #pragma endregion Initialization
-  #pragma region Cyclic //----------------------------------------
+  #pragma region Cyclic //-------------------------------------------------------------------------
 #endif
 
 
@@ -67,6 +67,6 @@ int main(void) {
 }
 #ifdef VISUAL_STUDIO
   #pragma endregion Cyclic
-  #pragma region Functions //------------------------------------
+  #pragma region Functions //----------------------------------------------------------------------
 #endif
 
