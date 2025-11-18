@@ -19,6 +19,7 @@
 //Includes
 #include <Arduino.h>
 #include <Wire.h>
+#include "src/SerialSetup.h"
 
 #include <CustomDatatypes.h>
 
