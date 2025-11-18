@@ -102,3 +102,7 @@ void cyclicMainTask(){
 void cyclicRunTask(){
   //Cyclic tasks when in RUN state
 }
+
+#ifdef VISUAL_STUDIO
+  #pragma endregion Functions //-------------------------------------------------------------------
+#endif
