@@ -2,7 +2,7 @@
 // date: 18.11.2025
 // description: Main Program file for Robot
 
-#ifdef VISUAL_STUDIO
+#ifdef _MSC_VER
   #pragma region Defines //------------------------------------------------------------------------
 #endif
 
@@ -11,7 +11,7 @@
 
 
 
-#ifdef VISUAL_STUDIO
+#ifdef _MSC_VER
   #pragma endregion Defines
   #pragma region Includes //-----------------------------------------------------------------------
 #endif
@@ -28,7 +28,7 @@
 
 
 
-#ifdef VISUAL_STUDIO
+#ifdef _MSC_VER
   #pragma endregion Includes
   #pragma region Objects //------------------------------------------------------------------------
 #endif
@@ -36,7 +36,7 @@
 //Objects
 
 
-#ifdef VISUAL_STUDIO
+#ifdef _MSC_VER
   #pragma endregion Objects
   #pragma region Variables //----------------------------------------------------------------------
 #endif
@@ -44,7 +44,7 @@
 //Variables
 RobotState currentMenuState;
 
-#ifdef VISUAL_STUDIO
+#ifdef _MSC_VER
   #pragma endregion Variables
   #pragma region Prototypes //----------------------------------------------------------------------
 #endif
@@ -54,7 +54,7 @@ RobotState currentMenuState;
   void cyclicRunTask();
 
 
-#ifdef VISUAL_STUDIO
+#ifdef _MSC_VER
   #pragma endregion Functions
   #pragma region Initialization //-----------------------------------------------------------------
 #endif
@@ -68,7 +68,7 @@ int main(void) {
 
 
 
-#ifdef VISUAL_STUDIO
+#ifdef _MSC_VER
   #pragma endregion Initialization
   #pragma region Cyclic //-------------------------------------------------------------------------
 #endif
@@ -91,7 +91,7 @@ while(true){
 
   }
 } return 0;}
-#ifdef VISUAL_STUDIO
+#ifdef _MSC_VER
   #pragma endregion Cyclic
   #pragma region Functions //----------------------------------------------------------------------
 #endif
