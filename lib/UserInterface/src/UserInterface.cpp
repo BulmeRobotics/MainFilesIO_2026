@@ -8,8 +8,8 @@
   #pragma region Constructor //-----------------------------------------------------------
 #endif
 
-UserInterface::UserInterface(){
-
+UserInterface::UserInterface(uint8_t updateInterval){
+    UPDATE_INTERVAL = updateInterval;
 }
 
 #ifdef _MSC_VER
@@ -29,11 +29,33 @@ uint8_t UserInterface::GetCharge(){
     return lastPercent;
 }
 
+void UserInterface::DrawBattery(){
+    display.fillRoundRect(680, 10, 100, 44, 5, HL_COLOR); //Battery Background
+	display.setTextColor(TEXT_COLOR);
+	//Battery symbol
+	display.fillRoundRect(685, 24, 3, 16, 5, BG_COLOR);
+	display.fillRoundRect(690, 15, 85, 34, 5, BG_COLOR);
+	display.fillRoundRect(693, 18, 79, 28, 5, HL_COLOR);
+
+	//Current Charge
+	display.fillRoundRect(768 - (lastPercent * 0.75), 18, 4 + (lastPercent * 0.75), 28, 5, BTN_COLOR);
+	display.setTextSize(2);
+	display.setCursor(715, 25);
+	char buff[4];
+	sprintf(buff, "%3d", lastPercent);
+	display.print(buff);
+	display.setTextSize(TEXT_SIZE);
+}
+
     // TOUCH HANDLER
+void UserInterface::gigaTouchHandler(uint8_t contacts, GDTpoint_t* points) {
+	NewContact = true;
+	LastContact = points[0];
+}
 
 #ifdef _MSC_VER
   #pragma endregion Private Methods
-  #pragma region UserInterface Global Methods //------------------------------------------------------
+  #pragma region Public Methods //------------------------------------------------------
 #endif
 
 void UserInterface::Initialize(){
@@ -93,8 +115,41 @@ void UserInterface::Initialize(){
     } else AddInfoMsg("Battery", "OK", true);
 }
 
+void UserInterface::AddInfoMsg(String Info, String Message, bool success){
+    if (statePointer != nullptr && *statePointer == RobotState::BOOT) display.setCursor(15, display.getCursorY());
+    else if(statePointer != nullptr && *statePointer == RobotState::BT) display.setCursor(10, display.getCursorY());
+	else if(statePointer != nullptr && *statePointer == RobotState::CHECKPOINT) display.setCursor(10, display.getCursorY());
+    
+    display.setTextSize(3);
+	display.print(Info);
+	display.setCursor(800 - (68 + 24 * Message.length()), display.getCursorY());
+	
+    if(success)	display.setTextColor(0x0fc0);
+	else display.setTextColor(0xf800);
+
+	display.print("[");
+	display.setTextColor(TEXT_COLOR);
+	display.print(Message);
+	
+    if(success)	display.setTextColor(0x0fc0);
+	else display.setTextColor(0xf800);
+	display.println("]");
+    
+	display.setTextColor(TEXT_COLOR);
+}
+
+void UserInterface::Update(){
+    uint32_t currentMillis = millis();
+    if(currentMillis >= lastUpdate + UPDATE_INTERVAL){
+        lastUpdate = currentMillis;
+
+        //Update Battery Status
+        GetCharge();
+    }
+}
+
 #ifdef _MSC_VER
-  #pragma endregion UserInterface Global Methods  
+  #pragma endregion Public Methods  
   #pragma region Signal Unit //-----------------------------------------------------------------------
 #endif
 

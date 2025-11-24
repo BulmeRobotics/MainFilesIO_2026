@@ -25,6 +25,7 @@ class UserInterface {
 private:
     const char UI_VERSION[4] = "0.1";
 
+    #define TEXT_SIZE 4
     #define TEXT_COLOR 0xce4a
     #define BG_COLOR 0
     #define HL_COLOR 0x1168
@@ -36,7 +37,8 @@ private:
     GigaDisplayRGB rgb;
 
     static void gigaTouchHandler(uint8_t contacts, GDTpoint_t* points);	//Touch detection INTERRUPT
-
+    static GDTpoint_t LastContact;
+    static bool NewContact;
 
     // LEDs and Buzzer
     const uint8_t neoPin = 8;
@@ -45,19 +47,38 @@ private:
     const uint8_t buzzerPin = 58;
     Adafruit_NeoPixel pixels = Adafruit_NeoPixel(pixelNum, neoPin, NEO_GRBW + NEO_KHZ800);
 
-    //Battery Measurement
+    // Battery Measurement
     const uint8_t batteryPin = A0;
     uint8_t lastPercent = 0;
+
+    // Settings
+    uint8_t UPDATE_INTERVAL = 50; //in ms
+    uint32_t lastUpdate = 0;
     
     // Pointers
     RobotState* statePointer = nullptr;
 
-
-
     // Private Methods
 
+    // @brief Draws Battery Status on Display
+    void DrawBattery();
+
+
+
 public:
-    UserInterface();    //CONSTRUCTOR
+
+    /**
+     * @brief Construct a new User Interface object
+     * @param updateInterval Update Interval for the User Interface in milliseconds
+     */
+    UserInterface(uint8_t updateInterval);    //CONSTRUCTOR
+
+    /**
+     * @brief Updates the User Interface (should be called cyclically)
+     */
+    void Update();
+
+    // EVENTS ---------------------------------------------------------------------------------
 
     void Initialize();
 
@@ -88,11 +109,6 @@ public:
      * @param message Custom message to display
      */
     void ShowErrorMsg(ErrorCodes error, String message);
-
-    /**
-     * @brief Updates the User Interface (should be called cyclically)
-     */
-    void Update();
 
     // SIGNALS ---------------------------------------------------------------------------------
 
