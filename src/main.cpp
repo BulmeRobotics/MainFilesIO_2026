@@ -9,6 +9,9 @@
   #define BAUD_RATE 115200
   #define I2C_CLOCK 1000000UL
 
+  #define BUTTON_Black 49
+  #define BUTTON_Gray	 51
+
 
 
 #ifdef _MSC_VER
@@ -25,6 +28,7 @@
 #include <CustomDatatypes.h>
 
   //Custom Includes - Modules
+#include <UserInterface.h>
 
 
 
@@ -34,6 +38,7 @@
 #endif
 
 //Objects
+UserInterface UI(50);
 
 
 #ifdef _MSC_VER
@@ -53,6 +58,9 @@ RobotState currentMenuState;
   void cyclicMainTask();
   void cyclicRunTask();
 
+  void ISR_Btn_Black();
+  void ISR_btn_Gray();
+
 
 #ifdef _MSC_VER
   #pragma endregion Functions
@@ -65,6 +73,20 @@ int main(void) {
   Serial.begin(BAUD_RATE);
   Wire.begin(I2C_CLOCK);
   Wire1.begin();
+
+  //Initialize Modules
+    //User Interface
+  UI.Initialize();
+  UI.ConnectPointer(&currentMenuState);
+    //Buttons
+  attachInterrupt(digitalPinToInterrupt(BUTTON_Black), ISR_ButtonBlack, RISING);
+	attachInterrupt(digitalPinToInterrupt(BUTTON_Gray), ISR_ButtonGray, RISING);
+
+
+
+
+
+  
 
 
 
@@ -98,9 +120,23 @@ while(true){
 
 void cyclicMainTask(){
   //Main cyclic tasks
+  UI.Update();
 }
 void cyclicRunTask(){
   //Cyclic tasks when in RUN state
+}
+
+void ISR_ButtonBlack() {
+	//Button for Starting and Checkpoint
+}
+void ISR_ButtonGray() {
+  //Button for changing Drive Mode
+	// if(lastButtonPressGray + 300 < millis()){
+	// 	if (UI.driveMode != ErrorCodes::West) UI.driveMode = (ErrorCodes)((uint8_t)UI.driveMode + 1);
+	// 	else UI.driveMode = ErrorCodes::straight;
+	// 	(mapSys.changeDriveMode(UI.driveMode));
+	// 	lastButtonPressGray = millis();
+	// }
 }
 
 #ifdef VISUAL_STUDIO
