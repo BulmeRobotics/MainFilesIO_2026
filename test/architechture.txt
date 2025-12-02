@@ -24,8 +24,7 @@ Variablen IMMER Private
 
 Public Methoden IMMER mit ausführlichem Kommentar
 /**
-* @brief Wichtigstes Zusammengefasst
-* Genaue Infos, wichtige Hinweise für den Bneutzer
-* @param Übergabeparameter beschreiben
+* @brief  Wichtigstes Zusammengefasst
+* @param  Übergabeparameter beschreiben
 * @return Rückgabewert beschreiben
 */

@@ -9,5 +9,17 @@ enum class RobotState : uint8_t {
 
 enum class ErrorCodes : uint8_t {
     OK,
-    UNKNOWN
+    ERROR,
+    UNKNOWN,
+    TIMEOUT,
+    NEW_DATA,
+};
+
+enum class TofType : uint8_t {
+    SHORT_LEFT_FRONT,
+    SHORT_LEFT_BACK,
+    SHORT_RIGHT_FRONT,
+    SHORT_RIGHT_BACK,
+    MID_FRONT,
+    MID_BACK,
 };
