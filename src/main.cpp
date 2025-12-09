@@ -29,6 +29,7 @@
 
   //Custom Includes - Modules
 #include <UserInterface.h>
+#include <TofSensors.h>
 
 
 
@@ -79,8 +80,8 @@ int main(void) {
   UI.Initialize();
   UI.ConnectPointer(&currentMenuState);
     //Buttons
-  attachInterrupt(digitalPinToInterrupt(BUTTON_Black), ISR_ButtonBlack, RISING);
-	attachInterrupt(digitalPinToInterrupt(BUTTON_Gray), ISR_ButtonGray, RISING);
+  //attachInterrupt(digitalPinToInterrupt(BUTTON_Black), ISR_ButtonBlack, RISING);
+	//attachInterrupt(digitalPinToInterrupt(BUTTON_Gray), ISR_ButtonGray, RISING);
 
 
 

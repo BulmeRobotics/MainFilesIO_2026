@@ -13,6 +13,7 @@ enum class ErrorCodes : uint8_t {
     UNKNOWN,
     TIMEOUT,
     NEW_DATA,
+    OUT_OF_RANGE,
 };
 
 enum class TofType : uint8_t {
@@ -22,4 +23,10 @@ enum class TofType : uint8_t {
     SHORT_RIGHT_BACK,
     MID_FRONT,
     MID_BACK,
+};
+
+enum class TofStatus : uint8_t{
+    VALID,
+    OUT_OF_RANGE,
+    TIMEOUT,
 };
