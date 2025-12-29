@@ -1,6 +1,8 @@
-// author: Vincent Rohkamm, Florian Wiesner
-// date: 18.11.2025
-// description: Main Program file for Robot
+/**
+* @authors: Vincent Rohkamm, Florian Wiesner
+* @date: 18.11.2025
+* @description: Main Program file for Robot
+*/
 
 #ifdef _MSC_VER
   #pragma region Defines //------------------------------------------------------------------------

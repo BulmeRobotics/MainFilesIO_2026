@@ -57,19 +57,28 @@ bool TofVL180X::Init(void) {
 }
 
 ErrorCodes TofVL180X::Read(void) {
-    lastMeasurement = sensor.readRangeContinuousMillimeters();
-    ts_lastMeasurement = millis();
-    newData = true;
-    measurementCount++;
+    uint8_t update = sensor.readRangeContinuous();
+    if (update != 0) {
+        lastMeasurement = update;
+        ts_lastMeasurement = millis();
+        newData = true;
+        measurementCount++;
 
-    if (lastMeasurement < 255) {
-        lastStatus = TofStatus::VALID;
-        return ErrorCodes::NEW_DATA;
+        if (lastMeasurement < 255) {
+            lastStatus = TofStatus::VALID;
+            return ErrorCodes::NEW_DATA;
+        }
+        else {
+            lastStatus = TofStatus::OUT_OF_RANGE;
+            return ErrorCodes::OUT_OF_RANGE;
+        }
     }
-    else {
-        lastStatus = TofStatus::OUT_OF_RANGE;
-        return ErrorCodes::OUT_OF_RANGE;
-    }
+    if (sensor.timeoutOccurred()) return ErrorCodes::TIMEOUT;
+    else return ErrorCodes::OK;
+
+    
+
+    
 }
 
 uint16_t TofVL180X::GetRange(void) {

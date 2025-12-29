@@ -11,7 +11,7 @@
 #endif
 #include <Arduino.h>
 #include <Wire.h>
-#include <VL6180X.h>
+#include "VL6180X_Custom/VL6180X_Custom.h"
 #include <vl53l4cd_class.h>
 #include <vl53l4cd_api.h>
 #include "CustomDatatypes.h"
@@ -85,6 +85,7 @@ class TofVL180X : public TofParent {
     * @return OK if no new data is available.
     *         NEW_DATA if data was retrieved and stored.
     *         OUT_OF_RANGE if measurement was out of range.
+    *         TIMEOUT if a timeout occured.
     */
     ErrorCodes Read(void) override;
 
@@ -145,6 +146,7 @@ class TofVL53L4CD : public TofParent {
     * @return OK if no new data is available.
     *         NEW_DATA if data was retrieved and stored.
     *         OUT_OF_RANGE if measurement was out of range.
+    *         TIMEOUT if a timeout occured.
     */
     ErrorCodes Read(void) override;
 
