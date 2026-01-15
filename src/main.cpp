@@ -8,11 +8,10 @@
   #pragma region Defines //------------------------------------------------------------------------
 #endif
 
-  #define BAUD_RATE 115200
-  #define I2C_CLOCK 1000000UL
-
-  #define BUTTON_Black 49
-  #define BUTTON_Gray	 51
+#define BAUD_RATE 115200
+#define I2C_CLOCK 1000000UL
+#define BUTTON_Black 49
+#define BUTTON_Gray	 51
 
 
 
