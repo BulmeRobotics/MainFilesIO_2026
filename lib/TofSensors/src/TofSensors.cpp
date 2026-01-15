@@ -2,7 +2,7 @@
 * @name:    TofSensors.cpp
 * @date:	18.11.2025
 * @authors: Florian Wiesner
-* @details: Header file for Time-of-Flight-Sensors 
+* @details: .cpp file for Time-of-Flight-Sensors 
 */
 
 // Libraries
@@ -262,3 +262,6 @@ TofStatus TofSensors::GetStatus(TofType sensor) {
         break;
     }
 }
+#ifdef _MSC_VER
+    #pragma endregion
+#endif

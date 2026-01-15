@@ -247,5 +247,6 @@ class TofSensors {
     */
     TofStatus GetStatus(TofType sensor);
 };
-
-#pragma endregion
+#ifdef _MSC_VER
+    #pragma endregion
+#endif

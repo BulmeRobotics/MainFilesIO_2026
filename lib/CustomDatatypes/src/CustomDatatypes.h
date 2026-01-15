@@ -30,3 +30,21 @@ enum class TofStatus : uint8_t{
     OUT_OF_RANGE,
     TIMEOUT,
 };
+
+struct GyroData {
+	float angle_abs;
+	float angle_car;
+	float angle_error;
+	bool direction_left;
+	bool direction_right;
+};
+
+enum class GyroAxles : uint8_t {
+	Axis_X,
+	Axis_Y,
+	Axis_Z
+};
+
+enum class Orientations : uint8_t {
+	North, East, South, West
+};
