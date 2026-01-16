@@ -35,10 +35,10 @@ void TofParent::On(void) {
     #pragma endregion
     #pragma region VL6180X //----------------------------------------------------------------------------------------------------
 #endif
-TofVL180X::TofVL180X(uint8_t i2cAddress , uint8_t xshutPin)
+TofVL6180X::TofVL6180X(uint8_t i2cAddress , uint8_t xshutPin)
     : TofParent(i2cAddress, xshutPin) {}
 
-bool TofVL180X::Init(void) {
+bool TofVL6180X::Init(void) {
     On();
 	delay(100);
 	sensor.setTimeout(500);
@@ -56,7 +56,7 @@ bool TofVL180X::Init(void) {
     return true;
 }
 
-ErrorCodes TofVL180X::Read(void) {
+ErrorCodes TofVL6180X::Read(void) {
     uint8_t update = sensor.readRangeContinuous();
     if (update != 0) {
         lastMeasurement = update;
@@ -81,15 +81,15 @@ ErrorCodes TofVL180X::Read(void) {
     
 }
 
-uint16_t TofVL180X::GetRange(void) {
+uint16_t TofVL6180X::GetRange(void) {
     return lastMeasurement;
 }
 
-TofStatus TofVL180X::GetStatus(void) {
+TofStatus TofVL6180X::GetStatus(void) {
     return lastStatus;
 }
 
-ErrorCodes TofVL180X::Stop(void) {
+ErrorCodes TofVL6180X::Stop(void) {
     sensor.stopContinuous();
     delay(5);
     newData = false;
@@ -99,7 +99,7 @@ ErrorCodes TofVL180X::Stop(void) {
     else return ErrorCodes::OK;
 }
 
-ErrorCodes TofVL180X::Continue(void) {
+ErrorCodes TofVL6180X::Continue(void) {
     sensor.startRangeContinuous(RANGING_BUDGET_SHORT);
     return ErrorCodes::OK;
 }

@@ -16,95 +16,7 @@
 #include <vl53l4cd_api.h>
 #include "CustomDatatypes.h"
 
-// Forward declarations
-class TofParent;
-class TofVL6180X;
-class TofVL53L4CD;
-
 #ifdef _MSC_VER
-    #pragma endregion
-    #pragma region TOF Class //--------------------------------------------------------------------------------------------------
-#endif
-class TofSensors {
-    private:
-    // #define OLD_ROBOT    // when the old robot is in use, to disable x64 TOFs
-
-    // I2C addresses for the sensors
-    #define I2C_ADDRESS_SLF 0x43
-    #define I2C_ADDRESS_SLB 0x42
-    #define I2C_ADDRESS_SRF 0x44
-    #define I2C_ADDRESS_SRB 0x45
-    #define I2C_ADDRESS_MF  0xC9
-    #define I2C_ADDRESS_MB  0xC4
-
-    // XSHUT pins for the sensors
-    #define XSHUT_PIN_SLF A2
-    #define XSHUT_PIN_SLB A5
-    #define XSHUT_PIN_SRF A3
-    #define XSHUT_PIN_SRB A4
-    #define XSHUT_PIN_MF  A7
-    #define XSHUT_PIN_MB  A6
-
-    #ifdef OLD_ROBOT
-        #define XSHUT_PIN_X64_FRONT 32  // only for old robot, to keep them in XSHUT
-        #define XSHUT_PIN_X64_BACK 26   // only for old robot, to keep them in XSHUT
-    #endif
-
-    // Ranging budgets for the sensors
-    #define RANGING_BUDGET_SHORT 30
-    #define RANGING_BUDGET_MID 20
-
-    // Objects
-    TofVL180X shortLeftFront = TofVL180X(I2C_ADDRESS_SLF, XSHUT_PIN_SLF);
-    TofVL180X shortRightFront = TofVL180X(I2C_ADDRESS_SRF, XSHUT_PIN_SRF);
-    TofVL180X shortLeftBack = TofVL180X(I2C_ADDRESS_SLB, XSHUT_PIN_SLB);
-    TofVL180X shortRightBack = TofVL180X(I2C_ADDRESS_SRB, XSHUT_PIN_SRB);
-    TofVL53L4CD midFront = TofVL53L4CD(I2C_ADDRESS_MF, XSHUT_PIN_MF);
-    TofVL53L4CD midBack = TofVL53L4CD(I2C_ADDRESS_MB, XSHUT_PIN_MB);
-
-    // Method
-    void DisableAll(void);
-
-    public:
-    // Constructor
-    TofSensors() = default;
-
-    // Methods
-    /**
-    * @brief  Initializes and configures all Time-of-Flight-Sensors.
-    * @return OK if all sensors were intitalized succesfully.
-    *         ERROR if something went wrong.
-    */
-    ErrorCodes Init(void);
-
-    /**
-    * @brief  Updates all Time-of-Flight-Sensors. If a new measurement is ready, it is stored in the corresponding sensor object.
-    * @return OK if no data was updated.
-    *         NEW_DATA if there were new values.
-    *         TIMEOUT if a sensor is not reachable
-    */
-    ErrorCodes Update(void);
-
-    /**
-    * @brief  Getter-method to access to last range measurement of a Time-of-Flight-Sensor. 
-    * @param  sensor enum to choose the sensor to get the value from.
-    * @return Last range measurement in mm.
-    */
-    uint16_t GetRange(TofType sensor);
-
-    /**
-    * @brief  Getter-method to access to last range measurement of a Time-of-Flight-Sensor. 
-    * @param  sensor enum to choose the sensor to get the value from.
-    * @return VALID if the distance is not out of range or a timeout occured.
-    *         OUT_OF_RANGE the measurement was out of range.
-    *         TIMEOUT the sensor is in a timeout.
-    */
-    TofStatus GetStatus(TofType sensor);
-};
-
-
-#ifdef _MSC_VER
-    #pragma endregion
     #pragma region Parent Class //-----------------------------------------------------------------------------------------------
 #endif
 class TofParent {
@@ -151,14 +63,14 @@ class TofParent {
     #pragma endregion
     #pragma region VL6180X //----------------------------------------------------------------------------------------------------
 #endif
-class TofVL180X : public TofParent {
+class TofVL6180X : public TofParent {
     private:
     // Object
     VL6180X sensor;
     
     public:
     // Constructor
-    TofVL180X(uint8_t i2cAddress , uint8_t xshutPin);
+    TofVL6180X(uint8_t i2cAddress , uint8_t xshutPin);
     
     // Methods
     /**
@@ -267,6 +179,88 @@ class TofVL53L4CD : public TofParent {
     *         ERROR if something went wrong.
     */
     ErrorCodes Continue(void) override;
+};
+
+
+#ifdef _MSC_VER
+    #pragma endregion
+    #pragma region TOF Class //--------------------------------------------------------------------------------------------------
+#endif
+class TofSensors {
+    private:
+    // #define OLD_ROBOT    // when the old robot is in use, to disable x64 TOFs
+
+    // I2C addresses for the sensors
+    #define I2C_ADDRESS_SLF 0x43
+    #define I2C_ADDRESS_SLB 0x42
+    #define I2C_ADDRESS_SRF 0x44
+    #define I2C_ADDRESS_SRB 0x45
+    #define I2C_ADDRESS_MF  0xC9
+    #define I2C_ADDRESS_MB  0xC4
+
+    // XSHUT pins for the sensors
+    #define XSHUT_PIN_SLF A2
+    #define XSHUT_PIN_SLB A5
+    #define XSHUT_PIN_SRF A3
+    #define XSHUT_PIN_SRB A4
+    #define XSHUT_PIN_MF  A7
+    #define XSHUT_PIN_MB  A6
+
+    #ifdef OLD_ROBOT
+        #define XSHUT_PIN_X64_FRONT 32  // only for old robot, to keep them in XSHUT
+        #define XSHUT_PIN_X64_BACK 26   // only for old robot, to keep them in XSHUT
+    #endif
+
+    // Ranging budgets for the sensors
+    #define RANGING_BUDGET_SHORT 30
+    #define RANGING_BUDGET_MID 20
+
+    // Objects
+    TofVL6180X shortLeftBack = TofVL6180X(I2C_ADDRESS_SLB, XSHUT_PIN_SLB);
+    TofVL6180X shortLeftFront = TofVL6180X(I2C_ADDRESS_SLF, XSHUT_PIN_SLF);
+    TofVL6180X shortRightFront = TofVL6180X(I2C_ADDRESS_SRF, XSHUT_PIN_SRF);
+    TofVL6180X shortRightBack = TofVL6180X(I2C_ADDRESS_SRB, XSHUT_PIN_SRB);
+    TofVL53L4CD midFront = TofVL53L4CD(I2C_ADDRESS_MF, XSHUT_PIN_MF);
+    TofVL53L4CD midBack = TofVL53L4CD(I2C_ADDRESS_MB, XSHUT_PIN_MB);
+
+    // Method
+    void DisableAll(void);
+
+    public:
+    // Constructor
+    TofSensors() = default;
+
+    // Methods
+    /**
+    * @brief  Initializes and configures all Time-of-Flight-Sensors.
+    * @return OK if all sensors were intitalized succesfully.
+    *         ERROR if something went wrong.
+    */
+    ErrorCodes Init(void);
+
+    /**
+    * @brief  Updates all Time-of-Flight-Sensors. If a new measurement is ready, it is stored in the corresponding sensor object.
+    * @return OK if no data was updated.
+    *         NEW_DATA if there were new values.
+    *         TIMEOUT if a sensor is not reachable
+    */
+    ErrorCodes Update(void);
+
+    /**
+    * @brief  Getter-method to access to last range measurement of a Time-of-Flight-Sensor. 
+    * @param  sensor enum to choose the sensor to get the value from.
+    * @return Last range measurement in mm.
+    */
+    uint16_t GetRange(TofType sensor);
+
+    /**
+    * @brief  Getter-method to access to last range measurement of a Time-of-Flight-Sensor. 
+    * @param  sensor enum to choose the sensor to get the value from.
+    * @return VALID if the distance is not out of range or a timeout occured.
+    *         OUT_OF_RANGE the measurement was out of range.
+    *         TIMEOUT the sensor is in a timeout.
+    */
+    TofStatus GetStatus(TofType sensor);
 };
 #ifdef _MSC_VER
     #pragma endregion

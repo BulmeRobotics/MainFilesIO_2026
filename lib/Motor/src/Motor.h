@@ -11,7 +11,6 @@
 #endif
 #include <Arduino.h>
 #include <cmath>
-#include <Servo.h>
 #include "CustomDatatypes.h"
 
 //Encoder ISR - outside class
