@@ -206,7 +206,6 @@ class TofSensors {
     #define RANGING_BUDGET_SHORT 30
     #define RANGING_BUDGET_MID 20
 
-    public:
     // Objects
     TofVL180X shortLeftFront = TofVL180X(I2C_ADDRESS_SLF, XSHUT_PIN_SLF);
     TofVL180X shortRightFront = TofVL180X(I2C_ADDRESS_SRF, XSHUT_PIN_SRF);
@@ -214,6 +213,10 @@ class TofSensors {
     TofVL180X shortRightBack = TofVL180X(I2C_ADDRESS_SRB, XSHUT_PIN_SRB);
     TofVL53L4CD midFront = TofVL53L4CD(I2C_ADDRESS_MF, XSHUT_PIN_MF);
     TofVL53L4CD midBack = TofVL53L4CD(I2C_ADDRESS_MB, XSHUT_PIN_MB);
+
+    public:
+    // Constructor
+    TofSensors() = default;
 
     // Methods
     /**

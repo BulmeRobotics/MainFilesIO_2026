@@ -25,7 +25,7 @@ Battery::Battery(){
     #pragma endregion
     #pragma region Basic methods //----------------------------------------------------------------------------------------------
 #endif
-float Battery::getBatteryVoltage(void) {
+float Battery::GetBatteryVoltage(void) {
 	int per = analogRead(A0);
 	float voltage = (per * (3.216 / 1024.0));
 	voltage = voltage * 4.0;
@@ -33,8 +33,8 @@ float Battery::getBatteryVoltage(void) {
 	return voltage + 0.2;	//Offset for the voltage divider
 }
 
-uint8_t Battery::getBatteryPer(void) {
-	float voltage = getBatteryVoltage();
+uint8_t Battery::GetBatteryPercent(void) {
+	float voltage = GetBatteryVoltage();
 	int percent;
 
 	if (voltage >= 8.2)	percent = 100;
@@ -54,19 +54,19 @@ uint8_t Battery::getBatteryPer(void) {
     #pragma endregion
     #pragma region UI methods //-------------------------------------------------------------------------------------------------
 #endif
-// ErrorCodes Battery::batteryUpdateHandler(){
+// ErrorCodes Battery::BatteryUpdateHandler(){
 // 	if(millis() >= (lastUpdate + intervalTime)){
 // 		lastUpdate = millis();
 
-// 		p_UI->batteryChargePercent = getBatteryPer(); //Update Battery percentage
+// 		p_UI->batteryChargePercent = GetBatteryPercent(); //Update Battery percentage
 // 		p_UI->updateBattery = true; //Update UI
 // 	}
 // 	return ErrorCodes::OK;
 // }
 
-// ErrorCodes Battery::initScreen(){
+// ErrorCodes Battery::InitScreen(){
 // 	//Configure Battery
-// 	if (getBatteryVoltage() > 6.8) p_UI->addStartUpInfo("Battery", "OK", true);
+// 	if (GetBatteryVoltage() > 6.8) p_UI->addStartUpInfo("Battery", "OK", true);
 // 	else p_UI->addStartUpInfo("Battery", "LOW/ERROR", false);
 // 	p_UI->batteryChargePercent = getBatteryPer();
 // 	p_UI->updateBattery = true; //Update UI

@@ -31,20 +31,20 @@ class Battery {
         }
     
         // Methods
-        ErrorCodes batteryUpdateHandler();
-        ErrorCodes initScreen();
+        ErrorCodes BatteryUpdateHandler();
+        ErrorCodes InitScreen();
 
         /**
         * @brief  Method to get the volatage level of the battery.
         * @return battery voltage in V.
         */
-        float getBatteryVoltage(void);
+        float GetBatteryVoltage(void);
 
         /**
         * @brief  Method to get the volatage level of the battery in percent (0-100%).
         * @return volatage level percent (0-100%).
         */
-        uint8_t getBatteryPer(void);
+        uint8_t GetBatteryPercent(void);
     
     private:
         // Member

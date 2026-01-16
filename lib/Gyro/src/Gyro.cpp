@@ -20,7 +20,7 @@ ErrorCodes Gyro::Init(void) {
 	}
 	bno.setExtCrystalUse(true);
 	delay(500);
-	resetAllAngles();
+	ResetAllAngles();
 	return ErrorCodes::OK;
 }
 
@@ -28,7 +28,7 @@ ErrorCodes Gyro::Init(void) {
     #pragma endregion
     #pragma region Angle //------------------------------------------------------------------------------------------------------
 #endif
-float Gyro::getAngle(GyroAxles axis) {
+float Gyro::GetAngle(GyroAxles axis) {
 	sensors_event_t event;
 	bno.getEvent(&event);
 
@@ -53,7 +53,7 @@ float Gyro::getAngle(GyroAxles axis) {
 	return 0;
 }
 
-float Gyro::getAngle_advanced(float targetAngle, float actualAngle) {
+float Gyro::GetAngle_advanced(float targetAngle, float actualAngle) {
 	// Get and constrain values
     targetAngle = constrain(targetAngle, 0, 360);
     data.angle_abs = constrain(actualAngle, 0, 360);
@@ -112,15 +112,15 @@ float Gyro::getAngle_advanced(float targetAngle, float actualAngle) {
     return data.angle_abs;
 }
 
-float Gyro::getAngle_advanced(float targetAngle, GyroAxles axis) {
-    return getAngle_advanced(targetAngle, getAngle(axis));
+float Gyro::GetAngle_advanced(float targetAngle, GyroAxles axis) {
+    return GetAngle_advanced(targetAngle, GetAngle(axis));
 }
 
 #ifdef _MSC_VER
     #pragma endregion
     #pragma region Orientation //------------------------------------------------------------------------------------------------
 #endif
-float Gyro::getAngleFromOrientation(Orientations orientation) {
+float Gyro::GetAngleFromOrientation(Orientations orientation) {
 	switch (orientation) {
 	case Orientations::North: return 0;
 	case Orientations::East: return 90;
@@ -130,7 +130,7 @@ float Gyro::getAngleFromOrientation(Orientations orientation) {
 	}
 }
 
-Orientations Gyro::getOrientationFromAngle(float angle) {
+Orientations Gyro::GetOrientationFromAngle(float angle) {
     angle = constrain(angle, 0, 360);   // constrain input
 	if (angle >= 315 || angle < 45) return Orientations::North;
 	else if (angle >= 45 && angle < 135) return Orientations::East;
@@ -139,16 +139,16 @@ Orientations Gyro::getOrientationFromAngle(float angle) {
 	return Orientations::North;
 }
 
-Orientations Gyro::getOrientationFromAngle(void) {  // overloaded
-	float angle = getAngle(GyroAxles::Axis_X);
-	return getOrientationFromAngle(angle);
+Orientations Gyro::GetOrientationFromAngle(void) {  // overloaded
+	float angle = GetAngle(GyroAxles::Axis_X);
+	return GetOrientationFromAngle(angle);
 }
 
 #ifdef _MSC_VER
     #pragma endregion
     #pragma region Accel & Gravity //--------------------------------------------------------------------------------------------
 #endif
-float Gyro::getAcceleration(GyroAxles axis) {
+float Gyro::GetAcceleration(GyroAxles axis) {
 	sensors_event_t event;
 	bno.getEvent(&event, Adafruit_BNO055::VECTOR_ACCELEROMETER);
 
@@ -158,7 +158,7 @@ float Gyro::getAcceleration(GyroAxles axis) {
 	return 0;
 }
 
-float Gyro::getGravity(GyroAxles axis) {
+float Gyro::GetGravity(GyroAxles axis) {
 	sensors_event_t event;
 	bno.getEvent(&event, Adafruit_BNO055::VECTOR_GRAVITY);
 
@@ -172,35 +172,35 @@ float Gyro::getGravity(GyroAxles axis) {
     #pragma endregion
     #pragma region Reset //------------------------------------------------------------------------------------------------------
 #endif
-void Gyro::resetAngle(GyroAxles axis) {
-	if (axis == GyroAxles::Axis_X) diff_x = -getRawAngle(GyroAxles::Axis_X);
-	else if (axis == GyroAxles::Axis_Y) diff_y = -getRawAngle(GyroAxles::Axis_Y);
-	else if (axis == GyroAxles::Axis_Z) diff_z = -getRawAngle(GyroAxles::Axis_Z);
+void Gyro::ResetAngle(GyroAxles axis) {
+	if (axis == GyroAxles::Axis_X) diff_x = -GetRawAngle(GyroAxles::Axis_X);
+	else if (axis == GyroAxles::Axis_Y) diff_y = -GetRawAngle(GyroAxles::Axis_Y);
+	else if (axis == GyroAxles::Axis_Z) diff_z = -GetRawAngle(GyroAxles::Axis_Z);
 }
 
-void Gyro::resetAllAngles(void) {
-	resetAngle(GyroAxles::Axis_X);
-	resetAngle(GyroAxles::Axis_Y);
-	resetAngle(GyroAxles::Axis_Z);
+void Gyro::ResetAllAngles(void) {
+	ResetAngle(GyroAxles::Axis_X);
+	ResetAngle(GyroAxles::Axis_Y);
+	ResetAngle(GyroAxles::Axis_Z);
 }
 
-void Gyro::setAngle(GyroAxles axis, float value) {
+void Gyro::SetAngle(GyroAxles axis, float value) {
     value = constrain(value, 0, 360);   //constrain input
 
 	if (axis == GyroAxles::Axis_X) {
-		resetAngle(axis);
+		ResetAngle(axis);
 		diff_x = diff_x + value;
 		if (diff_x > 360) diff_x -= 360;
 		if (diff_x < 0) diff_x += 360;
 	}
 	else if (axis == GyroAxles::Axis_Y) {
-		resetAngle(axis);
+		ResetAngle(axis);
 		diff_y = diff_y + value;
 		if (diff_y > 360) diff_y -= 360;
 		if (diff_y < 0) diff_y += 360;
 	}
 	else if (axis == GyroAxles::Axis_Z) {
-		resetAngle(axis);
+		ResetAngle(axis);
 		diff_z = diff_z + value;
 		if (diff_z > 360) diff_z -= 360;
 		if (diff_z < 0) diff_z += 360;
@@ -211,7 +211,7 @@ void Gyro::setAngle(GyroAxles axis, float value) {
     #pragma endregion
     #pragma region Temp //-------------------------------------------------------------------------------------------------------
 #endif
-int8_t Gyro::getTemp(void) {
+int8_t Gyro::GetTemp(void) {
 	return bno.getTemp();
 }
 
@@ -220,7 +220,7 @@ int8_t Gyro::getTemp(void) {
     #pragma region Private //----------------------------------------------------------------------------------------------------
 #endif
 //Private method to get the raw angle measurement from the sensor; NOT optimal to get the angle for the main program
-float Gyro::getRawAngle(GyroAxles axis) {
+float Gyro::GetRawAngle(GyroAxles axis) {
 	sensors_event_t event;
 	bno.getEvent(&event);
 
@@ -231,7 +231,7 @@ float Gyro::getRawAngle(GyroAxles axis) {
 }
 
 //Private method to subtract one angle from another
-float Gyro::subtractAngles(float currentAngle, float subBy) {
+float Gyro::SubtractAngles(float currentAngle, float subBy) {
 	float out = currentAngle - subBy;
 	if (out < 0) return 360 + out;
 	return out;

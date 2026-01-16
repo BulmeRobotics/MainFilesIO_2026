@@ -31,8 +31,8 @@ class Gyro {
         float diff_x, diff_y, diff_z;
 
         // Methods
-        float getRawAngle(GyroAxles axis);
-        float subtractAngles(float currentAngle, float subBy);
+        float GetRawAngle(GyroAxles axis);
+        float SubtractAngles(float currentAngle, float subBy);
         
     public:
         // Constructor
@@ -51,7 +51,7 @@ class Gyro {
         * @param  axis enum to specify the axis (Axis_X, Axis_Y, Axis_Z).
         * @return current angle in degrees (0-360°).
         */
-        float getAngle(GyroAxles axis);
+        float GetAngle(GyroAxles axis);
 
         /**
         * @brief  Overloaded method to calculate values suiting for control loops in the struct GyroData.
@@ -62,15 +62,15 @@ class Gyro {
         * @param actualAngle if instead of an axis an existing angle is given, the data will only be calculated
         * @return current angle in degrees (0-360°), the caluclated data is stored in 'data'.
         */
-        float getAngle_advanced(float targetAngle, float actualAngle);
-        float getAngle_advanced(float targetAngle, GyroAxles axis);
+        float GetAngle_advanced(float targetAngle, float actualAngle);
+        float GetAngle_advanced(float targetAngle, GyroAxles axis);
 
         /**
         * @brief  Method to get the angular value from a given orientation (NESW).
         * @param  orientation enum for the orientation (North, East, South, West).
         * @return corresponding angle in degrees (0, 90, 180, 270).
         */
-        float getAngleFromOrientation(Orientations orientation);
+        float GetAngleFromOrientation(Orientations orientation);
 
         /**
         * @brief  Overloaded method to get the orientation (NESW) from an angular value.
@@ -78,46 +78,46 @@ class Gyro {
         *         If no parameter is given, the angle is measured by the IMU.
         * @return corresponding orientation (NESW) (enum).
         */
-        Orientations getOrientationFromAngle(float angle);
-        Orientations getOrientationFromAngle(void);
+        Orientations GetOrientationFromAngle(float angle);
+        Orientations GetOrientationFromAngle(void);
 
         /**
         * @brief  Method to get an acceleration measurement from the IMU. DISCLAIMER - not well tested.
         * @param  axis enum to specify the axis (Axis_X, Axis_Y, Axis_Z).
         * @return current acceleration.
         */
-        float getAcceleration(GyroAxles axis);
+        float GetAcceleration(GyroAxles axis);
 
         /**
         * @brief  Method to get an gravity measurement from the IMU. DISCLAIMER - not well tested.
         * @param  axis enum to specify the axis (Axis_X, Axis_Y, Axis_Z).
         * @return current gravity.
         */
-        float getGravity(GyroAxles axis);
+        float GetGravity(GyroAxles axis);
 
         /**
         * @brief  Method to reset the angle of a specific axis. Zeros an axis.
         * @param  axis enum to specify the axis (Axis_X, Axis_Y, Axis_Z).
         */
-        void resetAngle(GyroAxles axis);
+        void ResetAngle(GyroAxles axis);
 
         /**
         * @brief  Method to reset all angles of the IMU. Zeros the IMU.
         */
-        void resetAllAngles(void);
+        void ResetAllAngles(void);
 
         /**
         * @brief  Method to set an axis to a specific angle.
         * @param  axis enum to specify the axis (Axis_X, Axis_Y, Axis_Z).
         * @param  value angular value in degrees (0-360°).
         */
-        void setAngle(GyroAxles axis, float value);
+        void SetAngle(GyroAxles axis, float value);
 
         /**
         * @brief  Method to get a temperature measurement from the IMU.
         * @return temperature in °C
         */
-        int8_t getTemp(void);
+        int8_t GetTemp(void);
         
         /**
         * @brief  Struct to store values used for control loops.
