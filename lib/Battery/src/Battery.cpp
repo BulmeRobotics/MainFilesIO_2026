@@ -1,7 +1,7 @@
 /**
 * @name:    Battery.cpp
 * @date:	15.01.2026
-* @authors: Florian Wiesner
+* @authors: Florian Wiesner, Paul Charusa
 * @details: .cpp file for the Battery
 */
 

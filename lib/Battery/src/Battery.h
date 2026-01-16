@@ -2,7 +2,7 @@
 /**
 * @name:    Battery.h
 * @date:	15.01.2026
-* @authors: Florian Wiesner
+* @authors: Florian Wiesner, Paul Charusa
 * @details: Header file for Battery Class
 */
 
