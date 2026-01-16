@@ -180,7 +180,23 @@ ErrorCodes TofVL53L4CD::Continue(void) {
     #pragma endregion
     #pragma region TOF Class //--------------------------------------------------------------------------------------------------
 #endif
+void TofSensors::DisableAll(void) {
+    shortLeftBack.Off();
+    shortLeftFront.Off();
+    shortRightFront.Off();
+    shortRightBack.Off();
+    midFront.Off();
+    midBack.Off();
+    #ifdef OLD_ROBOT
+        digitalWrite(XSHUT_PIN_X64_FRONT, LOW);     // only neccessary for old robot
+        digitalWrite(XSHUT_PIN_X64_FRONT, LOW);     // only neccessary for old robot
+    #endif
+}
+
 ErrorCodes TofSensors::Init(void) {
+    DisableAll();
+    delay(50);
+
     if (shortLeftBack.Init() == true && shortLeftFront.Init() == true && shortRightFront.Init() == true 
         && shortRightBack.Init() == true && midBack.Init() == true && midFront.Init() == true)
         return ErrorCodes::OK;
