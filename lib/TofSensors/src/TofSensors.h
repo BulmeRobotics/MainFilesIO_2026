@@ -225,6 +225,7 @@ class TofSensors {
 
     // Method
     void DisableAll(void);
+    
 
     public:
     // Constructor

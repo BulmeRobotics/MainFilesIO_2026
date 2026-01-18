@@ -2,7 +2,7 @@
 * @name:    Motor.cpp
 * @date:	16.01.2026
 * @authors: Florian Wiesner
-* @details: .cpp file for Motor driver class
+* @details: .cpp file for Motor driver class and the Drivetrain class
 */
 
 // Libraries
@@ -19,12 +19,12 @@ void encoder_ISR(void) {
 
 #ifdef _MSC_VER
     #pragma endregion
-    #pragma region Constructor //------------------------------------------------------------------------------------------------
+    #pragma region Motor //------------------------------------------------------------------------------------------------
 #endif
-Motor::Motor(uint8_t pwmPin, uint8_t driver, float maxMotorVoltage, uint8_t driverPinCW, uint8_t driverPinCCW, uint8_t encoderPhaseA) {
+Motor::Motor(uint8_t pwmPin, uint8_t driver, uint8_t driverPinCW, uint8_t driverPinCCW, uint8_t encoderPhaseA, float maxMotorVoltage) {
 	this->pwmPin = pwmPin;
 	this->driver = driver;
-	this->maxMotorVoltage = constrain(maxMotorVoltage, 0, 8.26);
+	this->maxMotorVoltage = constrain(maxMotorVoltage, 5, 8.26);
 	this->encoderPhaseA = encoderPhaseA;
 
     maxPWM = (float)255 * (maxMotorVoltage / MAX_VOLTAGE_PWM);  // calculate max duty-cycle
@@ -43,11 +43,6 @@ Motor::Motor(uint8_t pwmPin, uint8_t driver, float maxMotorVoltage, uint8_t driv
 	InitDriverPins(driverPinCW, driverPinCCW);
 }
 
-
-#ifdef _MSC_VER
-    #pragma endregion
-    #pragma region Driving //----------------------------------------------------------------------------------------------------
-#endif
 void Motor::SetSpeed(int8_t speed) {
 	speed = constrain(speed, -100, 100);
 	int16_t speedPWM = map(speed, (int16_t)-100, (int16_t)100, -maxPWM, maxPWM);
@@ -62,11 +57,7 @@ void Motor::Stop(void) {
 	SetSpeed(0);
 }
 
-#ifdef _MSC_VER
-    #pragma endregion
-    #pragma region Encoder //----------------------------------------------------------------------------------------------------
-#endif
-void Motor::ResetEncoder(uint64_t value = 0) {
+void Motor::ResetEncoder(uint64_t value) {
 	counter = value;
 }
 
@@ -88,10 +79,6 @@ void Motor::DisableEncoder(void) {
 	detachInterrupt(digitalPinToInterrupt(encoderPhaseA));
 }
 
-#ifdef _MSC_VER
-    #pragma endregion
-    #pragma region Private //----------------------------------------------------------------------------------------------------
-#endif
 //Private method to set the H-Bridge for positive direction.
 void Motor::SetPositiveDirection(void) {
 	if (driver == DRIVER_A) {
@@ -122,6 +109,65 @@ void Motor::InitDriverPins(uint8_t pinA, uint8_t pinB) {
 	pinMode(pinB, OUTPUT);
 	pinMode(encoderPhaseA, INPUT_PULLDOWN);
 }
+
+
 #ifdef _MSC_VER
     #pragma endregion
+    #pragma region Drivetrain //----------------------------------------------------------------------------------------------------
 #endif
+void Drivetrain::SetSpeed(int8_t speedLB, int8_t speedLF, int8_t speedRF, int8_t speedRB) {
+	motorLB.SetSpeed(speedLB);
+	motorLF.SetSpeed(speedLF);
+	motorRF.SetSpeed(speedRF);
+	motorRB.SetSpeed(speedRB);
+}
+
+void Drivetrain::SetSpeed(int8_t speed) {
+	SetSpeed(speed, speed, speed, speed);
+}
+
+void Drivetrain::SetSpeed_LB(int8_t speed) {
+	motorLB.SetSpeed(speed);
+}
+
+void Drivetrain::SetSpeed_LF(int8_t speed) {
+	motorLF.SetSpeed(speed);
+}
+
+void Drivetrain::SetSpeed_RF(int8_t speed) {
+	motorRF.SetSpeed(speed);
+}
+
+void Drivetrain::SetSpeed_RB(int8_t speed) {
+	motorRB.SetSpeed(speed);
+}
+
+void Drivetrain::SetSpeed_Left(int8_t speed) {
+	motorLB.SetSpeed(speed);
+	motorLF.SetSpeed(speed);
+}
+
+void Drivetrain::SetSpeed_Right(int8_t speed) {
+	motorRB.SetSpeed(speed);
+	motorRF.SetSpeed(speed);
+}
+
+void Drivetrain::Stop(void) {
+	SetSpeed(0, 0, 0, 0);
+}
+
+void Drivetrain::ResetEncoder(uint64_t value) {
+	motorLB.ResetEncoder(value);
+}
+
+float Drivetrain::GetEncoderDistance(void) {
+	return motorLB.GetEncoderDistance();
+}
+
+void Drivetrain::EnableEncoder(void) {
+	motorLB.EnableEncoder();
+}
+
+void Drivetrain::DisableEncoder(void) {
+	motorLB.DisableEncoder();
+}
