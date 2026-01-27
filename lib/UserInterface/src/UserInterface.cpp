@@ -4,12 +4,100 @@
 
 #include "UserInterface.h"
 
+// Definitionen der statischen Member
+GDTpoint_t UserInterface::LastContact{};
+bool UserInterface::NewContact = false;
+
 #ifdef _MSC_VER
   #pragma region Constructor //-----------------------------------------------------------
 #endif
 
 UserInterface::UserInterface(uint8_t updateInterval){
     UPDATE_INTERVAL = updateInterval;
+}
+
+void UserInterface::HandleMainMenu(){
+    display.fillRoundRect(0, 6, 120, 468, 15, HL_COLOR);	//SecondaryBackground
+	display.setTextSize(6);
+	display.setTextColor(0x0000);
+
+	//Display MenuButtons:
+		//LocationMenu:
+	display.fillRoundRect(10, 16, 100, 100, 15, BTN_COLOR);
+
+	display.fillCircle(60, 46, 25, 0);
+	display.fillTriangle(35, 46, 60, 106, 85, 46, 0);
+	display.fillCircle(60, 46, 13, BTN_COLOR);
+
+	//GeneralInfoMenu:
+	display.fillRoundRect(10, 132, 100, 100, 15, BTN_COLOR);
+	display.fillCircle(60, 182, 40, 0);
+	display.fillCircle(60, 182, 35, BTN_COLOR);
+	display.fillCircle(60, 182, 10, 0);
+	display.fillCircle(60, 182, 30, BTN_COLOR);
+	display.fillCircle(60, 182, 25, 0);
+	display.fillCircle(60, 182, 20, BTN_COLOR);
+
+	display.fillTriangle(10, 147, 110, 147, 60, 182, BTN_COLOR);
+	display.fillTriangle(10, 217, 110, 217, 60, 182, BTN_COLOR);
+	display.fillRect(25, 132, 70, 15, BTN_COLOR);
+	display.fillRect(25, 217, 70, 15, BTN_COLOR);
+
+	display.fillCircle(60, 182, 10, 0);
+	display.fillCircle(60, 182, 5, BTN_COLOR);
+
+	//SettingMenu:
+	display.fillRoundRect(10, 248, 100, 100, 15, BTN_COLOR);
+	display.fillCircle(60, 298, 33, 0);
+	//display.fillCircle(60, 298, 15, BTN_COLOR);
+
+	display.fillCircle(60, 268, 10, 0);	//Vertical
+	display.fillCircle(60, 328, 10, 0);
+
+	display.fillCircle(30, 298, 10, 0);	//Horizontal
+	display.fillCircle(90, 298, 10, 0);
+
+	display.fillCircle(81, 277, 10, 0);
+	display.fillCircle(39, 277, 10, 0);
+
+	display.fillCircle(81, 319, 10, 0);
+	display.fillCircle(39, 319, 10, 0);
+	display.fillCircle(60, 298, 19, BTN_COLOR);
+
+	//InfoMenu:
+	display.fillRoundRect(10, 364, 100, 100, 15, BTN_COLOR);
+	display.setCursor(45, 393);
+	display.fillCircle(60, 414, 38, 0);
+	display.fillCircle(60, 414, 33, BTN_COLOR);
+	display.print("I");
+
+	display.setTextColor(TEXT_COLOR);
+	display.setTextSize(4);
+
+    //Menu switching handling
+    if (NewContact == true){
+		//Main Menu:
+		if (LastContact.y <= 120 &&
+            (*p_state == RobotState::SETTINGS || *p_state == RobotState::ABOUT ||
+                *p_state == RobotState::INFO_SENSOR || *p_state == RobotState::INFO_VISUAL))
+        {
+			//Menu selector:
+            //Location Information
+            if (LastContact.x >= 360 && *p_state != RobotState::INFO_VISUAL)
+                *p_state = RobotState::INFO_VISUAL;
+            //Sensor Information
+            else if (LastContact.x < 360 && LastContact.x >= 244 && *p_state != RobotState::INFO_SENSOR)
+                *p_state = RobotState::INFO_SENSOR;
+            //Settings
+            else if (LastContact.x < 244 && LastContact.x >= 128 && *p_state != RobotState::SETTINGS)
+                *p_state = RobotState::SETTINGS;
+            //About
+            else if (LastContact.x < 128 && *p_state != RobotState::ABOUT)
+                *p_state = RobotState::ABOUT;
+
+            BuzzerSignal(5,0,1);
+		}
+    }
 }
 
 #ifdef _MSC_VER
@@ -114,11 +202,19 @@ void UserInterface::Initialize(){
         }
     } else AddInfoMsg("Battery", "OK", true);
 }
+void UserInterface::ConnectPointer(RobotState* state, ColorSensing* cs){
+    p_state = state;
+    p_colorSens = cs;
+    
+    return;
+}
+
+
 
 void UserInterface::AddInfoMsg(String Info, String Message, bool success){
-    if (statePointer != nullptr && *statePointer == RobotState::BOOT) display.setCursor(15, display.getCursorY());
-    else if(statePointer != nullptr && *statePointer == RobotState::BT) display.setCursor(10, display.getCursorY());
-	else if(statePointer != nullptr && *statePointer == RobotState::CHECKPOINT) display.setCursor(10, display.getCursorY());
+    if (p_state != nullptr && *p_state == RobotState::BOOT) display.setCursor(15, display.getCursorY());
+    else if(p_state != nullptr && *p_state == RobotState::BT) display.setCursor(10, display.getCursorY());
+	else if(p_state != nullptr && *p_state == RobotState::CHECKPOINT) display.setCursor(10, display.getCursorY());
     
     display.setTextSize(3);
 	display.print(Info);
@@ -145,6 +241,13 @@ void UserInterface::Update(){
 
         //Update Battery Status
         GetCharge();
+        DrawBattery();
+
+        //Draw and Handle mainMenu
+        HandleMainMenu();
+
+        
+
     }
 }
 

@@ -38,12 +38,13 @@
 #endif
 
 //Objects
-UserInterface UI(50);
+UserInterface UI(50); // Update Interval: 50ms
+ColorSensing colorSens;
 
 
 #ifdef _MSC_VER
-  #pragma endregion Objects
-  #pragma region Variables //----------------------------------------------------------------------
+#pragma endregion Objects
+#pragma region Variables //----------------------------------------------------------------------
 #endif
 
 //Variables
@@ -59,7 +60,7 @@ RobotState currentMenuState;
   void cyclicRunTask();
 
   void ISR_Btn_Black();
-  void ISR_btn_Gray();
+  void ISR_Btn_Gray();
 
 
 #ifdef _MSC_VER
@@ -77,10 +78,10 @@ int main(void) {
   //Initialize Modules
     //User Interface
   UI.Initialize();
-  UI.ConnectPointer(&currentMenuState);
+  UI.ConnectPointer(&currentMenuState, &colorSens);
     //Buttons
-  attachInterrupt(digitalPinToInterrupt(BUTTON_Black), ISR_ButtonBlack, RISING);
-	attachInterrupt(digitalPinToInterrupt(BUTTON_Gray), ISR_ButtonGray, RISING);
+  attachInterrupt(digitalPinToInterrupt(BUTTON_Black), ISR_Btn_Black, RISING);
+	attachInterrupt(digitalPinToInterrupt(BUTTON_Gray), ISR_Btn_Gray, RISING);
 
 
 
@@ -126,10 +127,10 @@ void cyclicRunTask(){
   //Cyclic tasks when in RUN state
 }
 
-void ISR_ButtonBlack() {
+void ISR_Btn_Black() {
 	//Button for Starting and Checkpoint
 }
-void ISR_ButtonGray() {
+void ISR_Btn_Gray() {
   //Button for changing Drive Mode
 	// if(lastButtonPressGray + 300 < millis()){
 	// 	if (UI.driveMode != ErrorCodes::West) UI.driveMode = (ErrorCodes)((uint8_t)UI.driveMode + 1);
