@@ -68,6 +68,10 @@ private:
     // @brief Draws Battery Status on Display
     void DrawBattery();
 
+    //Helper Functions for Constructing Menus
+    void ConstructAboutMenu();
+    void ConstructSettingsMenu();
+
 
 
 public:
