@@ -10,8 +10,8 @@
 
 #define BAUD_RATE 115200
 #define I2C_CLOCK 1000000UL
-#define BUTTON_Black 49
-#define BUTTON_Gray	 51
+#define BUTTON_BLACK 49
+#define BUTTON_GRAY	 51
 
 
 
@@ -61,8 +61,8 @@ RobotState currentMenuState;
   void cyclicMainTask();
   void cyclicRunTask();
 
-  void ISR_Btn_Black();
-  void ISR_Btn_Gray();
+  void ISR_BTN_BLACK();
+  void ISR_BTN_GRAY();
 
 
 #ifdef _MSC_VER
@@ -82,8 +82,8 @@ int main(void) {
   UI.Initialize();
   UI.ConnectPointer(&currentMenuState, &colorSens);
     //Buttons
-  attachInterrupt(digitalPinToInterrupt(BUTTON_Black), ISR_Btn_Black, RISING);
-	attachInterrupt(digitalPinToInterrupt(BUTTON_Gray), ISR_Btn_Gray, RISING);
+  attachInterrupt(digitalPinToInterrupt(BUTTON_BLACK), ISR_BTN_BLACK, RISING);
+	attachInterrupt(digitalPinToInterrupt(BUTTON_GRAY), ISR_BTN_GRAY, RISING);
 
 
 
@@ -129,10 +129,10 @@ void cyclicRunTask(){
   //Cyclic tasks when in RUN state
 }
 
-void ISR_Btn_Black() {
+void ISR_BTN_BLACK() {
 	//Button for Starting and Checkpoint
 }
-void ISR_Btn_Gray() {
+void ISR_BTN_GRAY() {
   //Button for changing Drive Mode
 	// if(lastButtonPressGray + 300 < millis()){
 	// 	if (UI.driveMode != ErrorCodes::West) UI.driveMode = (ErrorCodes)((uint8_t)UI.driveMode + 1);
