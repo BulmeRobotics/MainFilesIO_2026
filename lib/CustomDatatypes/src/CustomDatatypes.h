@@ -15,23 +15,25 @@ enum class ErrorCodes : uint8_t {
     OK, ERROR, UNKNOWN,
     TIMEOUT,
     NEW_DATA,
+    NO_NEW_DATA,
     OUT_OF_RANGE,
     invalid, wall, straight, north, east, south, west, Overflow //Mapping specific
 };
 
 enum class TofType : uint8_t {
-    SHORT_LEFT_FRONT,
-    SHORT_LEFT_BACK,
-    SHORT_RIGHT_FRONT,
-    SHORT_RIGHT_BACK,
-    MID_FRONT,
-    MID_BACK,
+    LEFT_FRONT,
+    LEFT_BACK,
+    RIGHT_FRONT,
+    RIGHT_BACK,
+    FRONT,
+    BACK,
 };
 
 enum class TofStatus : uint8_t{
     VALID,
     OUT_OF_RANGE,
     TIMEOUT,
+    ERROR
 };
 
 struct GyroData {
