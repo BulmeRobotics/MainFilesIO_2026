@@ -7,13 +7,16 @@ enum class RobotState : uint8_t {
     BOOT, INFO_SENSOR, INFO_VISUAL, SETTINGS, ABOUT, CALIBRATION, RUN, BT, CHECKPOINT
 };
 
+enum class RunState : uint8_t {
+    INITIAL, SETTILE, GET_INSTRUCTIONS, CHECKPOINT_RESET, END, TURN, ALIGN, DRIVE, 
+};
+
 enum class ErrorCodes : uint8_t {
-    OK,
-    ERROR,
-    UNKNOWN,
+    OK, ERROR, UNKNOWN,
     TIMEOUT,
     NEW_DATA,
     OUT_OF_RANGE,
+    invalid, wall, straight, north, east, south, west, Overflow //Mapping specific
 };
 
 enum class TofType : uint8_t {
@@ -46,7 +49,7 @@ enum class GyroAxles : uint8_t {
 };
 
 enum class Orientations : uint8_t {
-	North, East, South, West
+    North, East, South, West
 };
 
 enum class PoI_Type : uint8_t {
@@ -54,4 +57,11 @@ enum class PoI_Type : uint8_t {
     white, blue, checkpoint, black, dangerZone,
     harmed, safe, unharmed,
     red, yellow, green
+};
+
+enum class TileType : uint8_t {
+    inactive = 0,
+    unexplored,
+    visited, obstacle,
+    checkpoint, dangerZone, blue, black
 };

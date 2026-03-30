@@ -22,32 +22,32 @@
 class EEPROM {
     private:
 
-#define EEPROM_ADDR 0x50  
+    #define EEPROM_ADDR 0x50  
 
-#define EEPROM_PACKAGE_SIZE 2
-#define EEPROM_PACKAGE_OVERHEAD 1
-#define EEPROM_PACKAGE_NUM 8
+    #define EEPROM_PACKAGE_SIZE 2
+    #define EEPROM_PACKAGE_OVERHEAD 1
+    #define EEPROM_PACKAGE_NUM 8
 
-#define EEPROM_START_ADD_FRONT_WHITE 0x000
-#define EEPROM_START_ADD_MIDDLE_WHITE 0x019
+    #define EEPROM_START_ADD_FRONT_WHITE 0x000
+    #define EEPROM_START_ADD_MIDDLE_WHITE 0x019
 
-#define EEPROM_START_ADD_FRONT_BLUE 0x032
-#define EEPROM_START_ADD_MIDDLE_BLUE 0x04B
+    #define EEPROM_START_ADD_FRONT_BLUE 0x032
+    #define EEPROM_START_ADD_MIDDLE_BLUE 0x04B
 
-#define EEPROM_START_ADD_FRONT_CP 0x064
-#define EEPROM_START_ADD_MIDDLE_CP 0x07D
+    #define EEPROM_START_ADD_FRONT_CP 0x064
+    #define EEPROM_START_ADD_MIDDLE_CP 0x07D
 
-#define EEPROM_START_ADD_FRONT_BLACK 0x096
-#define EEPROM_START_ADD_MIDDLE_BlACK 0x0AF
+    #define EEPROM_START_ADD_FRONT_BLACK 0x096
+    #define EEPROM_START_ADD_MIDDLE_BlACK 0x0AF
 
-#define EEPROM_START_ADD_FRONT_DZ 0x0C8
-#define EEPROM_START_ADD_MIDDLE_DZ 0x0FA
+    #define EEPROM_START_ADD_FRONT_DZ 0x0C8
+    #define EEPROM_START_ADD_MIDDLE_DZ 0x0FA
 
-#define EEPROM_START_ADD_REFLECTIVE 0x12C
+    #define EEPROM_START_ADD_REFLECTIVE 0x12C
 
-#define EEPROM_MAIN_SPEED 0x12C
+    #define EEPROM_MAIN_SPEED 0x12C
 
-#define EEPROM_NEXT_AVALIBLE_ADDR 0x15E
+    #define EEPROM_NEXT_AVALIBLE_ADDR 0x15E
 
     Adafruit_EEPROM_I2C i2ceeprom;
 
@@ -71,11 +71,13 @@ class ColorSensing{
     #define MULTIPLEX_ADRESS 0x70
     //Objects for CS
         EEPROM eeprom;
-        Adafruit_AS7341 Front;
-	    Adafruit_AS7341 Middle;
+        Adafruit_AS7341 front;
+	    Adafruit_AS7341 middle;
 
         PoI_Type colorFront;
         PoI_Type colorMiddle;
+
+        PoI_Type floorComb;
 
         bool _ALERT;
         bool _FREEZE_SENSOR;
@@ -95,8 +97,7 @@ class ColorSensing{
         /**
          * @brief inits ColorSensing for Floor
          * @param wire: Wire channel
-         * @param addr_front: I2C address of front CS
-         * @param addr_middle: I2C address of middle CS
+
          * @return	b1...Middle not found
 		 * @return	b2...LED Error front
 		 * @return	b3...LED Error middle
@@ -111,7 +112,7 @@ class ColorSensing{
          * @brief returns current floor type
          * @return current floor type as PoI_Type
          */
-        PoI_Type GetType();
+        PoI_Type GetFloor();
 
         /**
          * @brief returns if the front sensor registers not White
