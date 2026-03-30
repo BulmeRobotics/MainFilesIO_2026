@@ -10,8 +10,8 @@
 
 #define BAUD_RATE 115200
 #define I2C_CLOCK 1000000UL
-#define BUTTON_Black 49
-#define BUTTON_Gray	 51
+#define BUTTON_BLACK 49
+#define BUTTON_GRAY	 51
 
 
 
@@ -33,14 +33,14 @@
 #include <TofSensors.h>
 
 
-
 #ifdef _MSC_VER
   #pragma endregion Includes
   #pragma region Objects //------------------------------------------------------------------------
 #endif
 
 //Objects
-UserInterface UI(50);
+UserInterface UI(50); // Update Interval: 50ms
+ColorSensing colorSens;
 
 
 #ifdef _MSC_VER
@@ -60,8 +60,8 @@ RobotState currentMenuState;
   void cyclicMainTask();
   void cyclicRunTask();
 
-  void ISR_Btn_Black();
-  void ISR_btn_Gray();
+  void ISR_BTN_BLACK();
+  void ISR_BTN_GRAY();
 
 
 #ifdef _MSC_VER
@@ -79,10 +79,10 @@ int main(void) {
   //Initialize Modules
     //User Interface
   UI.Initialize();
-  UI.ConnectPointer(&currentMenuState);
+  UI.ConnectPointer(&currentMenuState, &colorSens);
     //Buttons
-  //attachInterrupt(digitalPinToInterrupt(BUTTON_Black), ISR_ButtonBlack, RISING);
-	//attachInterrupt(digitalPinToInterrupt(BUTTON_Gray), ISR_ButtonGray, RISING);
+  attachInterrupt(digitalPinToInterrupt(BUTTON_BLACK), ISR_BTN_BLACK, RISING);
+	attachInterrupt(digitalPinToInterrupt(BUTTON_GRAY), ISR_BTN_GRAY, RISING);
 
 
 
@@ -128,10 +128,12 @@ void cyclicRunTask(){
   //Cyclic tasks when in RUN state
 }
 
-void ISR_ButtonBlack() {
+void ISR_BTN_BLACK() {
 	//Button for Starting and Checkpoint
+
+
 }
-void ISR_ButtonGray() {
+void ISR_BTN_GRAY() {
   //Button for changing Drive Mode
 	// if(lastButtonPressGray + 300 < millis()){
 	// 	if (UI.driveMode != ErrorCodes::West) UI.driveMode = (ErrorCodes)((uint8_t)UI.driveMode + 1);

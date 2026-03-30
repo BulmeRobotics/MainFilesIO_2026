@@ -4,6 +4,10 @@
 
 #include "UserInterface.h"
 
+// Definitionen der statischen Member
+GDTpoint_t UserInterface::LastContact{};
+bool UserInterface::NewContact = false;
+
 #ifdef _MSC_VER
   #pragma region Constructor //-----------------------------------------------------------
 #endif

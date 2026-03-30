@@ -15,6 +15,7 @@
 #include <Adafruit_NeoPixel.h>
 
 #include <CustomDatatypes.h>
+#include <ColorSensing.h>
 
 #ifdef _MSC_VER
     #pragma endregion Includes
