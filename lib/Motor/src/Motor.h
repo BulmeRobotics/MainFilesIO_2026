@@ -115,7 +115,7 @@ class Drivetrain {
         #define MOTOR_LF_PWM 11
         #define MOTOR_LF_CW 36
         #define MOTOR_LF_CCW 39
-        #define MOTOR_LF_ENCODER 6
+        #define MOTOR_LF_ENCODER 6  // Not-existent
         #define MOTOR_LF_DRIVER DRIVER_A
 
         #define MOTOR_RF_PWM 10
@@ -127,7 +127,7 @@ class Drivetrain {
         #define MOTOR_RB_PWM 9
         #define MOTOR_RB_CW 37
         #define MOTOR_RB_CCW 38
-        #define MOTOR_RB_ENCODER 2
+        #define MOTOR_RB_ENCODER 2  // Not-existent
         #define MOTOR_RB_DRIVER DRIVER_B
 
         // Constructor
