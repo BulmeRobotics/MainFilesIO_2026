@@ -44,8 +44,8 @@ ColorSensing colorSens;
 
 
 #ifdef _MSC_VER
-  #pragma endregion Objects
-  #pragma region Variables //----------------------------------------------------------------------
+#pragma endregion Objects
+#pragma region Variables //----------------------------------------------------------------------
 #endif
 
 //Variables
