@@ -471,6 +471,20 @@ bool TofSensors::AnyTimeoutOccured(void) {
         return false;
 }
 
+int8_t TofSensors::CalculateLeftRightError(float angleError, uint8_t sideWallThreshold, uint8_t gapRobotWall) {
+	if (leftBack.GetRange() < sideWallThreshold && leftFront.GetRange() < sideWallThreshold && rightFront.GetRange() < sideWallThreshold && rightBack.GetRange() < sideWallThreshold)
+		return ((leftBack.GetRange() + leftFront.GetRange()) / 2 - (rightFront.GetRange() + rightBack.GetRange()) / 2) / 2;
+	else if (leftBack.GetRange() < sideWallThreshold && leftFront.GetRange() < sideWallThreshold)
+		return (leftBack.GetRange() + leftFront.GetRange()) / 2 - gapRobotWall;
+	else if (rightFront.GetRange() < sideWallThreshold && rightBack.GetRange() < sideWallThreshold)
+		return gapRobotWall - (rightFront.GetRange() + rightBack.GetRange()) / 2;
+	// else if (leftFront.GetRange() < sideWallThreshold && angleError >= -2.5 && angleError <= 2.5)
+	// 	return leftFront.GetRange() - gapRobotWall;
+	// else if (rightFront.GetRange() < sideWallThreshold && angleError >= -2.5 && angleError <= 2.5)
+	// 	return gapRobotWall - rightFront.GetRange();
+	else return 0;
+}
+
 #ifdef _MSC_VER
     #pragma endregion
 #endif
