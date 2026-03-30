@@ -57,12 +57,20 @@ private:
     uint32_t lastUpdate = 0;
     
     // Pointers
-    RobotState* statePointer = nullptr;
+    RobotState* p_state = nullptr;
+    ColorSensing* p_colorSens = nullptr;
 
     // Private Methods
 
+    // @brief Draws menu buttons
+    void HandleMainMenu();
+
     // @brief Draws Battery Status on Display
     void DrawBattery();
+
+    //Helper Functions for Constructing Menus
+    void ConstructAboutMenu();
+    void ConstructSettingsMenu();
 
 
 
@@ -86,7 +94,7 @@ public:
     /**
      * @brief Connects the other classes to the User Interface
      */
-    void ConnectPointer(RobotState* state);
+    void ConnectPointer(RobotState* state, ColorSensing* cs);
 
     /**
      * @brief Adds an Information to the Message Log in startup or BLE screen
