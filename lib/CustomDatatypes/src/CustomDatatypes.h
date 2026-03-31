@@ -12,19 +12,15 @@ enum class RunState : uint8_t {
 };
 
 enum class ErrorCodes : uint8_t {
-<<<<<<< HEAD
     OK,
     ERROR,
     UNKNOWN,
     INVALID,
-=======
     OK, ERROR, UNKNOWN,
->>>>>>> 37eae5f4e0bd41fcfccf5b08a225d3d34a03d391
     TIMEOUT,
     NEW_DATA,
     NO_NEW_DATA,
     OUT_OF_RANGE,
-<<<<<<< HEAD
     BUMPER_WALL,
     BUMPER_DISABLED,
     RAMP_END,
@@ -33,9 +29,7 @@ enum class ErrorCodes : uint8_t {
     CHECK_DRIVE,
     SCAN_DRIVE,
     CHECK_RAMP,
-=======
     invalid, wall, straight, north, east, south, west, Overflow //Mapping specific
->>>>>>> 37eae5f4e0bd41fcfccf5b08a225d3d34a03d391
 };
 
 enum class TofType : uint8_t {
