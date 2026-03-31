@@ -329,17 +329,8 @@ void UserInterface::Initialize(){
 	display.println("{OK}");
 
 	//Start touch Detector
-	if (touchDetector.begin()) {
-		#ifdef DEBUG_UI
-		Serial.print("Touch controller init - OK");
-		#endif //
-	}
-	else {	//Touch failed
-		#ifdef DEBUG_UI
-		Serial.print("Touch controller init - FAILED");
-		#endif // 
-		AddInfoMsg("TouchDetection", "Failed", false);
-	}
+	if (!touchDetector.begin()) AddInfoMsg("TouchDetection", "Failed", false);
+	
 	touchDetector.onDetect(gigaTouchHandler);
 
     //Check Battery at Startup

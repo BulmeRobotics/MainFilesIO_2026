@@ -150,7 +150,6 @@ int main(void) {
   #pragma endregion Initialization
   #pragma region Cyclic //-------------------------------------------------------------------------
 #endif
-currentMenuState = RobotState::SETTINGS;
 while (true) {
   serialLoop();
   cyclicMainTask();
