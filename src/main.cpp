@@ -69,6 +69,8 @@ RobotState currentMenuState;
 RunState currentRunState;
 uint32_t lastButtonPressGray;
 
+uint8_t speedMod = 1;
+
 //Flags
 bool _ROBOT_TURNING = false;
 bool _RAMP_INFRONT = false;
@@ -276,7 +278,7 @@ while(true){
 
     else if (currentRunState == RunState::DRIVE) {
       //Control Logic
-      ErrorCodes driveSave = robot.controlDrive(((UI.GetDriveSpeed() * 2) / robot.speedMOD), gyro.GetAngleFromOrientation(robot.robotTargetAngle));
+      ErrorCodes driveSave = robot.controlDrive((UI.GetDriveSpeed() * speedMod), gyro.GetAngleFromOrientation(robot.robotTargetAngle));
 			if(driveSave == ErrorCodes::CHECK_DRIVE) currentRunState = RunState::CHECK_DRIVE;
 			else if (driveSave == ErrorCodes::TIMEOUT) {
         robot.timeoutDrive();
