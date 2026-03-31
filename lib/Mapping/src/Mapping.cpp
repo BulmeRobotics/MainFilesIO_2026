@@ -588,25 +588,41 @@ Instructionset Mapping::GetInstruction() {
 
             // Convert path to movement instructions (reverse order)
             pathIndex = 0;
-            for (int16_t i = pathLength - 1; i >= 0 && pathIndex < MAX_INSTRUCTIONS - 1; i--) {
+            
+            Orientations simOrientation = currentOrientation; 
+
+            // IMPORTANT: -2 instead of -: Worst-Case 2 Instructions (Turn + Forward) for each Loop
+            for (int16_t i = pathLength - 1; i >= 0 && pathIndex < MAX_INSTRUCTIONS - 2; i--) {
                 uint16_t nextTile = tempPath[i];
                 uint16_t fromTile = (i == pathLength - 1) ? currrentPosition : tempPath[i + 1];
 
                 // Determine direction from fromTile to nextTile
                 if (tiles[fromTile].north == nextTile) {
-                    path[pathIndex++] = Instructionset::T_North;
+                    if (simOrientation != Orientations::North) {
+                        path[pathIndex++] = Instructionset::T_North;
+                        simOrientation = Orientations::North; // Simulierte Richtung aktualisieren
+                    }
                     path[pathIndex++] = Instructionset::D_Forward;
                 }
                 else if (tiles[fromTile].east == nextTile) {
-                    path[pathIndex++] = Instructionset::T_East;
+                    if (simOrientation != Orientations::East) {
+                        path[pathIndex++] = Instructionset::T_East;
+                        simOrientation = Orientations::East;
+                    }
                     path[pathIndex++] = Instructionset::D_Forward;
                 }
                 else if (tiles[fromTile].south == nextTile) {
-                    path[pathIndex++] = Instructionset::T_South;
+                    if (simOrientation != Orientations::South) {
+                        path[pathIndex++] = Instructionset::T_South;
+                        simOrientation = Orientations::South;
+                    }
                     path[pathIndex++] = Instructionset::D_Forward;
                 }
                 else if (tiles[fromTile].west == nextTile) {
-                    path[pathIndex++] = Instructionset::T_West;
+                    if (simOrientation != Orientations::West) {
+                        path[pathIndex++] = Instructionset::T_West;
+                        simOrientation = Orientations::West;
+                    }
                     path[pathIndex++] = Instructionset::D_Forward;
                 }
                 else if (tiles[fromTile].up == nextTile || tiles[fromTile].down == nextTile) {
