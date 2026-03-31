@@ -95,16 +95,22 @@ bool _RAMP_BEHIND = false;
 #endif
 
 int main(void) {
+  serialSetup(BAUD_RATE);
+
   currentMenuState = RobotState::BOOT;
 
-  Serial.begin(BAUD_RATE);
-  Wire.begin(I2C_CLOCK);
+  Wire.begin();
+  Wire.setClock(I2C_CLOCK);
   Wire1.begin();
 
   //Initialize Modules
     //User Interface
+  while (!Serial);
+  Serial.println("SETUP");
   UI.Initialize();
+  Serial.println("UI init done");
   UI.ConnectPointer(&currentMenuState, &cs, &mapper);
+  Serial.println("UI pointer done");
     //Buttons
   attachInterrupt(digitalPinToInterrupt(BUTTON_BLACK), ISR_BTN_BLACK, RISING);
 	attachInterrupt(digitalPinToInterrupt(BUTTON_GRAY), ISR_BTN_GRAY, RISING);
@@ -137,7 +143,8 @@ int main(void) {
   #pragma region Cyclic //-------------------------------------------------------------------------
 #endif
 currentMenuState = RobotState::SETTINGS;
-while(true){
+while (true) {
+  serialLoop();
   cyclicMainTask();
 
   if (currentMenuState == RobotState::RUN) {
