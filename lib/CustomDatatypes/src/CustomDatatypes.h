@@ -7,7 +7,7 @@ enum class RobotState : uint8_t {
 };
 
 enum class RunState : uint8_t {
-    INITIAL, SETTILE, GET_INSTRUCTIONS, CHECKPOINT_RESET, END, TURN, ALIGN, DRIVE, 
+    INITIAL, SETTILE, GET_INSTRUCTIONS, CHECKPOINT_RESET, END, TURN, ALIGN, CHECK_DRIVE, DRIVE, RAMP, SCAN,
 };
 
 enum class ErrorCodes : uint8_t {

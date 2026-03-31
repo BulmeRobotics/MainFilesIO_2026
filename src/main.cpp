@@ -13,6 +13,10 @@
 #define BUTTON_BLACK 49
 #define BUTTON_GRAY	 51
 
+#define RESET_HEIGHT_SPAN 90
+#define UPPER_LEVEL_HEIGHT 230
+#define LOWER_LEVEL_HEIGHT -100
+
 
 
 #ifdef _MSC_VER
@@ -34,7 +38,10 @@
 #include <UserInterface.h>
 #include <TofSensors.h>
 #include <ColorSensing.h>
-
+#include <Gyro.h>
+#include <Motor.h>
+#include <Ejector.h>
+#include <Driving.h>
 
 #ifdef _MSC_VER
   #pragma endregion Includes
@@ -45,7 +52,12 @@
 UserInterface UI(50); // Update Interval: 50ms
 EEPROM eeprom;
 ColorSensing cs(&Serial);
+Gyro gyro;
+Ejector ejector;
+TofSensors tof;
 Mapping mapper;
+Drivetrain drivetrain;
+Driving robot;
 
 #ifdef _MSC_VER
 #pragma endregion Objects
@@ -55,8 +67,12 @@ Mapping mapper;
 //Variables
 RobotState currentMenuState;
 RunState currentRunState;
-
 uint32_t lastButtonPressGray;
+
+//Flags
+bool _ROBOT_TURNING = false;
+bool _RAMP_INFRONT = false;
+bool _RAMP_BEHIND = false;
 
 #ifdef _MSC_VER
   #pragma endregion Variables
@@ -100,14 +116,18 @@ int main(void) {
   cs.EnableRead(true);
 
   //ROBOT (Driving, ToF)
+  tof.Init();
 
   //Gyro
+  gyro.Init();
 
   //Ejector
-
-  //MotorInterrupts
+  ejector.Init();
 
   //Camera
+
+  //Robot
+  robot.init(&cs, &tof, &gyro, &mapper, &drivetrain);
 
   UI.AddInfoMsg("Finished STARTUP", "ACK", false);
 #ifdef _MSC_VER
@@ -118,44 +138,102 @@ currentMenuState = RobotState::SETTINGS;
 while(true){
   cyclicMainTask();
 
-  if(currentMenuState == RobotState::RUN){
-    if(currentRunState == RunState::INITIAL){ //Initial Run Logic
+  if (currentMenuState == RobotState::RUN) {
+    if (currentRunState == RunState::INITIAL) { //Initial Run Logic
       mapper.Reset();
       currentRunState = RunState::SETTILE;
     }
 
     cyclicRunTask();  //Cyclic Run Tasks
 
-    if(currentRunState == RunState::SETTILE){
+    if (currentRunState == RunState::SETTILE) {
       //SetTile Logic
+			#ifdef DEBUG_RUN
+			Serial.println("SetTile");
+			#endif // DEBUG_RUN
 
-      mapper.SetTile(/*walls*/0, /*floor*/TileType::visited);
-    } else if(currentRunState == RunState::GET_INSTRUCTIONS){
+      UI.BuzzerSignal(5, 0, 1);
+			mapper.SetTile(tof.GetWalls(_RAMP_INFRONT, _RAMP_BEHIND), /*floor*/TileType::visited);
+			currentRunState = RunState::GET_INSTRUCTIONS;
+			robot.lastSetTile = millis();
+    } 
+
+    else if (currentRunState == RunState::GET_INSTRUCTIONS) {
+      #ifdef DEBUG_RUN
+			Serial.print("Get Instructions: ");
+			#endif // DEBUG_RUN
       //Get Instructions Logic
       switch (mapper.GetInstruction()) 
       {
       case Instructionset::T_North:
-        //Turn North Logic
+      //Turn North Logic
+        #ifdef DEBUG_RUN
+				Serial.println("Turn North");
+				#endif // DEBUG_RUN
+				robot.endDrive();
+				robot.startAdjustment();
+				currentRunState = RunState::TURN;
+				robot.robotTargetAngle = Orientations::North;
+        robot.startTurn(gyro.GetAngleFromOrientation(robot.robotTargetAngle));
+				_ROBOT_TURNING = true;
         break;
+
       case Instructionset::T_East:
         //Turn East Logic
+        #ifdef DEBUG_RUN
+				Serial.println("Turn EAST");
+				#endif // DEBUG_RUN
+				robot.endDrive();
+				robot.startAdjustment();
+				currentRunState = RunState::TURN;
+				robot.robotTargetAngle = Orientations::East;
+        robot.startTurn(gyro.GetAngleFromOrientation(robot.robotTargetAngle));
+				_ROBOT_TURNING = true;
         break;
+
       case Instructionset::T_South:
         //Turn South Logic
+        #ifdef DEBUG_RUN
+				Serial.println("Turn South");
+				#endif // DEBUG_RUN
+				robot.endDrive();
+				robot.startAdjustment();
+				currentRunState = RunState::TURN;
+				robot.robotTargetAngle = Orientations::South;
+        robot.startTurn(gyro.GetAngleFromOrientation(robot.robotTargetAngle));
+				_ROBOT_TURNING = true;
         break;
+
       case Instructionset::T_West:
         //Turn West Logic
+        #ifdef DEBUG_RUN
+				Serial.println("Turn West");
+				#endif // DEBUG_RUN
+				robot.endDrive();
+				robot.startAdjustment();
+				currentRunState = RunState::TURN;
+				robot.robotTargetAngle = Orientations::West;
+        robot.startTurn(gyro.GetAngleFromOrientation(robot.robotTargetAngle));
+				_ROBOT_TURNING = true;
         break;
+
       case Instructionset::D_Forward:
         //Drive Forward Logic
-
+        #ifdef DEBUG_RUN
+				Serial.println("Drive Forward");
+				#endif // DEBUG_RUN
         //Blue Tile:
-        if(cs.GetFloor() == PoI_Type::blue){
+        if (cs.GetFloor() == PoI_Type::blue) {
           //Stoppen
+          robot.endDrive();
+          UI.Update();
           delay(5000);  //5 Sekunden warten
           //Weiterfahren
         }
+        currentRunState = RunState::CHECK_DRIVE;	//Start Drive
+        robot.startDrive();
         break;
+
       case Instructionset::MazeFinished:
         //Maze Finished Logic
         currentRunState = RunState::END;
@@ -165,45 +243,131 @@ while(true){
         break;
       }
 
-    } else if(currentRunState == RunState::CHECKPOINT_RESET){
+    } 
+    
+    else if (currentRunState == RunState::CHECKPOINT_RESET) {
       //Checkpoint Reset Logic
-    } else if(currentRunState == RunState::END){
-      //End of Run Logic
-      UI.LED_BUZZER_Signal(100,200,3);
-    } else if(currentRunState == RunState::TURN){
+    } 
+    
+    else if (currentRunState == RunState::TURN) {
       //Turn Logic
-    } else if(currentRunState == RunState::ALIGN){
+      if (robot.controlTurn(gyro.GetAngleFromOrientation(robot.robotTargetAngle)) == ErrorCodes::TURNED) {
+        robot.endTurn();
+        _ROBOT_TURNING = false;
+				currentRunState = RunState::SETTILE;
+      }
+    }
+    
+    else if (currentRunState == RunState::ALIGN) {
       //Align Logic
-    } else if(currentRunState == RunState::DRIVE){
+    } 
+    
+    else if (currentRunState == RunState::CHECK_DRIVE) {
       //Drive Logic
-
-      
+      if(robot.checkDrive() == ErrorCodes::CHECK_RAMP) currentRunState = RunState::RAMP;
+			else currentRunState = RunState::SCAN;
     }
 
+    else if (currentRunState == RunState::RAMP) {
+      //Ramp Logic
+      if(robot.rampHandler() == ErrorCodes::RAMP_END) currentRunState = RunState::SCAN;
+			else currentRunState = RunState::DRIVE;
+    }
 
+    else if (currentRunState == RunState::DRIVE) {
+      //Control Logic
+      ErrorCodes driveSave = robot.controlDrive(((UI.driveSpeed * stdSPEED_MOD) / robot.speedMOD), gyro.GetAngleFromOrientation(robot.robotTargetAngle));
+			if(driveSave == ErrorCodes::CHECK_DRIVE) currentRunState = RunState::CHECK_DRIVE;
+			else if (driveSave == ErrorCodes::TIMEOUT) {
+        robot.timeoutDrive();
+				currentRunState = RunState::SETTILE;
+      }
+			else currentRunState = RunState::RAMP;
+    }
 
-  } else if(currentMenuState == RobotState::SETTINGS){
+    else if (currentRunState == RunState::SCAN) {
+      #ifdef DEBUG_DRIVING_1
+			Serial.print("30cm FORWARD");
+			Serial.print("\tRange: ");
+			Serial.println(newValue);
+			#endif // DEBUG_DRIVING
+			#ifdef DEBUG_RUN
+			Serial.println("ScanDrive");
+			#endif // DEBUG_RUN
+			
+			//Move the robot in the next tile and scan next field
+			mapper.Move(true);	//Move robot forward
+			//if Ramp detected during DRIVE give 
+			// if(robot._ON_RAMP){
+			// 	uint8_t rampLenght = 0;
+			// 	int8_t rampDirection = 0;
+				
+			// 	//Calculate RAMP INFOS
+			// 	rampLenght = (robot.RAMP_LENGTH / 300);	//Calculate num of Tiles
+			// 	//Determine RAMP Direction
+			// 	if(robot.currentRobotHeight < robot.currentRobotHeight + robot.RAMP_HEIGHT){
+			// 		if(robot.currentRobotHeight <= LOWER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT >= UPPER_LEVEL_HEIGHT
+			// 			) rampDirection = 2;
+			// 		else if(robot.currentRobotHeight <= LOWER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT > LOWER_LEVEL_HEIGHT
+			// 			) rampDirection = 1;
+			// 		else if(robot.currentRobotHeight < UPPER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT >= UPPER_LEVEL_HEIGHT
+			// 			) rampDirection = 1;						 
+			// 	}
+			// 	else if(robot.currentRobotHeight > robot.currentRobotHeight + robot.RAMP_HEIGHT){
+			// 		if(robot.currentRobotHeight >= UPPER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT <= LOWER_LEVEL_HEIGHT
+			// 			) rampDirection = -2;
+			// 		else if(robot.currentRobotHeight >= UPPER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT < UPPER_LEVEL_HEIGHT
+			// 			) rampDirection = -1;
+			// 		else if(robot.currentRobotHeight < UPPER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT <= LOWER_LEVEL_HEIGHT
+			// 			) rampDirection = -1;
+			// 	}
+			// 	robot.currentRobotHeight += robot.RAMP_HEIGHT;
+			// 	if(robot.currentRobotHeight <= RESET_HEIGHT_SPAN && robot.currentRobotHeight >= -RESET_HEIGHT_SPAN) robot.currentRobotHeight = 0;
+			// 	//Serial.print("Current Robot Height: " + String(robot.currentRobotHeight));
+			// 	//Serial.println("\tRamp Direction: " + String(rampDirection));
+			// 	robot._ON_RAMP = false;
+			// 	robot.maxRampIncline = 0;					
+			// 	//pass RampInfos to Mapping
+      //   mapper.Ramp(rampDirection, rampLenght);
+			// }
+			currentRunState = RunState::SETTILE;
+    }
+
+    else if (currentRunState == RunState::END) {
+      //End of Run Logic
+      robot.endDrive();
+      robot.disableBumpers();
+      UI.LED_BUZZER_Signal(100,200,3);
+    }
+  } 
+  
+  else if (currentMenuState == RobotState::SETTINGS) {
     //Settings Task
-  } else if(currentMenuState == RobotState::INFO_SENSOR){
+  } 
+  
+  else if (currentMenuState == RobotState::INFO_SENSOR) {
 
   } else if(currentMenuState == RobotState::INFO_VISUAL){
 
-  } else if(currentMenuState == RobotState::BT){
+  } 
+  
+  else if (currentMenuState == RobotState::BT) {
 
   }
+
 } return 0;}
 #ifdef _MSC_VER
   #pragma endregion Cyclic
   #pragma region Functions //----------------------------------------------------------------------
 #endif
 
-void cyclicMainTask(){
+void cyclicMainTask() {
   //Main cyclic tasks
   UI.Update();
   cs.Update();
 }
-void cyclicRunTask(){
-  //Cyclic tasks when in RUN state
+void cyclicRunTask() {
+  tof.Update();
 }
 
 void ISR_BTN_BLACK() {
@@ -214,12 +378,10 @@ void ISR_BTN_BLACK() {
 }
 void ISR_BTN_GRAY() {
   //Button for changing Drive Mode
-	if(lastButtonPressGray + 300 < millis()){
+	if (lastButtonPressGray + 300 < millis()) {
 		UI.CycleDriveMode();
 		lastButtonPressGray = millis();
 	}
-
-  
 }
 
 #ifdef VISUAL_STUDIO
