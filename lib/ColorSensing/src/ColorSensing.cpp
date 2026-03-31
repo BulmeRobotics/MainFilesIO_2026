@@ -2,6 +2,10 @@
 #include <CustomDatatypes.h>
 #include <UserInterface.h>
 
+ErrorCodes EEPROM::Init(){
+    if(i2ceeprom.begin(EEPROM_ADDR)) return ErrorCodes::OK;
+    else return ErrorCodes::ERROR;
+}
 
 int16_t EEPROM::GetStartAddr(PoI_Type type, char sensor){
     if (sensor == 'R')

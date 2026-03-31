@@ -111,10 +111,13 @@ int main(void) {
   attachInterrupt(digitalPinToInterrupt(BUTTON_BLACK), ISR_BTN_BLACK, RISING);
 	attachInterrupt(digitalPinToInterrupt(BUTTON_GRAY), ISR_BTN_GRAY, RISING);
   lastButtonPressGray = millis();
+  UI.AddInfoMsg("Buttons", "OK", true);
 
-  UI.AddInfoMsg("System", "OK", true);
 
-
+  //EEPROM
+  eeprom.Init() != ErrorCodes::OK ? UI.AddInfoMsg("I2C", "ERROR", false) : UI.AddInfoMsg("I2C", "OK", true); 
+  
+  //Color sensor
   if(cs.Init(&Wire,&UI,&eeprom)!=0) UI.AddInfoMsg("Color Sensor", "ERROR", false);
   else UI.AddInfoMsg("Color Sensor", "OK", true);
   cs.EnableRead(true);
