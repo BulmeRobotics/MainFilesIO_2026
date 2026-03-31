@@ -99,7 +99,6 @@ uint8_t ColorSensing::Init(TwoWire* wire, UserInterface* ui, EEPROM* eeprom){
     return ebuff;
 }
 
-
 ErrorCodes ColorSensing::EnableRead(bool enable){
     //Turn On
     if(!_READING && enable){
@@ -126,7 +125,6 @@ ErrorCodes ColorSensing::EnableRead(bool enable){
         _READING = false;
     }
 }
-
 
 ErrorCodes ColorSensing::Update(){
     if(_READING){
@@ -187,8 +185,6 @@ PoI_Type ColorSensing::checkFront(){
 
     //Only prints values when debugPort is set, otherwise does nothing
     printDebugData(colorRaw, 'F');
-
-    
 
     return PoI_Type::white; //TODO: Implement actual color checking
 }
