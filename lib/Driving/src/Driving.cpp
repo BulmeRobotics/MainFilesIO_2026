@@ -149,7 +149,6 @@ ErrorCodes Driving::checkRamp(void){
 			_RAMP_DOWN = true;	//Ramp DOWN detected
 			_RAMP_UP = false;	//Ramp UP not detected
 			if (millis() < lastSetTile + MIN_SETTILE_TIME) {	//Check if settile occured shortly before Ramp detection
-//!				p_mapSys->moveRobot(p_gyro->GetAbsoluteAngle(), 1);	//Move robot forward
 				p_mapSys->Move(true);
 //!				if(p_mapSys->rollBackPath(1) != ErrorCodes::OK){
 //!					// Serial.println("no Rollback!");	//Roll back the path
@@ -411,7 +410,6 @@ ErrorCodes Driving::controlTurn(float angle) {
 	return ErrorCodes::OK;
 }
 ErrorCodes Driving::endTurn(){
-	delay(100);
 	enableBumpers();	//Enable Bumpers
 	_CAM_ALERT_TURN = false;
 	// if (robotTargetAngle == Orientations::North) {
@@ -419,7 +417,6 @@ ErrorCodes Driving::endTurn(){
 	// 	p_gyro->resetAllAngles();
 	// }
 	
-//!	p_mapSys->moveRobot(p_gyro->GetAbsoluteAngle(), 2);
 	p_mapSys->Turn(p_gyro->GetOrientationFromAngle());
 	//Check for ramps in front and back
 //!	// if (p_tof->x64.isRamp(&p_tof->x64.front)) {
@@ -748,7 +745,6 @@ void Driving::init(ColorSensing* p_colorSensing, TofSensors* p_tof, Gyro* p_gyro
     this->p_gyro = p_gyro;
 	this->p_mapSys = mapSys_pointer;
 //!    this->p_cams = cam_pointer;
-
     this->p_drivetrain = p_drivetrain;	//Pointer to Motor 
 
     //ENABLE Bumper pins

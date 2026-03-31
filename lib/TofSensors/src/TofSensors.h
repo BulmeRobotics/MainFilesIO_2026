@@ -329,6 +329,7 @@ class TofSensors {
     bool AnyTimeoutOccured(void);
 
     int8_t CalculateLeftRightError(float angleError, uint8_t sideWallThreshold, uint8_t gapRobotWall);
+    uint8_t GetWalls(bool rampInfront, bool rampBehind);
 };
 #ifdef _MSC_VER
     #pragma endregion

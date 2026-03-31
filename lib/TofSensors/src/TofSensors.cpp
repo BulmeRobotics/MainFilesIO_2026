@@ -485,6 +485,36 @@ int8_t TofSensors::CalculateLeftRightError(float angleError, uint8_t sideWallThr
 	else return 0;
 }
 
+uint8_t TofSensors::GetWalls(bool rampInfront, bool rampBehind) {
+    uint8_t wallInfo = 0;
+
+	if (leftBack.GetRange() < 150 
+		&& leftFront.GetRange() < 150) wallInfo |= (1<<3);	//Left
+	if (rightBack.GetRange() < 150
+		&& rightFront.GetRange() < 150) wallInfo |= (1<<1);	//Right
+	if (midBack.GetRange() < 150 && !rampBehind) wallInfo |= (1<<2);	//Back
+	if (midFront.GetRange() < 150 && !rampInfront) wallInfo |= (1<<0);	//Front
+
+    #ifdef DEBUG_SCAN
+        Serial.print("Wall Info: ");
+        Serial.print(wallInfo, BIN);
+        Serial.print("\tLB: ");
+        Serial.print(leftBack.GetRange());
+        Serial.print("\tLF: ");
+        Serial.print(leftFront.GetRange());
+        Serial.print("\tRF: ");
+        Serial.print(rightFront.GetRange());
+        Serial.print("\tRB: ");
+        Serial.print(rightBack.GetRange());
+        Serial.print("\tMF: ");
+        Serial.print(midFront.GetRange());
+        Serial.print("\tMB: ");
+        Serial.println(midBack.GetRange());
+    #endif
+
+	return wallInfo;
+}
+
 #ifdef _MSC_VER
     #pragma endregion
 #endif
