@@ -157,8 +157,10 @@ bool ColorSensing::GetAlert(){
     return _ALERT;
 }
 
-void ColorSensing::printDebugData(uint16_t* rawColor){
+void ColorSensing::printDebugData(uint16_t* rawColor, char sensor){
     if(_debugPort != nullptr){
+        _debugPort->print(sensor);
+        _debugPort->print("\t");
         for (uint8_t i = 0; i < 12; i++)
         {
             _debugPort->print(rawColor[i]);
@@ -184,7 +186,7 @@ PoI_Type ColorSensing::checkFront(){
     colorRaw[9] = front.getChannel(AS7341_CHANNEL_NIR);
 
     //Only prints values when debugPort is set, otherwise does nothing
-    printDebugData(colorRaw);
+    printDebugData(colorRaw, 'F');
 
     
 
@@ -207,7 +209,7 @@ PoI_Type ColorSensing::checkMiddle(){
     colorRaw[9] = middle.getChannel(AS7341_CHANNEL_NIR);
 
     //Only prints values when debugPort is set, otherwise does nothing
-    printDebugData(colorRaw);
+    printDebugData(colorRaw, 'M');
 
     return PoI_Type::white; //TODO: Implement actual color checking
 }

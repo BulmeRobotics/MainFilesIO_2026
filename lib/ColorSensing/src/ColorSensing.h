@@ -144,7 +144,7 @@ class ColorSensing{
 
     // Diagnostic functionality
         Stream* _debugPort;
-        void printDebugData(uint16_t* rawColor);
+        void printDebugData(uint16_t* rawColor, char sensor);
 
     // Multiplexer Function
         /**
