@@ -125,7 +125,7 @@ void UserInterface::ConstructSettingsMenu() {
     display.print("ColorSensor Calibration");
 
     // Alle Buttons malen (Der Text wird durch die Klasse automatisch zentriert!)
-    btnSpeedMinus.Draw(display, "speed:  -");
+    btnSpeedMinus.Draw(display, "-");
     btnSpeedPlus.Draw(display, "+");
     btnCalibWhite.Draw(display, "WHITE");
     btnBleConnect.Draw(display, "BLE");
@@ -135,7 +135,6 @@ void UserInterface::ConstructSettingsMenu() {
     btnCalibDZone.Draw(display, "D-Zone");
     btnCalibCheckP.Draw(display, "CheckP");
 }
-
 
 #ifdef _MSC_VER
   #pragma endregion Settings
