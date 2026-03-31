@@ -1,0 +1,192 @@
+// author:  vincent rohkamm
+// date:    05.12.2025
+// description:
+// *Mapping library for Robot
+
+#ifndef _MAPPING_H_
+#define _MAPPING_H_
+
+#include <CustomDatatypes.h>
+
+#define MAX_TILES 256
+#define MAX_INSTRUCTIONS 256
+
+#define COST_RAMP 5
+#define COST_BLUE 6
+#define COST_DANGER_ZONE 8
+#define COST_OBSTACLE 7
+#define COST_REGULAR 1
+
+#define RAMP_LENGTH_MOD 3
+
+#define OPTION_MAX_RESETS 2
+
+// --------------------------------------------------------------------------------
+
+enum class Instructionset : uint8_t {
+    T_North, T_East, T_South, T_West,	//Desired Orientation
+    D_Forward, ramp,					//Move
+    undefined, Overflow, solvMap, reset,//Errors
+    FinishedInstructions, MazeFinished	//Finished! :)
+};
+
+struct Tile {
+    int16_t x, y, z = 0;
+    uint8_t weight = 1;
+    TileType type = TileType::inactive;
+    PoI_Type poi = PoI_Type::undef;
+
+    int16_t north = -1, east = -1, south = -1, west = -1, up = -1, down = -1;
+};
+
+struct OpenItem {
+    uint16_t nodeIndex;
+    uint16_t g;
+    uint16_t f;
+};
+
+
+class Mapping {
+private:
+
+#ifdef _MSC_VER
+#pragma region helpers
+#endif
+
+    // inline funktion um manhatten distanz zu errechnen
+    inline uint16_t heuristic3D(Tile a, Tile b);
+
+    uint16_t findNextTarget();
+
+    /**
+	 * @brief Searches for specific Tile by its coordinates
+	 * @return Index of the Tile in tiles[] or -1 if not found
+     */
+    uint16_t findTileByCoordinate(int16_t x, int16_t y, int16_t z);
+
+    void initLists(uint16_t target);
+
+    /**
+     * @brief finds next empty memory in tiles[]
+     * @return index of next empty Memory for Tile
+     */
+    uint16_t findNextEmptyMemory();
+
+    /**
+     * @brief corrects wallInfo from relative to absolute Orientation
+     * @param walls relative wall info as in SetTile
+     * @param orientation Current Orientation of Robot
+     * @return normalized wallInfo
+     */
+    uint8_t correctWallinfo(uint8_t walls, Orientations orientation);
+
+    /**
+     * @brief compares the saved Walls of the current tile with the input walls
+     * @param walls wall info -> MUST BE ABSOLUTE!! -> call correctWallinfo before!
+     * @return returns OK if ok or invalid if not matching
+     */
+    ErrorCodes compareWalls(uint8_t walls);
+
+#ifdef _MSC_VER
+#pragma region private vars
+#endif
+
+    Tile tiles[MAX_TILES];
+    OpenItem open[MAX_TILES];
+    bool closed[MAX_TILES];
+
+    Instructionset path[MAX_INSTRUCTIONS];
+    uint16_t pathIndex;
+
+    Orientations currentOrientation;
+    uint16_t currrentPosition, targetPosition;
+
+    //Checkpoint
+    Tile backupTiles[MAX_TILES];
+    uint16_t lastCheckpointPosition;
+    uint8_t resetCounter = 0;
+
+    //Config:
+    ErrorCodes pathPriority = ErrorCodes::straight;
+    bool _RETURN_HOME = false;
+
+public:
+
+#ifdef _MSC_VER
+#pragma region Information
+#endif
+
+    /**
+     * @brief Set the priority of searching for next Tile
+     * @param priority the new priority: -straight, -north, -east, -south, -west
+     * @return returns if succesful or invalid
+     */
+    ErrorCodes SetPriority(ErrorCodes priority);
+
+    /**
+     * @brief gives next Instruction to Robot
+     * @return returns the next Instruction
+     */
+    Instructionset GetInstruction();
+
+    /**
+     * @brief Informs Mapping of current Tile
+     * @param walls walls around the Robot; relative -> b0...front, b1...right, b2...behind, b3...left
+     * @param floor current floor Type -> Obstacle?, Color?, Regular?
+     * @return Informs about Errors like not matching data
+     * @todo
+     */
+    ErrorCodes SetTile(uint8_t walls, TileType floor);
+
+    // /**
+    //  * @brief Druckt die intern gespeicherte Karte des Roboters in die Konsole
+    //  */
+    // void PrintInternalMap();
+
+#ifdef _MSC_VER
+#pragma region Movement
+#endif
+
+    /**
+     * @brief Moves Robot 1Tile forward or backwards
+     * @param direction true...Forward, false...backward
+     * @return Returns if move was possible or error
+     */
+    ErrorCodes Move(bool direction);
+
+    /**
+     * @brief Rotates Robot to desired direction
+     * @param direction new direction the robot faces
+     */
+    ErrorCodes Turn(Orientations direction);
+
+    /**
+     * @brief registers a ramp instead of moving robot horizontally, is called instead of Move
+     * @param info b0-b6...length in Tiles; b7...direction -> 1...up, 0...down
+     * @return returns if operation is valid
+     */
+    ErrorCodes Ramp(uint8_t info);
+
+#ifdef _MSC_VER
+#pragma region Error Handling
+#endif
+
+    /**
+     * @brief Resets Mapping to start new Run
+     */
+    void Reset(void);
+
+    /**
+     * @brief  called to reset Mapping to last checkpoint, Resets mapping if no checkpoint registered
+     * @return Returns Errors
+     */
+    ErrorCodes RestartCheckpoint(void);
+
+    /**
+     * @brief call when Bumper is repeatedly triggered -> locks the current route
+     * @return returns if operation was succesful
+     */
+    ErrorCodes Bumper(void);
+};
+
+#endif

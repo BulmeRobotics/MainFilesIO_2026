@@ -28,6 +28,8 @@
 #include <SerialSetup.h>
 #include <CustomDatatypes.h>
 
+#include <Mapping.h>
+
   //Custom Includes - Modules
 #include <UserInterface.h>
 #include <TofSensors.h>
@@ -40,7 +42,7 @@
 
 //Objects
 UserInterface UI(50); // Update Interval: 50ms
-ColorSensing colorSens;
+ColorSensing cs;
 
 
 #ifdef _MSC_VER
@@ -50,6 +52,7 @@ ColorSensing colorSens;
 
 //Variables
 RobotState currentMenuState;
+RunState currentRunState;
 
 #ifdef _MSC_VER
   #pragma endregion Variables
@@ -79,17 +82,13 @@ int main(void) {
   //Initialize Modules
     //User Interface
   UI.Initialize();
-  UI.ConnectPointer(&currentMenuState, &colorSens);
+  UI.ConnectPointer(&currentMenuState, &cs);
     //Buttons
   attachInterrupt(digitalPinToInterrupt(BUTTON_BLACK), ISR_BTN_BLACK, RISING);
 	attachInterrupt(digitalPinToInterrupt(BUTTON_GRAY), ISR_BTN_GRAY, RISING);
 
-
-
-
-
-  
-
+  //Mapping
+  Mapping mapper;
 
 
 #ifdef _MSC_VER
@@ -101,7 +100,68 @@ while(true){
   cyclicMainTask();
 
   if(currentMenuState == RobotState::RUN){
-    cyclicRunTask();
+    if(currentRunState == RunState::INITIAL){ //Initial Run Logic
+      mapper.Reset();
+      currentRunState = RunState::SETTILE;
+    }
+
+    cyclicRunTask();  //Cyclic Run Tasks
+
+    if(currentRunState == RunState::SETTILE){
+      //SetTile Logic
+
+      mapper.SetTile(/*walls*/0, /*floor*/TileType::visited);
+    } else if(currentRunState == RunState::GET_INSTRUCTIONS){
+      //Get Instructions Logic
+      switch (mapper.GetInstruction()) 
+      {
+      case Instructionset::T_North:
+        //Turn North Logic
+        break;
+      case Instructionset::T_East:
+        //Turn East Logic
+        break;
+      case Instructionset::T_South:
+        //Turn South Logic
+        break;
+      case Instructionset::T_West:
+        //Turn West Logic
+        break;
+      case Instructionset::D_Forward:
+        //Drive Forward Logic
+
+        //Blue Tile:
+        if(cs.GetFloor() == PoI_Type::blue){
+          //Stoppen
+          delay(5000);  //5 Sekunden warten
+          //Weiterfahren
+        }
+        break;
+      case Instructionset::MazeFinished:
+        //Maze Finished Logic
+        currentRunState = RunState::END;
+        break;
+      
+      default:
+        break;
+      }
+
+    } else if(currentRunState == RunState::CHECKPOINT_RESET){
+      //Checkpoint Reset Logic
+    } else if(currentRunState == RunState::END){
+      //End of Run Logic
+      UI.LED_BUZZER_Signal(100,200,3);
+    } else if(currentRunState == RunState::TURN){
+      //Turn Logic
+    } else if(currentRunState == RunState::ALIGN){
+      //Align Logic
+    } else if(currentRunState == RunState::DRIVE){
+      //Drive Logic
+
+      
+    }
+
+
 
   } else if(currentMenuState == RobotState::SETTINGS){
     //Settings Task
@@ -130,7 +190,8 @@ void cyclicRunTask(){
 
 void ISR_BTN_BLACK() {
 	//Button for Starting and Checkpoint
-
+  currentRunState = RUN_States::INITIAL;
+  currentMenuState = RobotState::RUN;
 
 }
 void ISR_BTN_GRAY() {
