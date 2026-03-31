@@ -448,6 +448,7 @@ ErrorCodes Driving::turn180Degree(void) {
 ErrorCodes Driving::startAlign(void) {
 	//Reading all short TOFs on the side of the robot
 	uint16_t startTime = millis();	
+	p_tof->Update();
 	uint16_t sumDistanceLeft 	= p_tof->GetRange(TofType::LEFT_BACK) + p_tof->GetRange(TofType::LEFT_FRONT);
 	uint16_t sumDistanceRight 	= p_tof->GetRange(TofType::RIGHT_BACK) + p_tof->GetRange(TofType::RIGHT_FRONT);
 
@@ -485,16 +486,6 @@ ErrorCodes Driving::startAlign(void) {
 	while (distanceFront != distanceBack && millis() - startTime < 1500)
 	{
 		p_tof->Update();
-		distanceError = distanceFront - distanceBack;
-		#ifdef DEBUG_DRIVING
-			Serial.print("Distance error: ");
-			Serial.println(distanceError);
-		#endif // DEBUG_DRIVING
-
-		//direction of the correction, calculating the turn speed with an exponential function
-		if (distanceError > 0)	turnSpeed_align = 80 * (pow(EULER, distanceError / 20) - 1) + 20;
-		else if (distanceError < 0)	turnSpeed_align = 80 * (1 - pow(EULER, distanceError / -20)) - 20;
-		else  turnSpeed_align = 0;
 
 		if (side == "LEFT") {
 			//read the distances
@@ -513,9 +504,21 @@ ErrorCodes Driving::startAlign(void) {
 			return ErrorCodes::NOT_ALIGNING;	//No alignment possible, no wall next to the robot
 		}
 
+		distanceError = distanceFront - distanceBack;
+
+		//direction of the correction, calculating the turn speed with an exponential function
+		if (distanceError > 0)	turnSpeed_align = 50.0f * (pow(EULER, (float)-distanceError / 20.0f) - 1.0f) - 20.0f;
+		else if (distanceError < 0)	turnSpeed_align = 50.0f * (1 - pow(EULER, (float)abs(distanceError) / -20.0f)) + 20.0f;
+		else  turnSpeed_align = 0;
+
+		#ifdef DEBUG_DRIVING
+			Serial.print("Error: " + String(distanceError));
+			Serial.println("\tSpeed: " + String(turnSpeed_align));
+		#endif // DEBUG_DRIVING
+
 		//turning the robot with the calculated speed, in first cycle = 0
-		p_drivetrain->SetSpeed_Left(-turnSpeed_align * coeff_side);
-		p_drivetrain->SetSpeed_Right(turnSpeed_align * coeff_side);
+		p_drivetrain->SetSpeed_Left(turnSpeed_align * coeff_side);
+		p_drivetrain->SetSpeed_Right(-turnSpeed_align * coeff_side);
 	}
 	//stoping all motors
 	p_drivetrain->Stop();
@@ -643,12 +646,14 @@ ErrorCodes Driving::timeoutDrive(void) {
 }
 ErrorCodes Driving::startAdjustment(void) {
 	//Positon the robot in the middle of the field before turning
+	p_tof->Update();
 	if (p_tof->GetRange(TofType::FRONT) > 120)	return ErrorCodes::INVALID;
 
 	int8_t posError;
 	do {
 		p_tof->Update();
 		posError = p_tof->GetRange(TofType::FRONT) - adjust_wallDistance;
+		Serial.println(posError);
 		int8_t adjustSpeed = posError * adjustmentSpeedFactor;	//Calculate the adjustment speed
 
 		p_drivetrain->SetSpeed(adjustSpeed);

@@ -13,7 +13,6 @@
 #include <Gyro.h>
 #include <ColorSensing.h>
 #include <Mapping.h>
-// #include <Mapping.h>
 
 class Cameras; // Forward declaration of the Cameras class
 
@@ -23,6 +22,7 @@ protected:
     //#define DEBUG_RAMP
     //#define DEBUG_RAMP_ARRAY
     //#define DEBUG_X64
+    //#define DEBUG_DRIVING
 
 
 private:
@@ -36,7 +36,7 @@ private:
     const uint8_t gap_robot_wall = 75; //Distance between the robot and the wall
     const uint8_t stop_wallDistance = 75;
     const uint8_t adjust_wallDistance = 70;
-    const uint8_t adjustmentSpeedFactor = 1.5;	//Speed factor for the adjustment speed
+    const uint8_t adjustmentSpeedFactor = 1.8;	//Speed factor for the adjustment speed
 
     //Ramp settings
     const float rampThresholdAngle = 10;	//Angle threshold for the ramp
@@ -165,34 +165,142 @@ public:
     int16_t		currentRobotHeight;
     uint32_t    lastSetTile;
 
-    //@brief initializes driving
+    /**
+     * @brief  Initializes the Driving module and links all required subsystems.
+     * @param  Pointers to all required modules (sensors, mapping, drivetrain).
+     */
     void init(ColorSensing* p_colorSensing, TofSensors* p_tof, Gyro* p_gyro, Mapping* mapSys_pointer, /*Cameras* cam_pointer, */ Drivetrain* p_drivetrain);
 
-    //Bumpers:
+    //Bumpers:  
+    /**
+     * @brief  Drives the robot backwards for a defined distance using encoders.
+     * @param  distance Distance in mm to drive backwards.
+     * @param  speedLeft Speed of left motor.
+     * @param  speedRight Speed of right motor.
+     * @return OK if movement finished successfully.
+     *         TIMEOUT if the distance was not reached in time.
+     */    
     ErrorCodes reverseBumper(uint16_t distance, int8_t speedLeft, int8_t speedRight);
+
+    /**
+     * @brief  Enables bumper handling.
+     * @return OK always.
+     */
     ErrorCodes enableBumpers(void);
+
+    /**
+     * @brief  Disables bumper handling.
+     * @return OK always.
+     */
     ErrorCodes disableBumpers(void);
+
+    /**
+     * @brief  Handles bumper events and executes avoidance maneuvers.
+     * @return OK if bumper was triggered and handled.
+     *         BUMPER_WALL if repeated collision detected (map update).
+     *         BUMPER_DISABLED if bumpers are disabled.
+     *         UNKNOWN if no bumper event occurred.
+     */  
     ErrorCodes bumperHandler(void);
 
     //Ramps:
+    /**
+     * @brief  Handles ramp detection and processing.
+     * @return OK if still driving or no ramp event.
+     *         RAMP_END if ramp traversal is completed.
+     */
     ErrorCodes rampHandler(void);
+
+    /**
+     * @brief  Checks if current ramp is a stair-type ramp.
+     * @return true if stair ramp detected.
+     *         false otherwise.
+     */   
     bool checkStairRamp(void);
 
     //Turn
-
+    /**
+     * @brief  Initializes a turn to a target angle.
+     * @param  angle Target angle in degrees.
+     * @return OK if initialization successful.
+     *         INVALID if angle is out of range.
+     */
     ErrorCodes startTurn(float angle);
+
+    /**
+     * @brief  Controls the ongoing turn motion.
+     * @param  angle Target angle in degrees.
+     * @return OK while turning is in progress.
+     *         TURNED if target angle reached or timeout occurred.
+     */
     ErrorCodes controlTurn(float angle);
+
+    /**
+     * @brief  Finalizes a turn and updates system state.
+     * @return OK always.
+     */
     ErrorCodes endTurn();
+
+    /**
+     * @brief  Performs a blocking 180° turn.
+     * @return OK after completion.
+     */
     ErrorCodes turn180Degree(void);
+
+    /**
+     * @brief  Aligns the robot parallel to a wall using side ToF sensors.
+     * @return OK if alignment successful.
+     *         NOT_ALIGNING if no valid wall detected or alignment failed.
+     */
     ErrorCodes startAlign(void);
 
     //Drive
+    /**
+     * @brief  Initializes a forward driving sequence.
+     * @return OK always.
+     */    
     ErrorCodes startDrive(void);
+
+    /**
+     * @brief  Controls forward movement using PID and sensor fusion.
+     * @param  driveSpeed Base forward speed.
+     * @param  angle Target heading angle.
+     * @return OK if driving on ramp.
+     *         CHECK_DRIVE if normal driving continues.
+     *         TIMEOUT if max drive time exceeded.
+     */
     ErrorCodes controlDrive(int8_t drivespeed, float angle);
+
+    /**
+     * @brief  Checks if target distance or condition is reached.
+     * @return SCAN_DRIVE if target reached.
+     *         CHECK_RAMP if still driving.
+     */
     ErrorCodes checkDrive(void);
+
+    /**
+     * @brief  Stops the robot after driving.
+     * @return OK always.
+     */
     ErrorCodes endDrive(void);
+
+    /**
+     * @brief  Handles drive timeout recovery (align + adjust).
+     * @return OK always.
+     */
     ErrorCodes timeoutDrive(void);
+
+    /**
+     * @brief  Adjusts robot position relative to front wall.
+     * @return OK if adjustment successful.
+     *         INVALID if no wall detected in front.
+     */
     ErrorCodes startAdjustment(void);
+
+    /**
+     * @brief  Drives backwards to escape a black tile.
+     * @return OK always.
+     */
     ErrorCodes reverseBlackTile(void);
 };
 
