@@ -27,7 +27,7 @@ class Motor {
         #define MAX_VOLTAGE_PWM 8.26
         #define GEAR_REDUCTION_RATIO 74.83
         #define CLICKS_PER_MOTOR_ROTATION 11
-        #define CLICKS_PER_SHAFT_ROTATION GEAR_REDUCTION_RATIO * CLICKS_PER_MOTOR_ROTATION
+        #define CLICKS_PER_SHAFT_ROTATION (GEAR_REDUCTION_RATIO * CLICKS_PER_MOTOR_ROTATION)
     
         // Definitions
         #define DRIVER_A 0

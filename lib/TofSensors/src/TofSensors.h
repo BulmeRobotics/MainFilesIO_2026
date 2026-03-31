@@ -331,6 +331,8 @@ class TofSensors {
     *         false if no Timeout occured.
     */
     bool AnyTimeoutOccured(void);
+
+    int8_t CalculateLeftRightError(float angleError, uint8_t sideWallThreshold, uint8_t gapRobotWall);
 };
 #ifdef _MSC_VER
     #pragma endregion
