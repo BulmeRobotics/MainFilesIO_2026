@@ -16,92 +16,127 @@ UserInterface::UserInterface(uint8_t updateInterval){
     UPDATE_INTERVAL = updateInterval;
 }
 
-void UserInterface::HandleMainMenu(){
-    display.fillRoundRect(0, 6, 120, 468, 15, HL_COLOR);	//SecondaryBackground
-	display.setTextSize(6);
-	display.setTextColor(0x0000);
+#ifdef _MSC_VER
 
-	//Display MenuButtons:
-		//LocationMenu:
-	display.fillRoundRect(10, 16, 100, 100, 15, BTN_COLOR);
+  #pragma endregion Constructor //-----------------------------------------------------------
+  #pragma region Icon Drawing 
+#endif
 
-	display.fillCircle(60, 46, 25, 0);
-	display.fillTriangle(35, 46, 60, 106, 85, 46, 0);
-	display.fillCircle(60, 46, 13, BTN_COLOR);
+static void DrawIconLocation(GigaDisplay_GFX& display, uint16_t cx, uint16_t cy){
+    display.fillCircle(cx, cy - 20, 25, 0);
+    display.fillTriangle(cx - 25, cy - 20, cx, cy + 40, cx + 25, cy - 20, 0);
+    display.fillCircle(cx, cy - 20, 13, BTN_COLOR);
+}
+static void DrawIconSensor(GigaDisplay_GFX& display, uint16_t cx, uint16_t cy){
+    display.fillCircle(cx, cy, 40, 0);
+    display.fillCircle(cx, cy, 35, BTN_COLOR);
+    // (Weitere Ringe deines alten Codes hier optional ergänzen)
+    display.fillCircle(cx, cy, 10, 0);
+}
+static void DrawIconSettings(GigaDisplay_GFX& display, uint16_t cx, uint16_t cy){
 
-	//GeneralInfoMenu:
-	display.fillRoundRect(10, 132, 100, 100, 15, BTN_COLOR);
-	display.fillCircle(60, 182, 40, 0);
-	display.fillCircle(60, 182, 35, BTN_COLOR);
-	display.fillCircle(60, 182, 10, 0);
-	display.fillCircle(60, 182, 30, BTN_COLOR);
-	display.fillCircle(60, 182, 25, 0);
-	display.fillCircle(60, 182, 20, BTN_COLOR);
+    display.fillCircle(cx, cy, 33, 0);
 
-	display.fillTriangle(10, 147, 110, 147, 60, 182, BTN_COLOR);
-	display.fillTriangle(10, 217, 110, 217, 60, 182, BTN_COLOR);
-	display.fillRect(25, 132, 70, 15, BTN_COLOR);
-	display.fillRect(25, 217, 70, 15, BTN_COLOR);
+	display.fillCircle(cx, cy-30, 10, 0);	//Vertical
+	display.fillCircle(cx, cy+30, 10, 0);
 
-	display.fillCircle(60, 182, 10, 0);
-	display.fillCircle(60, 182, 5, BTN_COLOR);
+	display.fillCircle(cx-30, cy, 10, 0);	//Horizontal
+	display.fillCircle(cx+30, cy, 10, 0);
 
-	//SettingMenu:
-	display.fillRoundRect(10, 248, 100, 100, 15, BTN_COLOR);
-	display.fillCircle(60, 298, 33, 0);
-	//display.fillCircle(60, 298, 15, BTN_COLOR);
+	display.fillCircle(cx+21, cy-21, 10, 0);
+	display.fillCircle(cx+9, cy-21, 10, 0);
 
-	display.fillCircle(60, 268, 10, 0);	//Vertical
-	display.fillCircle(60, 328, 10, 0);
+	display.fillCircle(cx+21, cy+21, 10, 0);
+	display.fillCircle(cx+9, cy+21, 10, 0);
+	display.fillCircle(cx, cy, 19, BTN_COLOR);
+}
+static void DrawIconAbout(GigaDisplay_GFX& display, uint16_t cx, uint16_t cy){
+    display.fillCircle(cx, cy, 38, 0);
+    display.fillCircle(cx, cy, 33, BTN_COLOR);
+    display.setCursor(cx - 10, cy - 15);
+    display.setTextSize(4);
+    display.setTextColor(TEXT_COLOR);
+    display.print("I");
+}
 
-	display.fillCircle(30, 298, 10, 0);	//Horizontal
-	display.fillCircle(90, 298, 10, 0);
+#ifdef _MSC_VER
+  #pragma endregion Icon Drawing //-----------------------------------------------------------
+  #pragma region MainMenu 
+#endif
 
-	display.fillCircle(81, 277, 10, 0);
-	display.fillCircle(39, 277, 10, 0);
+// ------------------------------------------------------------------
+// HAUPTMENÜ (LINKER BALKEN)
+// ------------------------------------------------------------------
 
-	display.fillCircle(81, 319, 10, 0);
-	display.fillCircle(39, 319, 10, 0);
-	display.fillCircle(60, 298, 19, BTN_COLOR);
+void UserInterface::DrawMainMenuStatic() {
+    // Grauer Hintergrundbalken
+    display.fillRoundRect(0, 6, 120, 468, 15, HL_COLOR);
 
-	//InfoMenu:
-	display.fillRoundRect(10, 364, 100, 100, 15, BTN_COLOR);
-	display.setCursor(45, 393);
-	display.fillCircle(60, 414, 38, 0);
-	display.fillCircle(60, 414, 33, BTN_COLOR);
-	display.print("I");
+    // Buttons zeichnen (Die Klasse übernimmt Form, Text und Icons!)
+    btnMenuLocation.Draw(display);
+    btnMenuSensor.Draw(display);
+    btnMenuSettings.Draw(display);
+    btnMenuAbout.Draw(display);
+}
 
-	display.setTextColor(TEXT_COLOR);
-	display.setTextSize(4);
-
-    //Menu switching handling
-    if (NewContact == true){
-		//Main Menu:
-		if (LastContact.y <= 120 &&
-            (*p_state == RobotState::SETTINGS || *p_state == RobotState::ABOUT ||
-                *p_state == RobotState::INFO_SENSOR || *p_state == RobotState::INFO_VISUAL))
-        {
-			//Menu selector:
-            //Location Information
-            if (LastContact.x >= 360 && *p_state != RobotState::INFO_VISUAL)
-                *p_state = RobotState::INFO_VISUAL;
-            //Sensor Information
-            else if (LastContact.x < 360 && LastContact.x >= 244 && *p_state != RobotState::INFO_SENSOR)
-                *p_state = RobotState::INFO_SENSOR;
-            //Settings
-            else if (LastContact.x < 244 && LastContact.x >= 128 && *p_state != RobotState::SETTINGS)
-                *p_state = RobotState::SETTINGS;
-            //About
-            else if (LastContact.x < 128 && *p_state != RobotState::ABOUT)
-                *p_state = RobotState::ABOUT;
-
-            BuzzerSignal(5,0,1);
-		}
+void UserInterface::HandleMainMenu(uint16_t tx, uint16_t ty) {
+    if (btnMenuLocation.IsPressed(tx, ty) && *p_state != RobotState::INFO_VISUAL) {
+        *p_state = RobotState::INFO_VISUAL;
+        BuzzerSignal(5, 0, 1);
+    }
+    else if (btnMenuSensor.IsPressed(tx, ty) && *p_state != RobotState::INFO_SENSOR) {
+        *p_state = RobotState::INFO_SENSOR;
+        BuzzerSignal(5, 0, 1);
+    }
+    else if (btnMenuSettings.IsPressed(tx, ty) && *p_state != RobotState::SETTINGS) {
+        *p_state = RobotState::SETTINGS;
+        BuzzerSignal(5, 0, 1);
+    }
+    else if (btnMenuAbout.IsPressed(tx, ty) && *p_state != RobotState::ABOUT) {
+        *p_state = RobotState::ABOUT;
+        BuzzerSignal(5, 0, 1);
     }
 }
 
 #ifdef _MSC_VER
-  #pragma endregion Constructor
+  #pragma endregion MainMenu //-----------------------------------------------------------
+  #pragma region Settings 
+#endif
+
+// ------------------------------------------------------------------
+// SETTINGS
+// ------------------------------------------------------------------
+
+void UserInterface::ConstructSettingsMenu() {
+    display.fillScreen(BG_COLOR); // Komplettes Display löschen
+    DrawMainMenuStatic();         // Linke Navigation malen
+
+    // Label-Boxen (Statischer Text)
+    display.fillRoundRect(140, 10, 362, 44, 5, HL_COLOR);
+    display.fillRoundRect(140, 158, 640, 122, 5, HL_COLOR);
+    
+    display.setTextSize(3);
+    display.setTextColor(TEXT_COLOR, HL_COLOR);
+    display.setCursor(150, 20);
+    display.print("driveMode:");
+    display.setCursor(150, 168);
+    display.print("ColorSensor Calibration");
+
+    // Alle Buttons malen (Der Text wird durch die Klasse automatisch zentriert!)
+    btnSpeedMinus.Draw(display, "speed:  -");
+    btnSpeedPlus.Draw(display, "+");
+    btnCalibWhite.Draw(display, "WHITE");
+    btnBleConnect.Draw(display, "BLE");
+    
+    btnCalibBlack.Draw(display, "Black");
+    btnCalibBlue.Draw(display, "Blue");
+    btnCalibDZone.Draw(display, "D-Zone");
+    btnCalibCheckP.Draw(display, "CheckP");
+}
+
+
+#ifdef _MSC_VER
+  #pragma endregion Settings
   #pragma region Private Methods //----------------------------------------------------------------
 #endif
 
@@ -137,8 +172,24 @@ void UserInterface::DrawBattery(){
 
     // TOUCH HANDLER
 void UserInterface::gigaTouchHandler(uint8_t contacts, GDTpoint_t* points) {
-	NewContact = true;
-	LastContact = points[0];
+    NewContact = true;
+    LastContact = points[0];
+
+}
+
+bool UserInterface::GetValidTouch(uint16_t &touchX, uint16_t &touchY){
+    if (NewContact) {
+        NewContact = false;
+        
+        uint32_t time = millis();
+        if (time - lastTouch >= touchDebounce) {
+            lastTouch = time;
+            touchX = LastContact.x;
+            touchY = LastContact.y;
+            return true;
+        }
+    }
+    return false;
 }
 
 #ifdef _MSC_VER
@@ -202,10 +253,11 @@ void UserInterface::Initialize(){
         }
     } else AddInfoMsg("Battery", "OK", true);
 }
-void UserInterface::ConnectPointer(RobotState* state, ColorSensing* cs){
+void UserInterface::ConnectPointer(RobotState* state, ColorSensing* cs, Mapping* mapping){
     p_state = state;
     p_colorSens = cs;
-    
+    p_mapping = mapping;
+
     return;
 }
 
@@ -233,73 +285,95 @@ void UserInterface::AddInfoMsg(String Info, String Message, bool success){
 }
 
 void UserInterface::Update(){
-    uint32_t currentMillis = millis();
-    if(currentMillis >= lastUpdate + UPDATE_INTERVAL){
-        lastUpdate = currentMillis;
+    uint32_t time = millis();
+    if (time < lastUpdate + UPDATE_INTERVAL) return;
 
-        //Update Battery Status
+    lastUpdate = time;
+
+    //Toch Handling
+    uint16_t tx = 0, ty = 0;
+    bool touched = GetValidTouch(tx, ty);
+
+    //Rendering
+    if(*p_state != lastState){
+        switch (*p_state) {
+        case RobotState::SETTINGS:
+            ConstructSettingsMenu();
+            break;
+        case RobotState::ABOUT:
+            ConstructAboutMenu();
+            break;
+
+        
+        default:
+            break;
+        }
+        lastState = *p_state;
+    }
+
+    // Update Battery Status
+    if(*p_state == RobotState::SETTINGS || *p_state == RobotState::ABOUT || *p_state == RobotState::INFO_SENSOR || *p_state == RobotState::INFO_VISUAL){
         GetCharge();
         DrawBattery();
+    }
+    
 
-        //Draw and Handle mainMenu -> Menu Selector
-        if (*p_state != RobotState::RUN) HandleMainMenu();
+    //Draw and Handle mainMenu -> Menu Selector
+    if (touched && (*p_state == RobotState::SETTINGS || *p_state == RobotState::ABOUT || *p_state == RobotState::INFO_SENSOR || *p_state == RobotState::INFO_VISUAL))
+        HandleMainMenu(tx,ty);
 
-        // Handle Menus
-        if(*p_state == RobotState::RUN){
-            //RUN
+    //
+    
+    // Handle Menus
+    if(*p_state == RobotState::RUN){
+        //RUN
 
-        } else if (*p_state == RobotState::INFO_VISUAL){
-            //Info Visual
+    } else if (*p_state == RobotState::INFO_VISUAL){
+        //Info Visual
 
-        } else if (*p_state == RobotState::INFO_SENSOR){
-            //Sensor Information
+    } else if (*p_state == RobotState::INFO_SENSOR){
+        //Sensor Information
 
-        } else if (*p_state == RobotState::SETTINGS){
-            //Settings
-            ConstructSettingsMenu();
-            display.setTextSize(3);
+    } else if (*p_state == RobotState::SETTINGS){
+        //Settings
+        ConstructSettingsMenu();
+        display.setTextSize(3);
 
-            //Update driveMode
-            display.setCursor(348, 20);
-            display.setTextColor(TEXT_COLOR, HL_COLOR);
-            switch (driveMode) {
-            case ErrorCodes::straight:
-                display.print("straight");
-                break;
-            case ErrorCodes::left:
-                display.print("    left");
-                break;
-            case ErrorCodes::right:
-                display.print("   right");
-                break;
-            case ErrorCodes::North:
-                display.print("   North");
-                break;
-            case ErrorCodes::East:
-                display.print("    East");
-                break;
-            case ErrorCodes::South:
-                display.print("   South");
-                break;
-            case ErrorCodes::West:
-                display.print("    West");
-                break;
-            default:
-                display.print("   ERROR");
-                break;
-            }
+        //Update driveMode
+        display.setCursor(348, 20);
+        display.setTextColor(TEXT_COLOR, HL_COLOR);
+        switch (driveMode) {
+        case ErrorCodes::straight:
+            display.print("straight");
+            break;
+        case ErrorCodes::north:
+            display.print("   North");
+            break;
+        case ErrorCodes::east:
+            display.print("    East");
+            break;
+        case ErrorCodes::south:
+            display.print("   South");
+            break;
+        case ErrorCodes::west:
+            display.print("    West");
+            break;
+        default:
+            display.print("   ERROR");
+            break;
+        }
 
-            //Update speed:
-            if (NewContact == true && LastContact.x >= 332 && LastContact.x <= 416 && millis() > lastChange + WAITTIME) {
-                if (LastContact.y >= 150 && LastContact.y <= 355 && driveSpeed > 10){
-                    driveSpeed -= 10;
-                    signal.buzzer_pulse(5, 1);
-                } 
-                if (LastContact.y > 355 && LastContact.y < 500 && driveSpeed < 100) {
-                    driveSpeed += 10;
-                    signal.buzzer_pulse(5, 1);	
-                } 
-                lastChange = millis();
+        //Update speed:
+        if (NewContact == true && LastContact.x >= 332 && LastContact.x <= 416 && millis() > lastChange + WAITTIME) {
+            if (LastContact.y >= 150 && LastContact.y <= 355 && driveSpeed > 10){
+                driveSpeed -= 10;
+                signal.buzzer_pulse(5, 1);
+            } 
+            if (LastContact.y > 355 && LastContact.y < 500 && driveSpeed < 100) {
+                driveSpeed += 10;
+                signal.buzzer_pulse(5, 1);	
+            } 
+            lastChange = millis();
     #ifdef DEBUG_UI
                 Serial.println("ChangeSPEED");
     #endif // DEBUG_UI
@@ -459,6 +533,19 @@ void UserInterface::ConstructSettingsMenu(){
 	display.print("CheckP");
 
 	display.setTextColor(TEXT_COLOR, HL_COLOR);
+}
+
+ErrorCodes UserInterface::CycleDriveMode(){
+    if (driveMode != ErrorCodes::west) driveMode = (ErrorCodes)((uint8_t)driveMode + 1);
+	else driveMode = ErrorCodes::straight;
+	p_mapping->SetPriority(driveMode);
+}
+
+void UserInterface::ConnectPointer(RobotState* state, ColorSensing* cs, Mapping* mapping){
+    p_state = state;
+    p_colorSens = cs;
+    p_mapping = mapping;
+    return;
 }
 
 #ifdef _MSC_VER

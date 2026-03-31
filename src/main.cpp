@@ -33,6 +33,7 @@
   //Custom Includes - Modules
 #include <UserInterface.h>
 #include <TofSensors.h>
+#include <ColorSensing.h>
 
 
 #ifdef _MSC_VER
@@ -42,8 +43,9 @@
 
 //Objects
 UserInterface UI(50); // Update Interval: 50ms
-ColorSensing cs;
-
+EEPROM eeprom;
+ColorSensing cs(&Serial);
+Mapping mapper;
 
 #ifdef _MSC_VER
 #pragma endregion Objects
@@ -53,6 +55,8 @@ ColorSensing cs;
 //Variables
 RobotState currentMenuState;
 RunState currentRunState;
+
+uint32_t lastButtonPressGray;
 
 #ifdef _MSC_VER
   #pragma endregion Variables
@@ -82,15 +86,30 @@ int main(void) {
   //Initialize Modules
     //User Interface
   UI.Initialize();
-  UI.ConnectPointer(&currentMenuState, &cs);
+  UI.ConnectPointer(&currentMenuState, &cs, &mapper);
     //Buttons
   attachInterrupt(digitalPinToInterrupt(BUTTON_BLACK), ISR_BTN_BLACK, RISING);
 	attachInterrupt(digitalPinToInterrupt(BUTTON_GRAY), ISR_BTN_GRAY, RISING);
+  lastButtonPressGray = millis();
 
-  //Mapping
-  Mapping mapper;
+  UI.AddInfoMsg("System", "OK", true);
 
 
+  if(cs.Init(&Wire,&UI,&eeprom)!=0) UI.AddInfoMsg("Color Sensor", "ERROR", false);
+  else UI.AddInfoMsg("Color Sensor", "OK", true);
+  cs.EnableRead(true);
+
+  //ROBOT (Driving, ToF)
+
+  //Gyro
+
+  //Ejector
+
+  //MotorInterrupts
+
+  //Camera
+
+  UI.AddInfoMsg("Finished STARTUP", "ACK", false);
 #ifdef _MSC_VER
   #pragma endregion Initialization
   #pragma region Cyclic //-------------------------------------------------------------------------
@@ -183,6 +202,7 @@ while(true){
 void cyclicMainTask(){
   //Main cyclic tasks
   UI.Update();
+  cs.Update();
 }
 void cyclicRunTask(){
   //Cyclic tasks when in RUN state
@@ -190,18 +210,18 @@ void cyclicRunTask(){
 
 void ISR_BTN_BLACK() {
 	//Button for Starting and Checkpoint
-  currentRunState = RUN_States::INITIAL;
+  currentRunState = RunState::INITIAL;
   currentMenuState = RobotState::RUN;
 
 }
 void ISR_BTN_GRAY() {
   //Button for changing Drive Mode
-	// if(lastButtonPressGray + 300 < millis()){
-	// 	if (UI.driveMode != ErrorCodes::West) UI.driveMode = (ErrorCodes)((uint8_t)UI.driveMode + 1);
-	// 	else UI.driveMode = ErrorCodes::straight;
-	// 	(mapSys.changeDriveMode(UI.driveMode));
-	// 	lastButtonPressGray = millis();
-	// }
+	if(lastButtonPressGray + 300 < millis()){
+		UI.CycleDriveMode();
+		lastButtonPressGray = millis();
+	}
+
+  
 }
 
 #ifdef VISUAL_STUDIO
