@@ -276,7 +276,7 @@ while(true){
 
     else if (currentRunState == RunState::DRIVE) {
       //Control Logic
-      ErrorCodes driveSave = robot.controlDrive(((UI.driveSpeed * stdSPEED_MOD) / robot.speedMOD), gyro.GetAngleFromOrientation(robot.robotTargetAngle));
+      ErrorCodes driveSave = robot.controlDrive(((UI.GetDriveSpeed() * 2) / robot.speedMOD), gyro.GetAngleFromOrientation(robot.robotTargetAngle));
 			if(driveSave == ErrorCodes::CHECK_DRIVE) currentRunState = RunState::CHECK_DRIVE;
 			else if (driveSave == ErrorCodes::TIMEOUT) {
         robot.timeoutDrive();

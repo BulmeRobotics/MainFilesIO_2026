@@ -6,6 +6,7 @@
 #include <ColorSensing.h>
 
 // Definitionen der statischen Member
+constexpr char UserInterface::UI_VERSION[4];
 GDTpoint_t UserInterface::LastContact{};
 bool UserInterface::NewContact = false;
 
@@ -23,18 +24,18 @@ UserInterface::UserInterface(uint8_t updateInterval){
   #pragma region Icon Drawing 
 #endif
 
-static void DrawIconLocation(GigaDisplay_GFX& display, uint16_t cx, uint16_t cy){
+void UserInterface::DrawIconLocation(GigaDisplay_GFX& display, uint16_t cx, uint16_t cy){
     display.fillCircle(cx, cy - 20, 25, 0);
     display.fillTriangle(cx - 25, cy - 20, cx, cy + 40, cx + 25, cy - 20, 0);
     display.fillCircle(cx, cy - 20, 13, BTN_COLOR);
 }
-static void DrawIconSensor(GigaDisplay_GFX& display, uint16_t cx, uint16_t cy){
+void UserInterface::DrawIconSensor(GigaDisplay_GFX& display, uint16_t cx, uint16_t cy){
     display.fillCircle(cx, cy, 40, 0);
     display.fillCircle(cx, cy, 35, BTN_COLOR);
     // (Weitere Ringe deines alten Codes hier optional ergänzen)
     display.fillCircle(cx, cy, 10, 0);
 }
-static void DrawIconSettings(GigaDisplay_GFX& display, uint16_t cx, uint16_t cy){
+void UserInterface::DrawIconSettings(GigaDisplay_GFX& display, uint16_t cx, uint16_t cy){
 
     display.fillCircle(cx, cy, 33, 0);
 
@@ -51,7 +52,7 @@ static void DrawIconSettings(GigaDisplay_GFX& display, uint16_t cx, uint16_t cy)
 	display.fillCircle(cx+9, cy+21, 10, 0);
 	display.fillCircle(cx, cy, 19, BTN_COLOR);
 }
-static void DrawIconAbout(GigaDisplay_GFX& display, uint16_t cx, uint16_t cy){
+void UserInterface::DrawIconAbout(GigaDisplay_GFX& display, uint16_t cx, uint16_t cy){
     display.fillCircle(cx, cy, 38, 0);
     display.fillCircle(cx, cy, 33, BTN_COLOR);
     display.setCursor(cx - 10, cy - 15);
@@ -353,7 +354,6 @@ void UserInterface::ConnectPointer(RobotState* state, ColorSensing* cs, Mapping*
     p_state = state;
     p_colorSens = cs;
     p_mapping = mapping;
-
     return;
 }
 
@@ -557,72 +557,11 @@ void UserInterface::ConstructAboutMenu(){
 	display.println("Thomas Rauch | Vincent Rohkamm");
 }
 
-void UserInterface::ConstructSettingsMenu(){
-	//Drive Mode
-	display.fillRoundRect(140, 10, 362, 44, 5, HL_COLOR);
-	display.setTextSize(3);
-	display.setTextColor(TEXT_COLOR, HL_COLOR);
-	display.setCursor(150, 20);
-	display.print("driveMode:");
-
-
-	//speed
-	display.fillRoundRect(140, 64, 340, 84, 5, HL_COLOR);	//eig 338 bei width
-	display.setCursor(150, 94);
-	display.print("speed:  -");
-	display.setCursor(450, 94);
-	display.print("+");
-
-	//Caibrate CS - WHITE
-	display.fillRoundRect(490, 64, 155, 84, 5, HL_COLOR);
-	display.fillRoundRect(500, 71, 135, 70, 5, BTN_COLOR);
-
-	display.setTextColor(TEXT_COLOR);
-	display.setCursor(522, 98);
-	display.print("WHITE");
-
-	//Connect BLE (Bluetooth)
-	display.fillRoundRect(655, 64, 125, 84, 5, HL_COLOR);
-	display.fillRoundRect(665, 71, 105, 70, 5, BTN_COLOR);
-	display.setCursor(690, 98);
-	display.print("BLE");
-
-	//Calibrate ColorSensors
-	display.fillRoundRect(140, 158, 640, 122, 5, HL_COLOR);
-	display.setCursor(150, 168);
-	display.print("ColorSensor Calibration");
-	display.fillRoundRect(160, 200, 135, 70, 5, BTN_COLOR);
-	display.fillRoundRect(315, 200, 135, 70, 5, BTN_COLOR);
-	display.fillRoundRect(470, 200, 135, 70, 5, BTN_COLOR);
-	display.fillRoundRect(625, 200, 135, 70, 5, BTN_COLOR);
-
-	display.setTextColor(0);
-	display.setCursor(182, 223);
-	display.print("Black");
-	display.setTextColor(0x001f);
-	display.setCursor(346, 223);
-	display.print("Blue");
-	display.setTextColor(0xf800);
-	display.setCursor(483, 223);
-	display.print("D-Zone");
-	display.setTextColor(TEXT_COLOR);
-	display.setCursor(638, 223);
-	display.print("CheckP");
-
-	display.setTextColor(TEXT_COLOR, HL_COLOR);
-}
-
 ErrorCodes UserInterface::CycleDriveMode(){
     if (driveMode != ErrorCodes::west) driveMode = (ErrorCodes)((uint8_t)driveMode + 1);
 	else driveMode = ErrorCodes::straight;
 	p_mapping->SetPriority(driveMode);
-}
-
-void UserInterface::ConnectPointer(RobotState* state, ColorSensing* cs, Mapping* mapping){
-    p_state = state;
-    p_colorSens = cs;
-    p_mapping = mapping;
-    return;
+    return driveMode;
 }
 
 #ifdef _MSC_VER

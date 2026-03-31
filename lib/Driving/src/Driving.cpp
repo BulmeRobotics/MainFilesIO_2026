@@ -340,7 +340,7 @@ ErrorCodes Driving::startTurn(float angle) {
 	_registeredBumps = 0;
 
 	if (angle > 360) {
-		return ErrorCodes::INVALID;
+		return ErrorCodes::invalid;
 	}
 	#ifdef DEBUG_TURN
 		Serial.println("Starting turn");
@@ -644,7 +644,7 @@ ErrorCodes Driving::timeoutDrive(void) {
 ErrorCodes Driving::startAdjustment(void) {
 	//Positon the robot in the middle of the field before turning
 	p_tof->Update();
-	if (p_tof->GetRange(TofType::FRONT) > 120)	return ErrorCodes::INVALID;
+	if (p_tof->GetRange(TofType::FRONT) > 120)	return ErrorCodes::invalid;
 
 	int8_t posError;
 	do {
