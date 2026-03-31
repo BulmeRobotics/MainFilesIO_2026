@@ -221,7 +221,7 @@ class ColorSensing{
         /**
          * @brief Checks if the sensors finished measurement and updates floor type
          */
-        ErrorCodes UpdateSensors();
+        ErrorCodes Update();
 
 
 };

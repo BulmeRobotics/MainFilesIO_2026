@@ -123,7 +123,7 @@ ErrorCodes ColorSensing::EnableRead(bool enable){
 }
 
 
-ErrorCodes ColorSensing::UpdateSensors(){
+ErrorCodes ColorSensing::Update(){
     if(_READING){
         TCA9548A(0);
         if(front.checkReadingProgress()){
