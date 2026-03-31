@@ -20,7 +20,7 @@ int16_t EEPROM::GetStartAddr(PoI_Type type, char sensor){
     case(PoI_Type::black):
         return (sensor == 'F') ? EEPROM_START_ADD_FRONT_BLACK : EEPROM_START_ADD_MIDDLE_BlACK;
         break;
-    case(PoI_Type::dangerZone):
+    case(PoI_Type::red):
         return (sensor == 'F') ? EEPROM_START_ADD_FRONT_DZ : EEPROM_START_ADD_MIDDLE_DZ;
         break;
     default:
