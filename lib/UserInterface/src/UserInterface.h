@@ -16,15 +16,54 @@
 
 #include <CustomDatatypes.h>
 #include <ColorSensing.h>
+#include <Mapping.h>
 
 #ifdef _MSC_VER
     #pragma endregion Includes
+    #pragma region Button Class//----------------------------------------------------------------
+#endif
+
+typedef void (*IconDrawFunc)(GigaDisplay_GFX& display, uint16_t btnX, uint16_t btnY);
+
+class Button{
+    private:
+        uint16_t x, y, width, height;
+        uint16_t bgColor, textColor;
+        uint8_t textSize;
+        IconDrawFunc drawFunction;
+    public:
+        Button(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t bgColor, uint16_t textColor, uint8_t textSize, IconDrawFunc drawFunction)
+            : x(x), y(y), width(width), height(height), bgColor(bgColor), textColor(textColor), textSize(textSize), drawFunction(drawFunction) {}
+
+        void Draw(GigaDisplay_GFX& display, const char* label = ""){
+            display.fillRoundRect(x, y, width, height, 15, bgColor);
+            if(label[0] != '\0'){
+                display.setTextSize(textSize);
+                display.setTextColor(textColor);
+
+                uint16_t charWidth = 6 * textSize;
+                uint16_t charHeight = 8 * textSize;
+                uint16_t textWidth = strlen(label) * charWidth;
+
+                display.setCursor(x + (width / 2) - (textWidth / 2), y + (height / 2) - (charHeight / 2));
+                display.print(label);
+            }
+            if (drawFunction != nullptr) drawFunction(display, x + width / 2, y + height / 2);
+        }
+        bool IsPressed(uint16_t touchX, uint16_t touchY){
+            return (touchX >= x && touchX <= (x + width) && touchY >= y && touchY <= (y + height));
+        }
+};
+
+#ifdef _MSC_VER
+    #pragma endregion Button Class
     #pragma region UI Class//----------------------------------------------------------------
 #endif
 
+
 class UserInterface {
 private:
-    const char UI_VERSION[4] = "0.1";
+    static constexpr char UI_VERSION[4] = "0.1";
 
     #define TEXT_SIZE 4
     #define TEXT_COLOR 0xce4a
@@ -32,38 +71,75 @@ private:
     #define HL_COLOR 0x1168
     #define BTN_COLOR 0x630c
 
-    // Display Objects
+    // --- Display Objects ---
     GigaDisplay_GFX display;
     Arduino_GigaDisplayTouch touchDetector;
     GigaDisplayRGB rgb;
 
-    static void gigaTouchHandler(uint8_t contacts, GDTpoint_t* points);	//Touch detection INTERRUPT
+
+    // --- Toch Detection ---
+    static void gigaTouchHandler(uint8_t contacts, GDTpoint_t* points);
     static GDTpoint_t LastContact;
     static bool NewContact;
 
-    // LEDs and Buzzer
-    const uint8_t neoPin = 8;
-    const uint8_t pixelNum = 18;
-    const uint8_t ledPin = 56;
-    const uint8_t buzzerPin = 58;
+    uint32_t lastTouch;
+    static constexpr uint16_t touchDebounce = 250; //in ms
+
+    bool GetValidTouch(uint16_t &touchX, uint16_t &tocuhY);
+
+    // --- LEDs and Buzzer ---
+    static constexpr uint8_t neoPin = 8;
+    static constexpr uint8_t pixelNum = 18;
+    static constexpr uint8_t ledPin = 56;
+    static constexpr uint8_t buzzerPin = 58;
     Adafruit_NeoPixel pixels = Adafruit_NeoPixel(pixelNum, neoPin, NEO_GRBW + NEO_KHZ800);
 
-    // Battery Measurement
-    const uint8_t batteryPin = A0;
+    // --- Battery Measurement ---
+    static constexpr uint8_t batteryPin = A0;
     uint8_t lastPercent = 0;
 
-    // Settings
-    uint8_t UPDATE_INTERVAL = 50; //in ms
+    // --- Settings ---
+    uint8_t UPDATE_INTERVAL; //in ms
     uint32_t lastUpdate = 0;
     
-    // Pointers
-    RobotState* p_state = nullptr;
+    
+    // --- Object Pointers ---
     ColorSensing* p_colorSens = nullptr;
+    Mapping* p_mapping = nullptr;
 
-    // Private Methods
+    // --- States ---
+    ErrorCodes driveMode;
+    RobotState* p_state = nullptr;
+    RobotState lastState = RobotState::BOOT;
 
-    // @brief Draws menu buttons
-    void HandleMainMenu();
+    // --- Icon Drawing Functions ---
+    static void DrawIconLocation(GigaDisplay_GFX& display, uint16_t cx, uint16_t cy);
+    static void DrawIconSensor(GigaDisplay_GFX& display, uint16_t cx, uint16_t cy);
+    static void DrawIconSettings(GigaDisplay_GFX& display, uint16_t cx, uint16_t cy);
+    static void DrawIconAbout(GigaDisplay_GFX& display, uint16_t cx, uint16_t cy);
+
+// --- Buttons ---
+
+    // -- Menu Buttons --
+    Button btnMenuLocation = Button(10, 16, 100, 100, BTN_COLOR, TEXT_COLOR, 3, DrawIconLocation);
+    Button btnMenuSensor   = Button(10, 132, 100, 100, BTN_COLOR, TEXT_COLOR, 3, DrawIconSensor);
+    Button btnMenuSettings = Button(10, 248, 100, 100, BTN_COLOR, TEXT_COLOR, 3, DrawIconSettings);
+    Button btnMenuAbout    = Button(10, 364, 100, 100, BTN_COLOR, TEXT_COLOR, 3, DrawIconAbout);
+
+    // -- Settings --
+    Button btnSpeedMinus  = Button(140, 64, 160, 84, HL_COLOR, TEXT_COLOR, 4, nullptr);
+    Button btnSpeedPlus   = Button(320, 64, 160, 84, HL_COLOR, TEXT_COLOR, 4, nullptr);
+    Button btnCalibWhite  = Button(500, 71, 135, 70, BTN_COLOR, TEXT_COLOR, 3, nullptr);
+    Button btnBleConnect  = Button(665, 71, 105, 70, BTN_COLOR, TEXT_COLOR, 3, nullptr);
+    Button btnCalibBlack  = Button(160, 200, 135, 70, BTN_COLOR, 0x0000, 3, nullptr); // Schwarz
+    Button btnCalibBlue   = Button(315, 200, 135, 70, BTN_COLOR, 0x001f, 3, nullptr); // Blau
+    Button btnCalibDZone  = Button(470, 200, 135, 70, BTN_COLOR, 0xf800, 3, nullptr); // Rot
+    Button btnCalibCheckP = Button(625, 200, 135, 70, BTN_COLOR, TEXT_COLOR, 3, nullptr); // Gelb/Text
+
+// --- Functions ---
+    // -- Main Menu --
+    void DrawMainMenuStatic();
+    void HandleMainMenu(uint16_t tx, uint16_t ty);
 
     // @brief Draws Battery Status on Display
     void DrawBattery();
@@ -80,7 +156,7 @@ public:
      * @brief Construct a new User Interface object
      * @param updateInterval Update Interval for the User Interface in milliseconds
      */
-    UserInterface(uint8_t updateInterval);    //CONSTRUCTOR
+    UserInterface(uint8_t updateInterval = 50);    //CONSTRUCTOR
 
     /**
      * @brief Updates the User Interface (should be called cyclically)
@@ -94,7 +170,7 @@ public:
     /**
      * @brief Connects the other classes to the User Interface
      */
-    void ConnectPointer(RobotState* state, ColorSensing* cs);
+    void ConnectPointer(RobotState* state, ColorSensing* cs, Mapping* mapping);
 
     /**
      * @brief Adds an Information to the Message Log in startup or BLE screen
@@ -158,4 +234,10 @@ public:
      * @return Charge Level (0-100)
      */
     uint8_t GetCharge();
+
+    /**
+     * @brief Cycles through the Drive Modes in the Settings Menu
+     * @return The new Drive Mode after cycling
+     */
+    ErrorCodes CycleDriveMode();
 };
