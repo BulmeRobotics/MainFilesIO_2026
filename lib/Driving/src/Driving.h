@@ -12,6 +12,7 @@
 #include <TofSensors.h>
 #include <Gyro.h>
 #include <ColorSensing.h>
+#include <Mapping.h>
 // #include <Mapping.h>
 
 class Cameras; // Forward declaration of the Cameras class
@@ -19,77 +20,73 @@ class Cameras; // Forward declaration of the Cameras class
 class Driving {
 protected:
 
-//#define DEBUG_RAMP
-//#define DEBUG_RAMP_ARRAY
-//#define DEBUG_X64
-
-#define BUMPER_TRYS 5
-#define BUMPER_LEFT_PIN 47
-#define BUMPER_RIGHT_PIN 45
+    //#define DEBUG_RAMP
+    //#define DEBUG_RAMP_ARRAY
+    //#define DEBUG_X64
 
 
 private:
-//DEFINITIONS -------------------------------------------------------------------------------------------------------------------------
-#define MIN_SETTILE_TIME 750
-#define INCLINE_ARRAY_SIZE 250
-#define reverseBumperTimeout 2000
+//CONFIGURATION -------------------------------------------------------------------------------------------------------------------------
+    #define MIN_SETTILE_TIME 750
+    #define INCLINE_ARRAY_SIZE 250
+    #define reverseBumperTimeout 2000
 
-//Driving consants
-const uint8_t tof_sideWallThreshold = 170;
-const uint8_t gap_robot_wall = 75; //Distance between the robot and the wall
-const uint8_t stop_wallDistance = 75;
-const uint8_t adjust_wallDistance = 70;
-const uint8_t adjustmentSpeedFactor = 1.5;	//Speed factor for the adjustment speed
+    //Driving consants
+    const uint8_t tof_sideWallThreshold = 170;
+    const uint8_t gap_robot_wall = 75; //Distance between the robot and the wall
+    const uint8_t stop_wallDistance = 75;
+    const uint8_t adjust_wallDistance = 70;
+    const uint8_t adjustmentSpeedFactor = 1.5;	//Speed factor for the adjustment speed
 
-//Ramp settings
-const float rampThresholdAngle = 10;	//Angle threshold for the ramp
-const float rampConfidence = 0.9;    //Confidence for the ramp detection
-const uint8_t rampSpeedUp = 75;
-const uint8_t rampSpeedDown = 25;
-const uint8_t rampSubDistance = 30;
-const float rampStairsThreshold = 60;
-const float rampUp_K = 0.95;
-const float rampUp_d = 30; 
-const float rampDown_K = 1.7;
-const float rampDown_d = 25;
-const float stairUp_K = 0.7;
-const float stairUp_d = 0;
-const float stairDown_K = 1.15;
-const float stairDown_d = 0;	
-const float stairUp_angle_offset = 3.5;
-const float stairDown_angle_offset = -3.5;
+    //Ramp settings
+    const float rampThresholdAngle = 10;	//Angle threshold for the ramp
+    const float rampConfidence = 0.9;    //Confidence for the ramp detection
+    const uint8_t rampSpeedUp = 75;
+    const uint8_t rampSpeedDown = 25;
+    const uint8_t rampSubDistance = 30;
+    const float rampStairsThreshold = 60;
+    const float rampUp_K = 0.95;
+    const float rampUp_d = 30; 
+    const float rampDown_K = 1.7;
+    const float rampDown_d = 25;
+    const float stairUp_K = 0.7;
+    const float stairUp_d = 0;
+    const float stairDown_K = 1.15;
+    const float stairDown_d = 0;	
+    const float stairUp_angle_offset = 3.5;
+    const float stairDown_angle_offset = -3.5;
 
-//PID coefficents
-//const float pidCoeff_P
-const float pid_CriticalGain = 7.5;			//Maximum proportional amount for P-Controller
-const float pid_LoopDuration = 0.025;	//Duration of the control loop
-const float pid_OscillationPeriod = 0.75;	//Period time of the oscillation of the robot
-const float pid_LeftRightFactor = 0.35;
+    //PID coefficents
+    //const float pidCoeff_P
+    const float pid_CriticalGain = 7.5;			//Maximum proportional amount for P-Controller
+    const float pid_LoopDuration = 0.025;	//Duration of the control loop
+    const float pid_OscillationPeriod = 0.75;	//Period time of the oscillation of the robot
+    const float pid_LeftRightFactor = 0.35;
+
+    const uint8_t BUMPER_TRYS = 5;
+    const uint8_t BUMPER_LEFT_PIN = 47;
+    const uint8_t BUMPER_RIGHT_PIN = 45;
 
 //Obj Pointer -------------------------------------------------------------------------------------------------------------------------
     ColorSensing*  p_colorSensing = nullptr;
     TofSensors*    p_tof = nullptr;
     Gyro*          p_gyro = nullptr;
     Drivetrain*    p_drivetrain = nullptr;
-    // Mapping*        p_mapSys = nullptr;
-    // Cameras*        p_cams = nullptr;
+    Mapping*       p_mapSys = nullptr;
+    // Cameras*       p_cams = nullptr;
 
 //Objects -------------------------------------------------------------------------------------------------------------------------
     
 
 //Private Variables -------------------------------------------------------------------------------------------------------------------------
     //FLAGS
-        //Bumper
+    //Bumper
     bool    _ENABLE_BUMPERS = true;
     uint8_t _registeredBumps = 0;
 
-        //Ramps
+    //Ramps
     ErrorCodes finishRamp(uint8_t distance);
     ErrorCodes checkRamp(void);
-
-        //Turn
-    bool 	_CAM_ALERT_TURN = false;
-
     
     TOF_Optimal_Value 	lastSensor;
     uint32_t 			startTime;
@@ -132,6 +129,7 @@ const float pid_LeftRightFactor = 0.35;
     bool                _STAIR = false;
     bool 				_TURN_180_DEGREE = false;
     bool                _DRIVE_TIMEOUT = false;
+    bool 	            _CAM_ALERT_TURN = false;
     
     //speedMOD
     const uint8_t stdSPEED_MOD = 2;
@@ -168,7 +166,7 @@ public:
     uint32_t    lastSetTile;
 
     //@brief initializes driving
-    void init(ColorSensing* p_colorSensing, TofSensors* p_tof, Gyro* p_gyro, /*Mapping* mapSys_pointer,*/ /*Cameras* cam_pointer, */ Drivetrain* p_drivetrain);
+    void init(ColorSensing* p_colorSensing, TofSensors* p_tof, Gyro* p_gyro, Mapping* mapSys_pointer, /*Cameras* cam_pointer, */ Drivetrain* p_drivetrain);
 
     //Bumpers:
     ErrorCodes reverseBumper(uint16_t distance, int8_t speedLeft, int8_t speedRight);

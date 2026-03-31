@@ -36,7 +36,7 @@ ErrorCodes Driving::bumperHandler(void){
 			_registeredBumps += 1;	//add 1 to bump registered
 
 			if(_registeredBumps > BUMPER_TRYS){
-//!				p_mapSys->bumperWall();	//call bumper Wall fct if 4 umps
+				p_mapSys->Bumper();
 				_registeredBumps = 0;
 
 				reverseBumper(40,-40,-40); //Drive back 40mm
@@ -150,6 +150,7 @@ ErrorCodes Driving::checkRamp(void){
 			_RAMP_UP = false;	//Ramp UP not detected
 			if (millis() < lastSetTile + MIN_SETTILE_TIME) {	//Check if settile occured shortly before Ramp detection
 //!				p_mapSys->moveRobot(p_gyro->GetAbsoluteAngle(), 1);	//Move robot forward
+				p_mapSys->Move(true);
 //!				if(p_mapSys->rollBackPath(1) != ErrorCodes::OK){
 //!					// Serial.println("no Rollback!");	//Roll back the path
 //!				}
@@ -335,17 +336,18 @@ bool Driving::checkStairRamp(void) {
 #pragma endregion RAMPS
 #pragma region TURN
 #endif
+
 ErrorCodes Driving::startTurn(float angle) {
-	_registeredBumps = 0;	//add 1 to bump registered
+	_registeredBumps = 0;
 
 	if (angle > 360) {
 		return ErrorCodes::INVALID;
 	}
-#ifdef DEBUG_TURN
-	Serial.println("Starting turn");
-	Serial.print("TargetAngle: ");
-	Serial.println(angle);
-#endif
+	#ifdef DEBUG_TURN
+		Serial.println("Starting turn");
+		Serial.print("TargetAngle: ");
+		Serial.println(angle);
+	#endif
 	startTime = millis();
 	disableBumpers();	//Disable Bumpers
 
@@ -366,8 +368,8 @@ ErrorCodes Driving::controlTurn(float angle) {
 		//Get the gyro readings and calculate the control data
 		p_gyro->GetAngle_advanced(angle, GyroAxles::Axis_X);
 		#ifdef DEBUG_TURN
-				Serial.print("Angle error: ");
-				Serial.print(p_gyro->data.angle_error);
+			Serial.print("Angle error: ");
+			Serial.print(p_gyro->data.angle_error);
 		#endif
 
 		//Calculate the turn speed with an exponential function
@@ -385,8 +387,8 @@ ErrorCodes Driving::controlTurn(float angle) {
 		else turnSpeed = constrain(turnSpeed, -60, 60);	//Limit the speed to 50
 
 		#ifdef DEBUG_TURN
-		Serial.print("Turn speed: ");
-		Serial.println(turnSpeed);
+			Serial.print("Turn speed: ");
+			Serial.println(turnSpeed);
 		#endif
 
 		//Set the speed
@@ -398,10 +400,10 @@ ErrorCodes Driving::controlTurn(float angle) {
 		p_drivetrain->Stop();
 
 		#ifdef DEBUG_TURN
-		Serial.print("Final angle: ");
-		Serial.println(gyro.getAngle(GyroAxles::AXIS_X));
-		Serial.print("Time: ");
-		Serial.println(millis() - startTime);
+			Serial.print("Final angle: ");
+			Serial.println(gyro.getAngle(GyroAxles::AXIS_X));
+			Serial.print("Time: ");
+			Serial.println(millis() - startTime);
 		#endif
 		
 		return ErrorCodes::TURNED;
@@ -418,6 +420,7 @@ ErrorCodes Driving::endTurn(){
 	// }
 	
 //!	p_mapSys->moveRobot(p_gyro->GetAbsoluteAngle(), 2);
+	p_mapSys->Turn(p_gyro->GetOrientationFromAngle());
 	//Check for ramps in front and back
 //!	// if (p_tof->x64.isRamp(&p_tof->x64.front)) {
 	// 	_RAMP_INFRONT = true;
@@ -445,18 +448,18 @@ ErrorCodes Driving::turn180Degree(void) {
 ErrorCodes Driving::startAlign(void) {
 	//Reading all short TOFs on the side of the robot
 	uint16_t startTime = millis();	
-	uint16_t sumDistanceLeft 	= p_tof->GetRange(TofType::LEFT_BACK); + p_tof->GetRange(TofType::LEFT_FRONT);
+	uint16_t sumDistanceLeft 	= p_tof->GetRange(TofType::LEFT_BACK) + p_tof->GetRange(TofType::LEFT_FRONT);
 	uint16_t sumDistanceRight 	= p_tof->GetRange(TofType::RIGHT_BACK) + p_tof->GetRange(TofType::RIGHT_FRONT);
 
 	#ifdef DEBUG_DRIVING
-	Serial.print("LB: ");
-	Serial.print(p_tof->GetRange(TofType::LEFT_BACK));
-	Serial.print("\tLF: ");
-	Serial.print(p_tof->GetRange(TofType::LEFT_FRONT));
-	Serial.print("\tRF: ");
-	Serial.print(p_tof->GetRange(TofType::RIGHT_FRONT));
-	Serial.print("\tRB: ");
-	Serial.print(p_tof->GetRange(TofType::RIGHT_BACK));
+		Serial.print("LB: ");
+		Serial.print(p_tof->GetRange(TofType::LEFT_BACK));
+		Serial.print("\tLF: ");
+		Serial.print(p_tof->GetRange(TofType::LEFT_FRONT));
+		Serial.print("\tRF: ");
+		Serial.print(p_tof->GetRange(TofType::RIGHT_FRONT));
+		Serial.print("\tRB: ");
+		Serial.print(p_tof->GetRange(TofType::RIGHT_BACK));
 	#endif // DEBUG_DRIVING
 
 	//deciding which side to use for the procedure
@@ -475,8 +478,8 @@ ErrorCodes Driving::startAlign(void) {
 	else return ErrorCodes::NOT_ALIGNING;	//No alignment possible, no wall next to the robot
 
 	#ifdef DEBUG_DRIVING
-	Serial.print("\tSide: ");
-	Serial.println(side);
+		Serial.print("\tSide: ");
+		Serial.println(side);
 	#endif // DEBUG_DRIVING
 
 	while (distanceFront != distanceBack && millis() - startTime < 1500)
@@ -484,8 +487,8 @@ ErrorCodes Driving::startAlign(void) {
 		p_tof->Update();
 		distanceError = distanceFront - distanceBack;
 		#ifdef DEBUG_DRIVING
-		Serial.print("Distance error: ");
-		Serial.println(distanceError);
+			Serial.print("Distance error: ");
+			Serial.println(distanceError);
 		#endif // DEBUG_DRIVING
 
 		//direction of the correction, calculating the turn speed with an exponential function
@@ -565,10 +568,10 @@ ErrorCodes Driving::controlDrive(int8_t driveSpeed, float angle) {
 	PID_Coefficients coeff;
 	if (lastPID_timestamp) coeff = calculatePIDCoefficients((float)(millis() - lastPID_timestamp) / 1000);
 	else coeff = calculatePIDCoefficients(pid_LoopDuration);
-#ifdef DEBUG_DRIVING
-	Serial.print("Time: ");
-	Serial.println((float)(millis() - lastPID_timestamp));
-#endif // DEBUG_DRIVING
+	#ifdef DEBUG_DRIVING
+		Serial.print("Time: ");
+		Serial.println((float)(millis() - lastPID_timestamp));
+	#endif // DEBUG_DRIVING
 
 	correctionSpeed = (coeff.P * error) + (coeff.I * integralError) + (coeff.D * derivativeError);
 	correctionSpeed = constrain(correctionSpeed, (-driveSpeed * 0.33), (driveSpeed * 0.33));	//Limit the correction speed to 33% of the max speed
@@ -658,6 +661,7 @@ ErrorCodes Driving::reverseBlackTile(void) {
 	p_drivetrain->EnableEncoder();
 	p_drivetrain->ResetEncoder();
 	while (p_drivetrain->GetEncoderDistance() < 150) {	//Drive back 10cm
+		Serial.println(p_drivetrain->GetEncoderDistance());
 		p_drivetrain->SetSpeed(-30);
 	}
 	p_drivetrain->Stop();
@@ -733,12 +737,12 @@ TOF_Optimal_Value Driving::getOptimalSensor(void){
     #endif // DEBUG
 	return result;
 }
-void Driving::init(ColorSensing* p_colorSensing, TofSensors* p_tof, Gyro* p_gyro, /*Mapping* mapSys_pointer,*/ /*Cameras* cam_pointer, */ Drivetrain* p_drivetrain) {
+void Driving::init(ColorSensing* p_colorSensing, TofSensors* p_tof, Gyro* p_gyro, Mapping* mapSys_pointer, /*Cameras* cam_pointer, */ Drivetrain* p_drivetrain) {
     this->p_colorSensing = p_colorSensing;
     this->p_tof = p_tof;
     this->p_gyro = p_gyro;
-//!    this.p_mapSys = mapSys_pointer;
-//!    this.p_cams = cam_pointer;
+	this->p_mapSys = mapSys_pointer;
+//!    this->p_cams = cam_pointer;
 
     this->p_drivetrain = p_drivetrain;	//Pointer to Motor 
 
