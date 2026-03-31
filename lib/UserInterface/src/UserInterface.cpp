@@ -428,7 +428,14 @@ void UserInterface::Update(){
     } else if (*p_state == RobotState::INFO_SENSOR){
         //Sensor Information
 
-    } else if (*p_state == RobotState::SETTINGS){
+    } else if(*p_state == RobotState::BOOT){
+        if(touched){
+            *p_state = RobotState::SETTINGS;
+            BuzzerSignal(5,0,1);
+        }
+    } 
+    
+    else if (*p_state == RobotState::SETTINGS){
         //Settings
 
         //Update driveMode
