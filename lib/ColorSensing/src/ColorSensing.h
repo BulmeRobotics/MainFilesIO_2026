@@ -9,7 +9,8 @@
 #endif
 
 #include <Arduino.h>
-#include "CustomDatatypes.h"
+#include <CustomDatatypes.h>
+#include <UserInterface.h>
 #include <Adafruit_AS7341.h>
 #include <Adafruit_EEPROM_I2C.h>
 #include <Adafruit_FRAM_I2C.h>
@@ -26,38 +27,40 @@ class EEPROM {
 
     #define EEPROM_PACKAGE_SIZE 2
     #define EEPROM_PACKAGE_OVERHEAD 1
-    #define EEPROM_PACKAGE_NUM 8
+    #define EEPROM_PACKAGE_NUM 10
 
     #define EEPROM_START_ADD_FRONT_WHITE 0x000
-    #define EEPROM_START_ADD_MIDDLE_WHITE 0x019
+    #define EEPROM_START_ADD_MIDDLE_WHITE 0x01E
 
-    #define EEPROM_START_ADD_FRONT_BLUE 0x032
-    #define EEPROM_START_ADD_MIDDLE_BLUE 0x04B
+    #define EEPROM_START_ADD_FRONT_BLUE 0x03C
+    #define EEPROM_START_ADD_MIDDLE_BLUE 0x05A
 
-    #define EEPROM_START_ADD_FRONT_CP 0x064
-    #define EEPROM_START_ADD_MIDDLE_CP 0x07D
+    #define EEPROM_START_ADD_FRONT_CP 0x078
+    #define EEPROM_START_ADD_MIDDLE_CP 0x096
 
-    #define EEPROM_START_ADD_FRONT_BLACK 0x096
-    #define EEPROM_START_ADD_MIDDLE_BlACK 0x0AF
+    #define EEPROM_START_ADD_FRONT_BLACK 0x0B4
+    #define EEPROM_START_ADD_MIDDLE_BlACK 0x0D2
 
-    #define EEPROM_START_ADD_FRONT_DZ 0x0C8
-    #define EEPROM_START_ADD_MIDDLE_DZ 0x0FA
+    #define EEPROM_START_ADD_FRONT_DZ 0x0F0
+    #define EEPROM_START_ADD_MIDDLE_DZ 0x10E
 
     #define EEPROM_START_ADD_REFLECTIVE 0x12C
 
-    #define EEPROM_MAIN_SPEED 0x12C
+    #define EEPROM_MAIN_SPEED 0x14A
 
-    #define EEPROM_NEXT_AVALIBLE_ADDR 0x15E
+    #define EEPROM_NEXT_AVALIBLE_ADDR 0x14C
 
     Adafruit_EEPROM_I2C i2ceeprom;
 
     int16_t GetStartAddr(PoI_Type type, char sensor);
 
 
+    
+
     public:
         ErrorCodes Init();
-        ErrorCodes WriteColorSens(PoI_Type type, char sensor, uint32_t* buffer);
-        ErrorCodes ReadColorSens(PoI_Type type, char sensor, uint32_t* buffer);
+        ErrorCodes WriteToEEPROM(PoI_Type type, char sensor, uint16_t* buffer);
+        ErrorCodes ReadFromEEPROM(PoI_Type type, char sensor, uint16_t* buffer);
 };
 
 #ifdef _MSC_VER
@@ -68,12 +71,57 @@ class EEPROM {
 
 class ColorSensing{
     private:
+    // --- Adressen & Hardware-Settings ---
+    static constexpr uint8_t MULTIPLEX_ADRESS = 0x70;
+    static constexpr uint8_t LED_CURRENT      = 10;
+
+    // --- Sensor Timings ---
+    static constexpr uint16_t ATIME_Front     = 100;
+    static constexpr uint16_t ASTEP_Front     = 150;
+    static constexpr uint16_t ATIME_Middle    = 150;
+    static constexpr uint16_t ASTEP_Middle    = 700;
+ 
+    // --- Multiplikatoren ---
+    static constexpr uint8_t MULT_up          = 100;
+    static constexpr uint8_t MULT_down        = 100;
+ 
+    // --- Schwellenwerte Middle Sensor ---
+    static constexpr uint16_t MIDDLE_BLACK_RANGE_UP   = 4000;
+    static constexpr uint16_t MIDDLE_WHITE_RANGE_DOWN = 20000;
+    static constexpr uint16_t MIDDLE_WHITE_RANGE_UP   = 3000;
+    static constexpr uint16_t MIDDLE_SILVER_RANGE_F5  = 10000;
+    static constexpr uint16_t MIDDLE_BLUE_RANGE_DOWN  = 2000;
+    static constexpr uint16_t MIDDLE_RED_RANGE_DOWN   = 10000;
+ 
+    // --- Schwellenwerte Front Sensor ---
+    static constexpr uint16_t FRONT_BLACK_RANGE_UP    = 1500;
+    static constexpr uint16_t FRONT_WHITE_RANGE_DOWN  = 1900;
+    static constexpr uint16_t FRONT_WHITE_RANGE_UP    = 200;
+ 
+    // --- Konfiguration ---
+    static constexpr uint8_t RUNS_calibration = 7;
+    static constexpr uint16_t COLOR_TIMEOUT   = 500;
+ 
+    // --- LEDs ---
+    static constexpr bool _ENABLE_LED_FRONT  = true;
+    static constexpr bool _ENABLE_LED_MIDDLE = true;
+
+    // --- Float-Modifikatoren ---
+    // WICHTIG: Das 'f' am Ende macht daraus einen 32-bit float statt 64-bit double!
+    // Das spart auf einem STM32 massiv Rechenzeit und Flash-Speicher.
+    static constexpr float MOD_FrontRead       = 1.0f;
+    static constexpr float MOD_MiddleRead      = 2.5f;
+    static constexpr float MOD_HIGH_WAVELENGTH = 2.5f;
+    static constexpr float MOD_WHITE           = 1.5f;
+
     #define MULTIPLEX_ADRESS 0x70
     //Objects for CS
-        EEPROM eeprom;
+        EEPROM* _eeprom;
+        UserInterface* _ui;
         Adafruit_AS7341 front;
 	    Adafruit_AS7341 middle;
 
+    // private Fields for storing current state of the sensors
         PoI_Type colorFront;
         PoI_Type colorMiddle;
 
@@ -81,7 +129,23 @@ class ColorSensing{
 
         bool _ALERT;
         bool _FREEZE_SENSOR;
+        bool _READING;
 
+    // saved calibration Values
+        static constexpr uint8_t WHITE  = 0;
+        static constexpr uint8_t BLACK  = 1;
+        static constexpr uint8_t BLUE   = 2;
+        static constexpr uint8_t RED    = 3;
+        static constexpr uint8_t SILVER = 4;
+
+        rawColor frontColorsCalibrated[5];
+        rawColor middleColorsCalibrated[5]; 
+
+    // Diagnostic functionality
+        Stream* _debugPort;
+        void printDebugData(uint16_t* rawColor);
+
+    // Multiplexer Function
         /**
          * @brief toggles between multiplexer channels; enables use of multiple CS
          * @param bus: 0...front; 1...middle
@@ -92,12 +156,27 @@ class ColorSensing{
             Wire.endTransmission();
         }
 
+
+    // analyze Sensor Data
+
+        // @todo: check function
+        PoI_Type checkFront();
+        PoI_Type checkMiddle();
+
     public:
+
+        /**
+         * @brief Constructor for ColorSensing class
+         * @param debugPort: optional Stream for debug output (e.g. Serial), if left empty, no debug output will be produced
+         */
+        ColorSensing(Stream* debugPort = nullptr) : _debugPort(debugPort) {}
 
         /**
          * @brief inits ColorSensing for Floor
          * @param wire: Wire channel
-
+         * @param ui: UserInterface instance
+         * @param eeprom: EEPROM instance
+         *
          * @return	b1...Middle not found
 		 * @return	b2...LED Error front
 		 * @return	b3...LED Error middle
@@ -106,7 +185,7 @@ class ColorSensing{
 		 * @return	b6...Middle ATIME / ASTEP Error
 		 * @return	b7...Front ATIME / ASTEP Error
          */
-        uint8_t Init(TwoWire* wire);
+        uint8_t Init(TwoWire* wire, UserInterface* ui, EEPROM* eeprom);
 
         /**
          * @brief returns current floor type
@@ -123,9 +202,8 @@ class ColorSensing{
         /**
          * @brief freezes the cs output to white, use on ramp, etc
          * @param enable: true...freeze; false...normal operation
-         * @return ErrorCodes
          */
-        ErrorCodes Freeze(bool enable);
+        void Freeze(bool enable);
 
         /**
          * @brief calibrates all color sensors to selected color
@@ -133,5 +211,17 @@ class ColorSensing{
          * @return returns if successful
          */
         ErrorCodes Calibrate(PoI_Type color);
+
+        /**
+         * @brief starts or stops reading of the sensors
+         * @param enable: true...start reading; false...stop reading
+         */
+        ErrorCodes EnableRead(bool enable);
+
+        /**
+         * @brief Checks if the sensors finished measurement and updates floor type
+         */
+        ErrorCodes UpdateSensors();
+
 
 };

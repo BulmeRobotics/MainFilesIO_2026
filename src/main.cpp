@@ -33,6 +33,7 @@
   //Custom Includes - Modules
 #include <UserInterface.h>
 #include <TofSensors.h>
+#include <ColorSensing.h>
 
 
 #ifdef _MSC_VER
@@ -42,8 +43,8 @@
 
 //Objects
 UserInterface UI(50); // Update Interval: 50ms
-ColorSensing cs;
-
+EEPROM eeprom;
+ColorSensing cs(&Serial);
 
 #ifdef _MSC_VER
 #pragma endregion Objects
@@ -190,7 +191,7 @@ void cyclicRunTask(){
 
 void ISR_BTN_BLACK() {
 	//Button for Starting and Checkpoint
-  currentRunState = RUN_States::INITIAL;
+  currentRunState = RunState::INITIAL;
   currentMenuState = RobotState::RUN;
 
 }

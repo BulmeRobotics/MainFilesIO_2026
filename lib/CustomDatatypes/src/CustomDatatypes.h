@@ -1,8 +1,7 @@
 #pragma once
-
-
 #include <cstdint>
 
+#pragma region Robot States
 enum class RobotState : uint8_t {
     BOOT, INFO_SENSOR, INFO_VISUAL, SETTINGS, ABOUT, CALIBRATION, RUN, BT, CHECKPOINT
 };
@@ -17,9 +16,11 @@ enum class ErrorCodes : uint8_t {
     NEW_DATA,
     NO_NEW_DATA,
     OUT_OF_RANGE,
-    invalid, wall, straight, north, east, south, west, Overflow //Mapping specific
+    invalid, wall, straight, north, east, south, west, Overflow, //Mapping specific
+    disabled
 };
 
+#pragma region ToF
 enum class TofType : uint8_t {
     LEFT_FRONT,
     LEFT_BACK,
@@ -36,6 +37,7 @@ enum class TofStatus : uint8_t{
     ERROR
 };
 
+#pragma region Gyro
 struct GyroData {
 	float angle_abs;
 	float angle_car;
@@ -50,6 +52,7 @@ enum class GyroAxles : uint8_t {
 	Axis_Z
 };
 
+#pragma region Mapping
 enum class Orientations : uint8_t {
     North, East, South, West
 };
@@ -66,4 +69,19 @@ enum class TileType : uint8_t {
     unexplored,
     visited, obstacle,
     checkpoint, dangerZone, blue, black
+};
+
+#pragma region ColorSensor
+struct rawColor {
+	uint16_t
+		F1		= 0,
+		F2		= 0,
+		F3		= 0,
+		F4		= 0,
+		F5		= 0,
+		F6		= 0,
+		F7		= 0,
+		F8		= 0,
+		Clear	= 0,
+        NIR     = 0;
 };
