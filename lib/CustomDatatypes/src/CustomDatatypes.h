@@ -11,10 +11,6 @@ enum class RunState : uint8_t {
 };
 
 enum class ErrorCodes : uint8_t {
-    OK,
-    ERROR,
-    UNKNOWN,
-    INVALID,
     OK, ERROR, UNKNOWN,
     TIMEOUT,
     NEW_DATA,

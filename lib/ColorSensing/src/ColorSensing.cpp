@@ -1,5 +1,6 @@
 #include "ColorSensing.h"
 #include <CustomDatatypes.h>
+#include <UserInterface.h>
 
 
 int16_t EEPROM::GetStartAddr(PoI_Type type, char sensor){

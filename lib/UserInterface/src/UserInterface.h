@@ -15,8 +15,9 @@
 #include <Adafruit_NeoPixel.h>
 
 #include <CustomDatatypes.h>
-#include <ColorSensing.h>
 #include <Mapping.h>
+
+class ColorSensing;
 
 #ifdef _MSC_VER
     #pragma endregion Includes
@@ -101,6 +102,9 @@ private:
     // --- Settings ---
     uint8_t UPDATE_INTERVAL; //in ms
     uint32_t lastUpdate = 0;
+    static constexpr bool _BLE_ENABLED = false;
+
+    uint8_t driveSpeed = 50;
     
     
     // --- Object Pointers ---
@@ -240,4 +244,15 @@ public:
      * @return The new Drive Mode after cycling
      */
     ErrorCodes CycleDriveMode();
+
+    /**
+     * @brief returns current drive speed
+     * @return drivespeed 0...100
+     */
+    uint8_t GetDriveSpeed(){ return driveSpeed; }
+
+    // --- Calibration Overlay ---
+    void ShowCalibrationScreen(PoI_Type type);
+    void UpdateCalibrationProgress(uint8_t step, uint8_t totalSteps);
+    void FinishCalibration(bool success);
 };

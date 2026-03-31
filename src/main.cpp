@@ -188,8 +188,6 @@ while(true){
 
   } else if(currentMenuState == RobotState::INFO_VISUAL){
 
-  } else if(currentMenuState == RobotState::CALIBRATION){
-
   } else if(currentMenuState == RobotState::BT){
 
   }

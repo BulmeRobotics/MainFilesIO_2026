@@ -10,10 +10,11 @@
 
 #include <Arduino.h>
 #include <CustomDatatypes.h>
-#include <UserInterface.h>
 #include <Adafruit_AS7341.h>
 #include <Adafruit_EEPROM_I2C.h>
 #include <Adafruit_FRAM_I2C.h>
+
+class UserInterface;
 
 #ifdef _MSC_VER
     #pragma endregion Includes //-----------------------------------------------------------------------

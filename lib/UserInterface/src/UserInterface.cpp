@@ -3,6 +3,7 @@
 //description: User Interface for Robot
 
 #include "UserInterface.h"
+#include <ColorSensing.h>
 
 // Definitionen der statischen Member
 GDTpoint_t UserInterface::LastContact{};
@@ -99,7 +100,7 @@ void UserInterface::HandleMainMenu(uint16_t tx, uint16_t ty) {
 }
 
 #ifdef _MSC_VER
-  #pragma endregion MainMenu //-----------------------------------------------------------
+  #pragma endregion MainMenu 
   #pragma region Settings 
 #endif
 
@@ -137,10 +138,12 @@ void UserInterface::ConstructSettingsMenu() {
 
 #ifdef _MSC_VER
   #pragma endregion Settings
-  #pragma region Private Methods //----------------------------------------------------------------
+  #pragma region Battery 
 #endif
 
-    //Battery
+// ------------------------------------------------------------------
+// Battery
+// ------------------------------------------------------------------
 uint8_t UserInterface::GetCharge(){
     float voltage = 0.2 + analogRead(batteryPin) * (3.216/1023.0) * 4.0;
     if(voltage > 8.2) lastPercent = 100;
@@ -170,7 +173,15 @@ void UserInterface::DrawBattery(){
 	display.setTextSize(TEXT_SIZE);
 }
 
-    // TOUCH HANDLER
+#ifdef _MSC_VER
+  #pragma endregion Battery 
+  #pragma region Touch Handler 
+#endif
+
+// ------------------------------------------------------------------
+// Touch Handlers
+// ------------------------------------------------------------------
+
 void UserInterface::gigaTouchHandler(uint8_t contacts, GDTpoint_t* points) {
     NewContact = true;
     LastContact = points[0];
@@ -193,9 +204,13 @@ bool UserInterface::GetValidTouch(uint16_t &touchX, uint16_t &touchY){
 }
 
 #ifdef _MSC_VER
-  #pragma endregion Private Methods
+  #pragma endregion Touch Handler
   #pragma region Calibration //------------------------------------------------------
 #endif
+
+// ------------------------------------------------------------------
+// Calibration
+// ------------------------------------------------------------------
 
 void UserInterface::ShowCalibrationScreen(PoI_Type type){
     uint16_t popX = 150, popY = 150, popW = 500, popH = 180;
@@ -460,32 +475,39 @@ void UserInterface::Update(){
 
             //Calibration
             else if(btnCalibWhite.IsPressed(tx,ty)){
+                BuzzerSignal(5, 0, 1);
                 *p_state = RobotState::CALIBRATION;
                 p_colorSens->Calibrate(PoI_Type::white);
-                BuzzerSignal(5, 0, 1);
             }
             else if(btnCalibBlack.IsPressed(tx,ty)){
+                BuzzerSignal(5, 0, 1);
                 *p_state = RobotState::CALIBRATION;
                 p_colorSens->Calibrate(PoI_Type::black);
-                BuzzerSignal(5, 0, 1);
             }
             else if(btnCalibBlue.IsPressed(tx,ty)){
+                BuzzerSignal(5, 0, 1);
                 *p_state = RobotState::CALIBRATION;
                 p_colorSens->Calibrate(PoI_Type::blue);
-                BuzzerSignal(5, 0, 1);
             }
             else if(btnCalibDZone.IsPressed(tx,ty)){
+                BuzzerSignal(5, 0, 1);
                 *p_state = RobotState::CALIBRATION;
                 p_colorSens->Calibrate(PoI_Type::red);
-                BuzzerSignal(5, 0, 1);
             }
             else if(btnCalibCheckP.IsPressed(tx,ty)){
+                BuzzerSignal(5, 0, 1);
                 *p_state = RobotState::CALIBRATION;
                 p_colorSens->Calibrate(PoI_Type::checkpoint);
-                BuzzerSignal(5, 0, 1);
             }
             //BLE
-            RobotState::BT;
+            else if(btnBleConnect.IsPressed(tx,ty) && _BLE_ENABLED){
+                BuzzerSignal(5, 0, 1);
+                //Nicht in verwendung, da erst bei WM benötigt.
+            }
+
+            
+
+            
         }
     }
 }
