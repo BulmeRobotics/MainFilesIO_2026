@@ -105,12 +105,8 @@ int main(void) {
 
   //Initialize Modules
     //User Interface
-  while (!Serial);
-  Serial.println("SETUP");
   UI.Initialize();
-  Serial.println("UI init done");
   UI.ConnectPointer(&currentMenuState, &cs, &mapper);
-  Serial.println("UI pointer done");
     //Buttons
   attachInterrupt(digitalPinToInterrupt(BUTTON_BLACK), ISR_BTN_BLACK, RISING);
 	attachInterrupt(digitalPinToInterrupt(BUTTON_GRAY), ISR_BTN_GRAY, RISING);
