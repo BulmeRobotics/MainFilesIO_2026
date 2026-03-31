@@ -122,19 +122,28 @@ int main(void) {
   else UI.AddInfoMsg("Color Sensor", "OK", true);
   cs.EnableRead(true);
 
-  //ROBOT (Driving, ToF)
-  tof.Init();
+  //ToF
+  if (tof.Init() == ErrorCodes::OK)
+    UI.AddInfoMsg("TOF", "OK", true);
+  else
+    UI.AddInfoMsg("TOF", "ERROR", true);
 
   //Gyro
-  gyro.Init();
+  if (gyro.Init() == ErrorCodes::OK)
+    UI.AddInfoMsg("Gyro", "OK", true);
+  else
+    UI.AddInfoMsg("Gyro", "ERROR", true);
 
   //Ejector
   ejector.Init();
+  UI.AddInfoMsg("Ejectors", "OK", true);
+  UI.AddInfoMsg("Drivetrain", "OK", true);
 
   //Camera
 
   //Robot
   robot.init(&cs, &tof, &gyro, &mapper, &drivetrain);
+  UI.AddInfoMsg("Driving", "OK", true);
 
   UI.AddInfoMsg("Finished STARTUP", "ACK", false);
 #ifdef _MSC_VER

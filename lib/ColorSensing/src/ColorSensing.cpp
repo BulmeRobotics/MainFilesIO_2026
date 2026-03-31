@@ -37,8 +37,10 @@ ErrorCodes EEPROM::ReadFromEEPROM(PoI_Type type, char sensor, uint16_t* buffer){
 
     for(uint8_t i=0; i<EEPROM_PACKAGE_NUM; i++, curAddr += (EEPROM_PACKAGE_SIZE + EEPROM_PACKAGE_OVERHEAD)){
         uint8_t localBuffer[EEPROM_PACKAGE_SIZE];
+        Serial.println("Before i2c read");
 		i2ceeprom.read(curAddr, localBuffer, EEPROM_PACKAGE_SIZE);
-		memcpy((void*)&buffer[i], localBuffer, EEPROM_PACKAGE_SIZE);
+		Serial.println("after i2c read");
+        memcpy((void*)&buffer[i], localBuffer, EEPROM_PACKAGE_SIZE);
     }
     return ErrorCodes::OK;
 }
