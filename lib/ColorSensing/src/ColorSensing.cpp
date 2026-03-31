@@ -37,9 +37,7 @@ ErrorCodes EEPROM::ReadFromEEPROM(PoI_Type type, char sensor, uint16_t* buffer){
 
     for(uint8_t i=0; i<EEPROM_PACKAGE_NUM; i++, curAddr += (EEPROM_PACKAGE_SIZE + EEPROM_PACKAGE_OVERHEAD)){
         uint8_t localBuffer[EEPROM_PACKAGE_SIZE];
-        Serial.println("Before i2c read");
 		i2ceeprom.read(curAddr, localBuffer, EEPROM_PACKAGE_SIZE);
-		Serial.println("after i2c read");
         memcpy((void*)&buffer[i], localBuffer, EEPROM_PACKAGE_SIZE);
     }
     return ErrorCodes::OK;
@@ -57,13 +55,10 @@ ErrorCodes EEPROM::WriteToEEPROM(PoI_Type type, char sensor, uint16_t* buffer){
 
 // COLOR SENSING: --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 uint8_t ColorSensing::Init(TwoWire* wire, UserInterface* ui, EEPROM* eeprom){
-    Serial.print("ColorSens init");
     _eeprom = eeprom;
     _ui = ui;
-    Serial.println("\twritten pointers");
     uint8_t ebuff = 0;
     TCA9548A(0);
-    Serial.print("\tMultiplexed");
 
     if (!front.begin(0x39, wire, 0)) ebuff |= 1 << 0;
 	//LED
@@ -75,7 +70,6 @@ uint8_t ColorSensing::Init(TwoWire* wire, UserInterface* ui, EEPROM* eeprom){
     if (!front.setATIME(ATIME_Front))       ebuff |= 1 << 7;
     if (!front.setASTEP(ASTEP_Front))       ebuff |= 1 << 7;
 
-    Serial.print("\tset front");
         //Middle Color Sensor
     TCA9548A(1);
     if (!middle.begin(0x39, wire, 0))	ebuff |= 1 << 1;
@@ -89,8 +83,6 @@ uint8_t ColorSensing::Init(TwoWire* wire, UserInterface* ui, EEPROM* eeprom){
     if (!middle.setATIME(ATIME_Middle))     ebuff |= 1 << 6;
     if (!middle.setASTEP(ASTEP_Middle))     ebuff |= 1 << 6;
 
-    Serial.print("\tset back");
-
     //EEPROM
     _eeprom->ReadFromEEPROM(PoI_Type::white,      'F', (uint16_t*)&frontColorsCalibrated[WHITE]);
     _eeprom->ReadFromEEPROM(PoI_Type::black,      'F', (uint16_t*)&frontColorsCalibrated[BLACK]);
@@ -103,8 +95,7 @@ uint8_t ColorSensing::Init(TwoWire* wire, UserInterface* ui, EEPROM* eeprom){
     _eeprom->ReadFromEEPROM(PoI_Type::blue,       'M', (uint16_t*)&middleColorsCalibrated[BLUE]);
     _eeprom->ReadFromEEPROM(PoI_Type::red,        'M', (uint16_t*)&middleColorsCalibrated[RED]);
     _eeprom->ReadFromEEPROM(PoI_Type::checkpoint, 'M', (uint16_t*)&middleColorsCalibrated[SILVER]);
-  
-    Serial.print("\teeprom set");
+
     return ebuff;
 }
 

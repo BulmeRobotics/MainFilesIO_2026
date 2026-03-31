@@ -163,11 +163,6 @@ while (true) {
     cyclicRunTask();  //Cyclic Run Tasks
 
     if (currentRunState == RunState::SETTILE) {
-      //SetTile Logic
-			#ifdef DEBUG_RUN
-			Serial.println("SetTile");
-			#endif // DEBUG_RUN
-
       UI.BuzzerSignal(5, 0, 1);
 			mapper.SetTile(tof.GetWalls(_RAMP_INFRONT, _RAMP_BEHIND), /*floor*/TileType::visited);
 			currentRunState = RunState::GET_INSTRUCTIONS;
@@ -175,18 +170,12 @@ while (true) {
     } 
 
     else if (currentRunState == RunState::GET_INSTRUCTIONS) {
-      #ifdef DEBUG_RUN
-			Serial.print("Get Instructions: ");
-			#endif // DEBUG_RUN
       //Get Instructions Logic
       switch (mapper.GetInstruction()) 
       {
       case Instructionset::T_North:
       //Turn North Logic
-        #ifdef DEBUG_RUN
-				Serial.println("Turn North");
-				#endif // DEBUG_RUN
-				robot.endDrive();
+        robot.endDrive();
 				robot.startAdjustment();
 				currentRunState = RunState::TURN;
 				robot.robotTargetAngle = Orientations::North;
@@ -196,9 +185,6 @@ while (true) {
 
       case Instructionset::T_East:
         //Turn East Logic
-        #ifdef DEBUG_RUN
-				Serial.println("Turn EAST");
-				#endif // DEBUG_RUN
 				robot.endDrive();
 				robot.startAdjustment();
 				currentRunState = RunState::TURN;
@@ -209,9 +195,6 @@ while (true) {
 
       case Instructionset::T_South:
         //Turn South Logic
-        #ifdef DEBUG_RUN
-				Serial.println("Turn South");
-				#endif // DEBUG_RUN
 				robot.endDrive();
 				robot.startAdjustment();
 				currentRunState = RunState::TURN;
@@ -222,9 +205,6 @@ while (true) {
 
       case Instructionset::T_West:
         //Turn West Logic
-        #ifdef DEBUG_RUN
-				Serial.println("Turn West");
-				#endif // DEBUG_RUN
 				robot.endDrive();
 				robot.startAdjustment();
 				currentRunState = RunState::TURN;
@@ -235,9 +215,6 @@ while (true) {
 
       case Instructionset::D_Forward:
         //Drive Forward Logic
-        #ifdef DEBUG_RUN
-				Serial.println("Drive Forward");
-				#endif // DEBUG_RUN
         //Blue Tile:
         if (cs.GetFloor() == PoI_Type::blue) {
           //Stoppen
@@ -302,15 +279,6 @@ while (true) {
     }
 
     else if (currentRunState == RunState::SCAN) {
-      #ifdef DEBUG_DRIVING_1
-			Serial.print("30cm FORWARD");
-			Serial.print("\tRange: ");
-			Serial.println(newValue);
-			#endif // DEBUG_DRIVING
-			#ifdef DEBUG_RUN
-			Serial.println("ScanDrive");
-			#endif // DEBUG_RUN
-			
 			//Move the robot in the next tile and scan next field
 			mapper.Move(true);	//Move robot forward
 			//if Ramp detected during DRIVE give 
@@ -339,8 +307,6 @@ while (true) {
 			// 	}
 			// 	robot.currentRobotHeight += robot.RAMP_HEIGHT;
 			// 	if(robot.currentRobotHeight <= RESET_HEIGHT_SPAN && robot.currentRobotHeight >= -RESET_HEIGHT_SPAN) robot.currentRobotHeight = 0;
-			// 	//Serial.print("Current Robot Height: " + String(robot.currentRobotHeight));
-			// 	//Serial.println("\tRamp Direction: " + String(rampDirection));
 			// 	robot._ON_RAMP = false;
 			// 	robot.maxRampIncline = 0;					
 			// 	//pass RampInfos to Mapping
