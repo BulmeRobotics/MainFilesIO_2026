@@ -194,8 +194,89 @@ bool UserInterface::GetValidTouch(uint16_t &touchX, uint16_t &touchY){
 
 #ifdef _MSC_VER
   #pragma endregion Private Methods
-  #pragma region Public Methods //------------------------------------------------------
+  #pragma region Calibration //------------------------------------------------------
 #endif
+
+void UserInterface::ShowCalibrationScreen(PoI_Type type){
+    uint16_t popX = 150, popY = 150, popW = 500, popH = 180;
+    display.fillRoundRect(popX + 5, popY + 5, popW, popH, 15, 0x0000); 
+    display.fillRoundRect(popX, popY, popW, popH, 15, BG_COLOR);
+    display.drawRoundRect(popX, popY, popW, popH, 15, HL_COLOR);
+    display.drawRoundRect(popX+1, popY+1, popW-2, popH-2, 15, HL_COLOR); // Dickerer Rahmen
+    
+    // Titel schreiben
+    display.setTextColor(TEXT_COLOR);
+    display.setTextSize(4);
+    display.setCursor(popX + 20, popY + 20);
+    display.print("Calibrating ");
+    
+    // Name der Farbe auflösen
+    switch(type) {
+        case PoI_Type::black:      display.print("BLACK"); break;
+        case PoI_Type::blue:       display.print("BLUE"); break;
+        case PoI_Type::white:      display.print("WHITE"); break;
+        case PoI_Type::dangerZone: display.print("D-ZONE"); break;
+        case PoI_Type::red:        display.print("RED"); break;
+        case PoI_Type::checkpoint: display.print("CHECKP"); break;
+        default:                   display.print("UNKNOWN"); break;
+    }
+    
+    // Trennlinie
+    display.drawLine(popX, popY + 60, popX + popW, popY + 60, HL_COLOR);
+    
+    // Initiale Progress-Anzeige
+    display.setTextSize(3);
+    display.setCursor(popX + 20, popY + 80);
+    display.print("Progress:   0%");
+}
+void UserInterface::UpdateCalibrationProgress(uint8_t step, uint8_t totalSteps){
+    uint16_t popX = 150, popY = 150;
+    
+    // Prozentzahl überschreiben (Dank BG_COLOR schmiert der Text nicht!)
+    display.setTextColor(TEXT_COLOR, BG_COLOR); 
+    display.setTextSize(3);
+    display.setCursor(popX + 182, popY + 80);
+    
+    uint8_t percent = (step * 100) / totalSteps;
+    char buff[5];
+    sprintf(buff, "%3d%%", percent);
+    display.print(buff);
+    
+    // Dynamischen Fortschrittsbalken zeichnen
+    display.fillRoundRect(popX + 20, popY + 130, (460 * step) / totalSteps, 20, 5, BTN_COLOR);
+}
+void UserInterface::FinishCalibration(bool success){
+    uint16_t popX = 150, popY = 150;
+    
+    // Status-Text in Grün (Erfolg) oder Rot (Fehler) überschreiben
+    display.setTextColor(success ? 0x07E0 : 0xF800, BG_COLOR); 
+    display.setTextSize(3);
+    display.setCursor(popX + 20, popY + 80);
+    display.print(success ? "Done! Touch to close.   " : "ERROR! Touch to close.  ");
+    
+    // --- Warten: 3 Sekunden oder Touch ---
+    uint32_t start = millis();
+    NewContact = false; // Touch-Flag sicherheitshalber resetten
+    
+    while (millis() - start < 3000) {
+        if (NewContact) {
+            NewContact = false;
+            BuzzerSignal(5, 0, 1);
+            break; // Beendet das Warten sofort bei Touch
+        }
+        delay(10); // Verhindert Watchdog-Crashes
+    }
+    
+    // Wenn alles vorbei ist, zwingen wir das UI, das Settings-Menü neu zu zeichnen
+    *p_state = RobotState::SETTINGS;
+    lastState = RobotState::CALIBRATION;
+}
+
+#ifdef _MSC_VER
+  #pragma endregion Calibration
+  #pragma region Public Methods //------------------------------------------------------
+#endif    
+
 
 void UserInterface::Initialize(){
     // Initialize NeoPixel
@@ -321,8 +402,6 @@ void UserInterface::Update(){
     //Draw and Handle mainMenu -> Menu Selector
     if (touched && (*p_state == RobotState::SETTINGS || *p_state == RobotState::ABOUT || *p_state == RobotState::INFO_SENSOR || *p_state == RobotState::INFO_VISUAL))
         HandleMainMenu(tx,ty);
-
-    //
     
     // Handle Menus
     if(*p_state == RobotState::RUN){
@@ -336,12 +415,11 @@ void UserInterface::Update(){
 
     } else if (*p_state == RobotState::SETTINGS){
         //Settings
-        ConstructSettingsMenu();
-        display.setTextSize(3);
 
         //Update driveMode
         display.setCursor(348, 20);
         display.setTextColor(TEXT_COLOR, HL_COLOR);
+        display.setTextSize(3);
         switch (driveMode) {
         case ErrorCodes::straight:
             display.print("straight");
@@ -364,73 +442,50 @@ void UserInterface::Update(){
         }
 
         //Update speed:
-        if (NewContact == true && LastContact.x >= 332 && LastContact.x <= 416 && millis() > lastChange + WAITTIME) {
-            if (LastContact.y >= 150 && LastContact.y <= 355 && driveSpeed > 10){
+        display.setCursor(354, 94);
+        char buff[6];
+        sprintf(buff, "%3d", driveSpeed);
+        display.print(buff);
+
+        // Update Buttons
+        if(touched){
+            //Speed
+            if(btnSpeedMinus.IsPressed(tx,ty) && driveSpeed > 10){
                 driveSpeed -= 10;
-                signal.buzzer_pulse(5, 1);
-            } 
-            if (LastContact.y > 355 && LastContact.y < 500 && driveSpeed < 100) {
+                BuzzerSignal(5, 0, 1);
+            } else if(btnSpeedPlus.IsPressed(tx,ty) && driveSpeed < 100){
                 driveSpeed += 10;
-                signal.buzzer_pulse(5, 1);	
-            } 
-            lastChange = millis();
-    #ifdef DEBUG_UI
-                Serial.println("ChangeSPEED");
-    #endif // DEBUG_UI
+                BuzzerSignal(5, 0, 1);
             }
-            display.setCursor(354, 94);
-            sprintf(buff, "%3d", driveSpeed);
-            display.print(buff);
 
-            //Update ColorSensor:
-            if (NewContact == true && LastContact.x >= 205 && LastContact.x <= 285) {	//height 70, width 135; start y 200
-                if (LastContact.y >= 160 && LastContact.y <= 295) {	//Black - x = 160...295
-                    calibratingCS |= (0x01 | (1 << 6));
-                    currentMenu = UI_Menu::CALIBRATE_CS;
-                }
-                if (NewContact == true && LastContact.y >= 315 && LastContact.y <= 450) {	//Blue - x = 315...450
-                    calibratingCS |= (1 << 1 | (1 << 6));
-                    currentMenu = UI_Menu::CALIBRATE_CS;
-                }
-                if (NewContact == true && LastContact.y >= 470 && LastContact.y <= 605) {	//Danger Zone x = 470...605
-                    calibratingCS |= (1 << 2 | (1 << 6));
-                    currentMenu = UI_Menu::CALIBRATE_CS;
-                }
-                if (NewContact == true && LastContact.y >= 625 && LastContact.y <= 760) {	//Checkpoint x = 625...760
-                    calibratingCS |= (1 << 3 | (1 << 6));
-                    currentMenu = UI_Menu::CALIBRATE_CS;
-                }
+            //Calibration
+            else if(btnCalibWhite.IsPressed(tx,ty)){
+                *p_state = RobotState::CALIBRATION;
+                p_colorSens->Calibrate(PoI_Type::white);
+                BuzzerSignal(5, 0, 1);
             }
-            if (NewContact == true && LastContact.x >= 332 && LastContact.x <= 416 && LastContact.y >= 500 && LastContact.y <= 635) {
-                calibratingCS |= (1 << 4 | (1 << 6));
-                currentMenu = UI_Menu::CALIBRATE_CS;
+            else if(btnCalibBlack.IsPressed(tx,ty)){
+                *p_state = RobotState::CALIBRATION;
+                p_colorSens->Calibrate(PoI_Type::black);
+                BuzzerSignal(5, 0, 1);
             }
-            
-            //Connect to BLE
-            if(NewContact == true && LastContact.x >= 332 && LastContact.x <= 416 && LastContact.y >= 640){
-                currentMenu = UI_Menu::BT_CONNECT;
-                _FINISH_BLE_CONNECT = false;
-                constructBLEInfo();
-                NewContact = false;
-                return;
-            } 
-
-            //Update drive into DZ
-            if(	NewContact == true && millis() > (lastDZ_change + (WAITTIME * 5)) &&
-                LastContact.y >= 150 && LastContact.x >= 110 && LastContact.x <= 190
-            ) {
-                *driveIntoDZ_UI = !*driveIntoDZ_UI;
-                signal.buzzer_pulse(5,1);
-                lastDZ_change = millis();
+            else if(btnCalibBlue.IsPressed(tx,ty)){
+                *p_state = RobotState::CALIBRATION;
+                p_colorSens->Calibrate(PoI_Type::blue);
+                BuzzerSignal(5, 0, 1);
             }
-            display.setTextColor(TEXT_COLOR, HL_COLOR);
-            display.setCursor(150,318);
-            display.print("Drive into DZ: ");
-            if(*driveIntoDZ_UI) display.print("    true");
-            else display.print("   false");
-
-        } else if (LastContact.x < 128 && *p_state != RobotState::ABOUT){
-            ConstructAboutMenu();
+            else if(btnCalibDZone.IsPressed(tx,ty)){
+                *p_state = RobotState::CALIBRATION;
+                p_colorSens->Calibrate(PoI_Type::red);
+                BuzzerSignal(5, 0, 1);
+            }
+            else if(btnCalibCheckP.IsPressed(tx,ty)){
+                *p_state = RobotState::CALIBRATION;
+                p_colorSens->Calibrate(PoI_Type::checkpoint);
+                BuzzerSignal(5, 0, 1);
+            }
+            //BLE
+            RobotState::BT;
         }
     }
 }

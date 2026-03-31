@@ -210,21 +210,29 @@ PoI_Type ColorSensing::checkMiddle(){
 ErrorCodes ColorSensing::Calibrate(PoI_Type type){
     uint32_t time = millis();
 
+    _ui->ShowCalibrationScreen(type);
+
     //Finish old reading
     TCA9548A(0);
     while(!front.checkReadingProgress()){
-        if(time + COLOR_TIMEOUT < millis()) return ErrorCodes::TIMEOUT;
+        if(time + COLOR_TIMEOUT < millis()) {
+            _ui->FinishCalibration(false);
+            return ErrorCodes::TIMEOUT;
+        }
         delay(5);
     }
     TCA9548A(1);
     while(!middle.checkReadingProgress()){
-        if(time + COLOR_TIMEOUT < millis()) return ErrorCodes::TIMEOUT;
+        if(time + COLOR_TIMEOUT < millis()) {
+            _ui->FinishCalibration(false);
+            return ErrorCodes::TIMEOUT;
+        }
         delay(5);
     }
 
 
     //Update calibration screen:
-    //_ui->Calibrate();
+    _ui->UpdateCalibrationProgress(1, RUNS_calibration + 1);
 
     uint32_t bufferFront[10] = {0};
     uint32_t bufferMiddle[10] = {0};
@@ -273,7 +281,12 @@ ErrorCodes ColorSensing::Calibrate(PoI_Type type){
                 bufferMiddle[9] += middle.getChannel(AS7341_CHANNEL_NIR);
                 middleReady = true;
             }
-            if(time + COLOR_TIMEOUT < millis()) return ErrorCodes::TIMEOUT;
+            if(time + COLOR_TIMEOUT < millis()) {
+                _ui->FinishCalibration(false);
+                return ErrorCodes::TIMEOUT;
+            }
+
+            _ui->UpdateCalibrationProgress(2, RUNS_calibration + 1);
         }
 
         uint8_t floor = 0;
@@ -321,5 +334,8 @@ ErrorCodes ColorSensing::Calibrate(PoI_Type type){
 
         _eeprom->WriteToEEPROM(type, 'F', (uint16_t*)&frontColorsCalibrated[floor]);
         _eeprom->WriteToEEPROM(type, 'M', (uint16_t*)&middleColorsCalibrated[floor]);
+
+        _ui->FinishCalibration(true);
+        return ErrorCodes::OK;
     }
 }
