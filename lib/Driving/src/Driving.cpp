@@ -536,8 +536,8 @@ ErrorCodes Driving::startDrive(void) {
 		if (sensor.back > 250) nextTargetDistance = sensor.back + 300;
 		else nextTargetDistance = 320;
 	else if (sensor.type == ReferenceObj::FRONT)
-		if (sensor.front > 400) nextTargetDistance = sensor.front - 300;
-		else nextTargetDistance = 100;
+		if (sensor.front > 410) nextTargetDistance = sensor.front - 300;
+		else nextTargetDistance = 110;
 	else
 		nextTargetDistance = 310;
 
