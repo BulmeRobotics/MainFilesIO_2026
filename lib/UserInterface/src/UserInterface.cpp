@@ -400,6 +400,9 @@ void UserInterface::ConstructSettingsMenu() {
     display.setCursor(150, 168);
     display.print("ColorSensor Calibration");
 
+    //Hintergrund
+    display.drawRect(150,64,200,84, BTN_COLOR);
+
     // Alle Buttons malen (Der Text wird durch die Klasse automatisch zentriert!)
     btnSpeedMinus.Draw(display, "-");
     btnSpeedPlus.Draw(display, "+");
@@ -815,7 +818,7 @@ void UserInterface::Update(){
         }
 
         //Update speed:
-        display.setCursor(354, 94);
+        display.setCursor(223, 94);
         char buff[6];
         sprintf(buff, "%3d", driveSpeed);
         display.print(buff);
