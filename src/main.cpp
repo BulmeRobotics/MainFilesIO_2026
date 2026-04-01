@@ -333,6 +333,7 @@ while (true) {
       robot.endDrive();
       robot.disableBumpers();
       UI.LED_BUZZER_Signal(100,200,3);
+      currentMenuState = RobotState::ABOUT;
     }
   } 
   
@@ -350,7 +351,9 @@ while (true) {
 
   }
 
-} return 0;}
+}
+return 0;
+}
 #ifdef _MSC_VER
   #pragma endregion Cyclic
   #pragma region Functions //----------------------------------------------------------------------
