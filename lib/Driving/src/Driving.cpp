@@ -480,8 +480,7 @@ ErrorCodes Driving::startAlign(void) {
 		Serial.println(side);
 	#endif // DEBUG_DRIVING
 
-	while (distanceFront != distanceBack && millis() - startTime < 1500)
-	{
+	do {
 		p_tof->Update();
 
 		if (side == "LEFT") {
@@ -504,8 +503,8 @@ ErrorCodes Driving::startAlign(void) {
 		distanceError = distanceFront - distanceBack;
 
 		//direction of the correction, calculating the turn speed with an exponential function
-		if (distanceError > 0)	turnSpeed_align = 50.0f * (pow(EULER, (float)-distanceError / 20.0f) - 1.0f) - 20.0f;
-		else if (distanceError < 0)	turnSpeed_align = 50.0f * (1 - pow(EULER, (float)abs(distanceError) / -20.0f)) + 20.0f;
+		if (distanceError > 0)	turnSpeed_align = 40.0f * (pow(EULER, (float)-distanceError / 20.0f) - 1.0f) - 20.0f;
+		else if (distanceError < 0)	turnSpeed_align = 40.0f * (1 - pow(EULER, (float)abs(distanceError) / -20.0f)) + 20.0f;
 		else  turnSpeed_align = 0;
 
 		#ifdef DEBUG_DRIVING
@@ -516,7 +515,7 @@ ErrorCodes Driving::startAlign(void) {
 		//turning the robot with the calculated speed, in first cycle = 0
 		p_drivetrain->SetSpeed_Left(turnSpeed_align * coeff_side);
 		p_drivetrain->SetSpeed_Right(-turnSpeed_align * coeff_side);
-	}
+	} while (abs(distanceError) < 5 && millis() - startTime < 1500);
 	//stoping all motors
 	p_drivetrain->Stop();
 	return ErrorCodes::OK;
