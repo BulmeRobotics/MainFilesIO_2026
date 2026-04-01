@@ -759,7 +759,7 @@ void UserInterface::Update(){
     }
 
     // Update Battery Status
-    if(*p_state == RobotState::SETTINGS || *p_state == RobotState::ABOUT || *p_state == RobotState::INFO_SENSOR || *p_state == RobotState::INFO_VISUAL){
+    if(*p_state == RobotState::SETTINGS || *p_state == RobotState::INFO_SENSOR || *p_state == RobotState::INFO_VISUAL){
         GetCharge();
         DrawBattery();
     }
