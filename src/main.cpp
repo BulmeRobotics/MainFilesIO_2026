@@ -50,9 +50,9 @@
 #endif
 
 //Objects
-UserInterface UI(75); // Update Interval: 50ms
+UserInterface UI(100); // Update Interval: 50ms
 EEPROM eeprom;
-ColorSensing cs;
+ColorSensing cs(&Serial);
 Gyro gyro;
 Ejector ejector;
 TofSensors tof;
@@ -358,9 +358,7 @@ while (true) {
 
 void cyclicMainTask() {
   //Main cyclic tasks
-  ts_lastCycle = ts_start;
   UI.Update();
-  Serial.print(millis() - ts_start);
   cs.Update();
 }
 void cyclicRunTask() {

@@ -105,7 +105,7 @@ private:
     uint32_t lastUpdate = 0;
     static constexpr bool _BLE_ENABLED = false;
 
-    uint8_t driveSpeed = 60;
+    uint8_t driveSpeed = 50;
 
     // --- Pop-Up System ---
     bool _popupActive = false;
