@@ -280,6 +280,7 @@ ErrorCodes Driving::rampHandler(void){
 			_RAMP_UP = false;
 			_RAMP_DOWN = false;
 			_STAIR = false;
+			_ON_RAMP = false;
 			arr_incline_index = 0;	//Reset the incline array index
 
 			#ifdef DEBUG_RAMP
