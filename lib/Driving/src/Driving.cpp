@@ -561,7 +561,7 @@ ErrorCodes Driving::controlDrive(int8_t driveSpeed, float angle) {
 	float error = -p_gyro->data.angle_error + (leftRightError * pid_LeftRightFactor);
 
 	if (error != 0)	integralError += error;	//Summenfehler berechnen
-	else integralError = 0;	//Summe zur�cksetzen bei Sollwert
+	else integralError = 0;	//Summe zurücksetzen bei Sollwert
 	derivativeError = error - pid_lastError;	//�nderung des Winkels berechnen
 	pid_lastError = error;
 
