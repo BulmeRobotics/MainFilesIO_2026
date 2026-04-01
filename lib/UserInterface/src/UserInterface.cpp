@@ -50,8 +50,8 @@ void UserInterface::DrawIconSettings(GigaDisplay_GFX& display, uint16_t cx, uint
 	display.fillCircle(cx+21, cy-21, 10, 0);
 	display.fillCircle(cx+9, cy-21, 10, 0);
 
-	display.fillCircle(cx+21, cy+21, 10, 0);
-	display.fillCircle(cx+9, cy+21, 10, 0);
+	display.fillCircle(cx-21, cy+21, 10, 0);
+	display.fillCircle(cx-9, cy+21, 10, 0);
 	display.fillCircle(cx, cy, 19, BTN_COLOR);
 }
 void UserInterface::DrawIconAbout(GigaDisplay_GFX& display, uint16_t cx, uint16_t cy){
@@ -113,6 +113,8 @@ void UserInterface::HandleMainMenu(uint16_t tx, uint16_t ty) {
 
 void UserInterface::ConstructAboutMenu(){
     display.fillScreen(0);
+
+    DrawMainMenuStatic();
 	//prepare font
 	display.setTextSize(10);
 	display.setTextColor(TEXT_COLOR);
@@ -877,8 +879,6 @@ void UserInterface::Update(){
         }
     }
 }
-
-
 
 ErrorCodes UserInterface::CycleDriveMode(){
     if (driveMode != ErrorCodes::west) driveMode = (ErrorCodes)((uint8_t)driveMode + 1);
