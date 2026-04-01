@@ -289,54 +289,53 @@ ErrorCodes ColorSensing::Calibrate(PoI_Type type){
 
             _ui->UpdateCalibrationProgress(2, RUNS_calibration + 1);
         }
-
-        uint8_t floor = 0;
-        switch (type)
-        {
-        case PoI_Type::black:
-            floor = BLACK;
-            break;
-        case PoI_Type::blue:
-            floor = BLUE;
-            break;
-        case PoI_Type::checkpoint:
-            floor = SILVER;
-            break;
-        case PoI_Type::red:
-            floor = RED;
-            break;
-        
-        default:
-            floor = WHITE;
-            break;
-        }
-
-        frontColorsCalibrated[floor].F1     = bufferFront[0]/RUNS_calibration;
-        frontColorsCalibrated[floor].F2     = bufferFront[1]/RUNS_calibration;
-        frontColorsCalibrated[floor].F3     = bufferFront[2]/RUNS_calibration;
-        frontColorsCalibrated[floor].F4     = bufferFront[3]/RUNS_calibration;
-        frontColorsCalibrated[floor].F5     = bufferFront[4]/RUNS_calibration;
-        frontColorsCalibrated[floor].F6     = bufferFront[5]/RUNS_calibration;
-        frontColorsCalibrated[floor].F7     = bufferFront[6]/RUNS_calibration;
-        frontColorsCalibrated[floor].F8     = bufferFront[7]/RUNS_calibration;
-        frontColorsCalibrated[floor].Clear  = bufferFront[8]/RUNS_calibration;
-        frontColorsCalibrated[floor].NIR    = bufferFront[9]/RUNS_calibration;
-        
-        middleColorsCalibrated[floor].F1     = bufferMiddle[0]/RUNS_calibration;
-        middleColorsCalibrated[floor].F2     = bufferMiddle[1]/RUNS_calibration;
-        middleColorsCalibrated[floor].F3     = bufferMiddle[2]/RUNS_calibration;
-        middleColorsCalibrated[floor].F4     = bufferMiddle[3]/RUNS_calibration;
-        middleColorsCalibrated[floor].F5     = bufferMiddle[4]/RUNS_calibration;
-        middleColorsCalibrated[floor].F6     = bufferMiddle[5]/RUNS_calibration;
-        middleColorsCalibrated[floor].F7     = bufferMiddle[6]/RUNS_calibration;
-        middleColorsCalibrated[floor].F8     = bufferMiddle[7]/RUNS_calibration;
-        middleColorsCalibrated[floor].Clear  = bufferMiddle[8]/RUNS_calibration;
-        middleColorsCalibrated[floor].NIR    = bufferMiddle[9]/RUNS_calibration;
-
-        _eeprom->WriteToEEPROM(type, 'F', (uint16_t*)&frontColorsCalibrated[floor]);
-        _eeprom->WriteToEEPROM(type, 'M', (uint16_t*)&middleColorsCalibrated[floor]);
-
-        _ui->FinishCalibration(true);
-        return ErrorCodes::OK;
     }
+    uint8_t floor = 0;
+    switch (type)
+    {
+    case PoI_Type::black:
+        floor = BLACK;
+        break;
+    case PoI_Type::blue:
+        floor = BLUE;
+        break;
+    case PoI_Type::checkpoint:
+        floor = SILVER;
+        break;
+    case PoI_Type::red:
+        floor = RED;
+        break;
+    
+    default:
+        floor = WHITE;
+        break;
+    }
+
+    frontColorsCalibrated[floor].F1     = bufferFront[0]/RUNS_calibration;
+    frontColorsCalibrated[floor].F2     = bufferFront[1]/RUNS_calibration;
+    frontColorsCalibrated[floor].F3     = bufferFront[2]/RUNS_calibration;
+    frontColorsCalibrated[floor].F4     = bufferFront[3]/RUNS_calibration;
+    frontColorsCalibrated[floor].F5     = bufferFront[4]/RUNS_calibration;
+    frontColorsCalibrated[floor].F6     = bufferFront[5]/RUNS_calibration;
+    frontColorsCalibrated[floor].F7     = bufferFront[6]/RUNS_calibration;
+    frontColorsCalibrated[floor].F8     = bufferFront[7]/RUNS_calibration;
+    frontColorsCalibrated[floor].Clear  = bufferFront[8]/RUNS_calibration;
+    frontColorsCalibrated[floor].NIR    = bufferFront[9]/RUNS_calibration;
+    
+    middleColorsCalibrated[floor].F1     = bufferMiddle[0]/RUNS_calibration;
+    middleColorsCalibrated[floor].F2     = bufferMiddle[1]/RUNS_calibration;
+    middleColorsCalibrated[floor].F3     = bufferMiddle[2]/RUNS_calibration;
+    middleColorsCalibrated[floor].F4     = bufferMiddle[3]/RUNS_calibration;
+    middleColorsCalibrated[floor].F5     = bufferMiddle[4]/RUNS_calibration;
+    middleColorsCalibrated[floor].F6     = bufferMiddle[5]/RUNS_calibration;
+    middleColorsCalibrated[floor].F7     = bufferMiddle[6]/RUNS_calibration;
+    middleColorsCalibrated[floor].F8     = bufferMiddle[7]/RUNS_calibration;
+    middleColorsCalibrated[floor].Clear  = bufferMiddle[8]/RUNS_calibration;
+    middleColorsCalibrated[floor].NIR    = bufferMiddle[9]/RUNS_calibration;
+
+    _eeprom->WriteToEEPROM(type, 'F', (uint16_t*)&frontColorsCalibrated[floor]);
+    _eeprom->WriteToEEPROM(type, 'M', (uint16_t*)&middleColorsCalibrated[floor]);
+
+    _ui->FinishCalibration(true);
+    return ErrorCodes::OK;
 }
