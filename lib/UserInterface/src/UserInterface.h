@@ -18,6 +18,7 @@
 #include <Mapping.h>
 
 class ColorSensing;
+class Vcameras;
 
 #ifdef _MSC_VER
     #pragma endregion Includes
@@ -110,6 +111,7 @@ private:
     // --- Object Pointers ---
     ColorSensing* p_colorSens = nullptr;
     Mapping* p_mapping = nullptr;
+    Vcameras* p_camera = nullptr;
 
     // --- States ---
     ErrorCodes driveMode;
@@ -145,12 +147,20 @@ private:
     void DrawMainMenuStatic();
     void HandleMainMenu(uint16_t tx, uint16_t ty);
 
+    // -- Run Menu --
+    static constexpr uint16_t MAP_AREA_WIDTH = 600;
+    static constexpr uint8_t TILE_SIZE = 60; // Größe einer Kachel in Pixeln auf dem Display
+
+    void ConstructRunMenu();
+    void UpdateRunMenu();
+    void DrawMap();
+
     // @brief Draws Battery Status on Display
     void DrawBattery();
 
     //Helper Functions for Constructing Menus
-    void ConstructAboutMenu();
     void ConstructSettingsMenu();
+    void ConstructAboutMenu();
 
 
 
@@ -174,7 +184,7 @@ public:
     /**
      * @brief Connects the other classes to the User Interface
      */
-    void ConnectPointer(RobotState* state, ColorSensing* cs, Mapping* mapping);
+    void ConnectPointer(RobotState* state, ColorSensing* cs, Mapping* mapping, Vcameras* camera);
 
     /**
      * @brief Adds an Information to the Message Log in startup or BLE screen
