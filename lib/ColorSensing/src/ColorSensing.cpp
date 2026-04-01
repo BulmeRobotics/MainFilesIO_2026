@@ -184,6 +184,20 @@ PoI_Type ColorSensing::checkFront(){
     //Only prints values when debugPort is set, otherwise does nothing
     printDebugData(colorRaw, 'F');
 
+    if( colorRaw[4] <= frontColorsCalibrated[WHITE].F5 - FRONT_WHITE_RANGE_DOWN &&
+        colorRaw[5] <= frontColorsCalibrated[WHITE].F6 - FRONT_WHITE_RANGE_DOWN &&
+        colorRaw[6] <= frontColorsCalibrated[WHITE].F7 - FRONT_WHITE_RANGE_DOWN)
+    {
+        _ALERT = true;
+
+        //Check Black
+        if( colorRaw[1] <= frontColorsCalibrated[WHITE].F2    + FRONT_BLACK_RANGE_UP / 2 &&
+            colorRaw[8] <= frontColorsCalibrated[WHITE].Clear + FRONT_BLACK_RANGE_UP)
+            return PoI_Type::black;
+        else return PoI_Type::undef;
+        
+    }
+    _ALERT = false;
     return PoI_Type::white; //TODO: Implement actual color checking
 }
 
