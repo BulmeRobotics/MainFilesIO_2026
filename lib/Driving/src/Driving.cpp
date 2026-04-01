@@ -11,7 +11,7 @@ ErrorCodes Driving::reverseBumper(uint16_t distance, int8_t speedLeft, int8_t sp
 	p_drivetrain->ResetEncoder();
 	while (p_drivetrain->GetEncoderDistance() < distance && buffer_beginTime + reverseBumperTimeout > millis()) {	//Drive back the distance, Check Timeout
         p_drivetrain->SetSpeed_Left(speedLeft);
-        p_drivetrain->SetSpeed_Left(speedRight);
+        p_drivetrain->SetSpeed_Right(speedRight);
 	}
 	p_drivetrain->Stop();
 

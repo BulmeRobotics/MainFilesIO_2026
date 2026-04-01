@@ -50,9 +50,9 @@
 #endif
 
 //Objects
-UserInterface UI(75); // Update Interval: 50ms
+UserInterface UI(100); // Update Interval: 50ms
 EEPROM eeprom;
-ColorSensing cs;
+ColorSensing cs(&Serial);
 Gyro gyro;
 Ejector ejector;
 TofSensors tof;
@@ -109,6 +109,9 @@ int main(void) {
   //Initialize Modules
     //User Interface
   UI.Initialize();
+
+  Wire1.setClock(I2C_CLOCK);
+
   UI.ConnectPointer(&currentMenuState, &cs, &mapper, &cameras);
     //Buttons
   attachInterrupt(digitalPinToInterrupt(BUTTON_BLACK), ISR_BTN_BLACK, RISING);
@@ -357,10 +360,8 @@ return 0;
 
 void cyclicMainTask() {
   //Main cyclic tasks
-  ts_start = millis();
   UI.Update();
   cs.Update();
-  Serial.println(millis() - ts_start);
 }
 void cyclicRunTask() {
   tof.Update();
