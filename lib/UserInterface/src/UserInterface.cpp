@@ -112,6 +112,7 @@ void UserInterface::HandleMainMenu(uint16_t tx, uint16_t ty) {
 // ------------------------------------------------------------------
 
 void UserInterface::ConstructAboutMenu(){
+    display.fillScreen(0);
 	//prepare font
 	display.setTextSize(10);
 	display.setTextColor(TEXT_COLOR);
