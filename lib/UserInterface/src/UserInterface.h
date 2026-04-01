@@ -169,9 +169,7 @@ private:
     //Helper Functions for Constructing Menus
     void ConstructSettingsMenu();
     void ConstructAboutMenu();
-
-
-
+    
 public:
 
     /**
