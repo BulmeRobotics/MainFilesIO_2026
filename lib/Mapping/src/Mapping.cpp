@@ -303,7 +303,7 @@ ErrorCodes Mapping::Ramp(uint8_t info) {
 #endif
 
 ErrorCodes Mapping::SetTile(uint8_t walls, TileType floor) {
-	if (currrentPosition >= MAX_TILES || currrentPosition < 0) return ErrorCodes::invalid;
+	if (currrentPosition >= MAX_TILES) return ErrorCodes::invalid;
     //check if tile is activated:
     if (tiles[currrentPosition].type == TileType::inactive) return ErrorCodes::invalid;
 
