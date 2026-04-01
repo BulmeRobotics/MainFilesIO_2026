@@ -160,7 +160,6 @@ class ColorSensing{
 
 
     // analyze Sensor Data
-
         // @todo: check function
         PoI_Type checkFront();
         TileType checkMiddle();
