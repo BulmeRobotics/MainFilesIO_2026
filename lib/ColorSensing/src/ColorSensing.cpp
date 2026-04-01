@@ -257,6 +257,7 @@ ErrorCodes ColorSensing::Calibrate(PoI_Type type){
 
     //Read new values
     for (uint8_t i = 0; i<RUNS_calibration; i++){
+        time = millis();
         frontReady = false;
         middleReady = false;
 

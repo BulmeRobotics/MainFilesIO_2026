@@ -79,6 +79,7 @@ class ColorSensing{
     static constexpr uint8_t LED_CURRENT      = 10;
 
     // --- Sensor Timings ---
+    //  Total integration time will be (ATIME + 1) * (ASTEP + 1) * 2.78µS
     static constexpr uint16_t ATIME_Front     = 100;
     static constexpr uint16_t ASTEP_Front     = 150;
     static constexpr uint16_t ATIME_Middle    = 150;
