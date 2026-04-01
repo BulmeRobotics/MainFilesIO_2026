@@ -70,7 +70,6 @@ Vcameras cameras;
 RobotState currentMenuState;
 RunState currentRunState;
 uint32_t lastButtonPressGray;
-uint32_t ts_start = 0;
 
 uint8_t speedMod = 1;
 
