@@ -50,8 +50,8 @@ void UserInterface::DrawIconSettings(GigaDisplay_GFX& display, uint16_t cx, uint
 	display.fillCircle(cx+21, cy-21, 10, 0);
 	display.fillCircle(cx+9, cy-21, 10, 0);
 
-	display.fillCircle(cx+21, cy+21, 10, 0);
-	display.fillCircle(cx+9, cy+21, 10, 0);
+	display.fillCircle(cx-21, cy+21, 10, 0);
+	display.fillCircle(cx-9, cy+21, 10, 0);
 	display.fillCircle(cx, cy, 19, BTN_COLOR);
 }
 void UserInterface::DrawIconAbout(GigaDisplay_GFX& display, uint16_t cx, uint16_t cy){
@@ -113,6 +113,8 @@ void UserInterface::HandleMainMenu(uint16_t tx, uint16_t ty) {
 
 void UserInterface::ConstructAboutMenu(){
     display.fillScreen(0);
+
+    DrawMainMenuStatic();
 	//prepare font
 	display.setTextSize(10);
 	display.setTextColor(TEXT_COLOR);
@@ -398,6 +400,9 @@ void UserInterface::ConstructSettingsMenu() {
     display.setCursor(150, 168);
     display.print("ColorSensor Calibration");
 
+    //Hintergrund
+    display.drawRect(150,64,200,84, BTN_COLOR);
+
     // Alle Buttons malen (Der Text wird durch die Klasse automatisch zentriert!)
     btnSpeedMinus.Draw(display, "-");
     btnSpeedPlus.Draw(display, "+");
@@ -618,6 +623,8 @@ void UserInterface::Initialize(){
             BuzzerSignal(200,200,1);
         }
     } else AddInfoMsg("Battery", "OK", true);
+
+    driveMode = ErrorCodes::straight;
 }
 
 void UserInterface::ConnectPointer(RobotState* state, ColorSensing* cs, Mapping* mapping, Vcameras* camera){
@@ -757,7 +764,7 @@ void UserInterface::Update(){
     }
 
     // Update Battery Status
-    if(*p_state == RobotState::SETTINGS || *p_state == RobotState::ABOUT || *p_state == RobotState::INFO_SENSOR || *p_state == RobotState::INFO_VISUAL){
+    if(*p_state == RobotState::SETTINGS || *p_state == RobotState::INFO_SENSOR || *p_state == RobotState::INFO_VISUAL){
         GetCharge();
         DrawBattery();
     }
@@ -813,7 +820,7 @@ void UserInterface::Update(){
         }
 
         //Update speed:
-        display.setCursor(354, 94);
+        display.setCursor(223, 94);
         char buff[6];
         sprintf(buff, "%3d", driveSpeed);
         display.print(buff);
@@ -877,8 +884,6 @@ void UserInterface::Update(){
         }
     }
 }
-
-
 
 ErrorCodes UserInterface::CycleDriveMode(){
     if (driveMode != ErrorCodes::west) driveMode = (ErrorCodes)((uint8_t)driveMode + 1);
