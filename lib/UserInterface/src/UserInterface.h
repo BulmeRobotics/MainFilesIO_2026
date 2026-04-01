@@ -106,6 +106,14 @@ private:
     static constexpr bool _BLE_ENABLED = false;
 
     uint8_t driveSpeed = 60;
+
+    // --- Pop-Up System ---
+    bool _popupActive = false;
+    uint32_t _popupStartTime = 0;
+    uint32_t _popupDurationMs = 0;
+    const char* _popupMsg = nullptr;
+    ErrorCodes _popupType = ErrorCodes::OK;
+    void DrawPopup();
     
     
     // --- Object Pointers ---
