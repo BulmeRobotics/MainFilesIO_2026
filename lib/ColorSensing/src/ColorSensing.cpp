@@ -229,19 +229,11 @@ ErrorCodes ColorSensing::Calibrate(PoI_Type type){
 
     //Finish old reading
     TCA9548A(0);
-    while(!front.checkReadingProgress()){
-        if(time + COLOR_TIMEOUT < millis()) {
-            _ui->FinishCalibration(false);
-            return ErrorCodes::TIMEOUT;
-        }
+    while(!front.checkReadingProgress() && time + COLOR_TIMEOUT > millis()){
         delay(5);
     }
     TCA9548A(1);
-    while(!middle.checkReadingProgress()){
-        if(time + COLOR_TIMEOUT < millis()) {
-            _ui->FinishCalibration(false);
-            return ErrorCodes::TIMEOUT;
-        }
+    while(!middle.checkReadingProgress()&& time + COLOR_TIMEOUT > millis()){
         delay(5);
     }
 
@@ -301,9 +293,8 @@ ErrorCodes ColorSensing::Calibrate(PoI_Type type){
                 _ui->FinishCalibration(false);
                 return ErrorCodes::TIMEOUT;
             }
-
-            _ui->UpdateCalibrationProgress(2, RUNS_calibration + 1);
         }
+        _ui->UpdateCalibrationProgress(i + 2, RUNS_calibration + 1);
     }
     uint8_t floor = 0;
     switch (type)
