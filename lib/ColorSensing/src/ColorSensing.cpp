@@ -230,12 +230,12 @@ ErrorCodes ColorSensing::Calibrate(PoI_Type type){
     //Finish old reading
     TCA9548A(0);
     while(!front.checkReadingProgress() && time + COLOR_TIMEOUT > millis()){
-        delay(5);
+        delay(10);
     }
 
     TCA9548A(1);
     while(!middle.checkReadingProgress()&& time + COLOR_TIMEOUT > millis()){
-        delay(5);
+        delay(10);
     }
 
 
@@ -252,11 +252,10 @@ ErrorCodes ColorSensing::Calibrate(PoI_Type type){
     for (uint8_t i = 0; i<RUNS_calibration; i++){
         time = millis();
 
-
         //Middle Sensor --------------------------------------------------------
         TCA9548A(1);
         middle.startReading();
-        while (!middle.checkReadingProgress());
+        while (!middle.checkReadingProgress()) {delay(10);};
 
         bufferMiddle[0] += middle.getChannel(AS7341_CHANNEL_415nm_F1);
         bufferMiddle[1] += middle.getChannel(AS7341_CHANNEL_445nm_F2);
@@ -273,7 +272,7 @@ ErrorCodes ColorSensing::Calibrate(PoI_Type type){
         TCA9548A(0);
         front.startReading();
 
-        while(!front.checkReadingProgress());
+        while(!front.checkReadingProgress()) {delay(10);};
 
         bufferFront[0] += front.getChannel(AS7341_CHANNEL_415nm_F1);
         bufferFront[1] += front.getChannel(AS7341_CHANNEL_445nm_F2);
@@ -287,8 +286,9 @@ ErrorCodes ColorSensing::Calibrate(PoI_Type type){
         bufferFront[9] += front.getChannel(AS7341_CHANNEL_NIR);
         frontReady = true;
 
-        if(time + COLOR_TIMEOUT < millis()) {
+        if((uint32_t)(time + COLOR_TIMEOUT) < millis()) {
             _ui->FinishCalibration(false);
+            Serial.println("Error1");
             return ErrorCodes::TIMEOUT;
         }
         
@@ -315,27 +315,27 @@ ErrorCodes ColorSensing::Calibrate(PoI_Type type){
         break;
     }
 
-    frontColorsCalibrated[floor].F1     = bufferFront[0]/RUNS_calibration;
-    frontColorsCalibrated[floor].F2     = bufferFront[1]/RUNS_calibration;
-    frontColorsCalibrated[floor].F3     = bufferFront[2]/RUNS_calibration;
-    frontColorsCalibrated[floor].F4     = bufferFront[3]/RUNS_calibration;
-    frontColorsCalibrated[floor].F5     = bufferFront[4]/RUNS_calibration;
-    frontColorsCalibrated[floor].F6     = bufferFront[5]/RUNS_calibration;
-    frontColorsCalibrated[floor].F7     = bufferFront[6]/RUNS_calibration;
-    frontColorsCalibrated[floor].F8     = bufferFront[7]/RUNS_calibration;
-    frontColorsCalibrated[floor].Clear  = bufferFront[8]/RUNS_calibration;
-    frontColorsCalibrated[floor].NIR    = bufferFront[9]/RUNS_calibration;
+    frontColorsCalibrated[floor].F1     = (uint16_t)(bufferFront[0]/RUNS_calibration);
+    frontColorsCalibrated[floor].F2     = (uint16_t)(bufferFront[1]/RUNS_calibration);
+    frontColorsCalibrated[floor].F3     = (uint16_t)(bufferFront[2]/RUNS_calibration);
+    frontColorsCalibrated[floor].F4     = (uint16_t)(bufferFront[3]/RUNS_calibration);
+    frontColorsCalibrated[floor].F5     = (uint16_t)(bufferFront[4]/RUNS_calibration);
+    frontColorsCalibrated[floor].F6     = (uint16_t)(bufferFront[5]/RUNS_calibration);
+    frontColorsCalibrated[floor].F7     = (uint16_t)(bufferFront[6]/RUNS_calibration);
+    frontColorsCalibrated[floor].F8     = (uint16_t)(bufferFront[7]/RUNS_calibration);
+    frontColorsCalibrated[floor].Clear  = (uint16_t)(bufferFront[8]/RUNS_calibration);
+    frontColorsCalibrated[floor].NIR    = (uint16_t)(bufferFront[9]/RUNS_calibration);
     
-    middleColorsCalibrated[floor].F1     = bufferMiddle[0]/RUNS_calibration;
-    middleColorsCalibrated[floor].F2     = bufferMiddle[1]/RUNS_calibration;
-    middleColorsCalibrated[floor].F3     = bufferMiddle[2]/RUNS_calibration;
-    middleColorsCalibrated[floor].F4     = bufferMiddle[3]/RUNS_calibration;
-    middleColorsCalibrated[floor].F5     = bufferMiddle[4]/RUNS_calibration;
-    middleColorsCalibrated[floor].F6     = bufferMiddle[5]/RUNS_calibration;
-    middleColorsCalibrated[floor].F7     = bufferMiddle[6]/RUNS_calibration;
-    middleColorsCalibrated[floor].F8     = bufferMiddle[7]/RUNS_calibration;
-    middleColorsCalibrated[floor].Clear  = bufferMiddle[8]/RUNS_calibration;
-    middleColorsCalibrated[floor].NIR    = bufferMiddle[9]/RUNS_calibration;
+    middleColorsCalibrated[floor].F1     = (uint16_t)(bufferMiddle[0]/RUNS_calibration);
+    middleColorsCalibrated[floor].F2     = (uint16_t)(bufferMiddle[1]/RUNS_calibration);
+    middleColorsCalibrated[floor].F3     = (uint16_t)(bufferMiddle[2]/RUNS_calibration);
+    middleColorsCalibrated[floor].F4     = (uint16_t)(bufferMiddle[3]/RUNS_calibration);
+    middleColorsCalibrated[floor].F5     = (uint16_t)(bufferMiddle[4]/RUNS_calibration);
+    middleColorsCalibrated[floor].F6     = (uint16_t)(bufferMiddle[5]/RUNS_calibration);
+    middleColorsCalibrated[floor].F7     = (uint16_t)(bufferMiddle[6]/RUNS_calibration);
+    middleColorsCalibrated[floor].F8     = (uint16_t)(bufferMiddle[7]/RUNS_calibration);
+    middleColorsCalibrated[floor].Clear  = (uint16_t)(bufferMiddle[8]/RUNS_calibration);
+    middleColorsCalibrated[floor].NIR    = (uint16_t)(bufferMiddle[9]/RUNS_calibration);
 
     _eeprom->WriteToEEPROM(type, 'F', (uint16_t*)&frontColorsCalibrated[floor]);
     _eeprom->WriteToEEPROM(type, 'M', (uint16_t*)&middleColorsCalibrated[floor]);

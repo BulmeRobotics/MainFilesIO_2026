@@ -104,7 +104,7 @@ class ColorSensing{
  
     // --- Konfiguration ---
     static constexpr uint8_t RUNS_calibration = 7;
-    static constexpr uint16_t COLOR_TIMEOUT   = 500;
+    static constexpr uint32_t COLOR_TIMEOUT   = 1000;
  
     // --- LEDs ---
     static constexpr bool _ENABLE_LED_FRONT  = true;
