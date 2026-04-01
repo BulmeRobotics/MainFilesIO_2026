@@ -28,7 +28,8 @@ enum class ErrorCodes : uint8_t {
     SCAN_DRIVE,
     CHECK_RAMP,
     invalid, wall, straight, north, east, south, west, Overflow, //Mapping specific
-    disabled, left, right
+    disabled, left, right,
+    info,warning    //Popup System
 };
 
 #ifdef _MSC_VER

@@ -628,6 +628,64 @@ void UserInterface::AddInfoMsg(String Info, String Message, bool success){
 	display.setTextColor(TEXT_COLOR);
 }
 
+void UserInterface::ShowPopup(const char* text, ErrorCodes type, uint16_t timeS) {
+    _popupMsg = text;
+    _popupType = type;
+    _popupDurationMs = (uint32_t)timeS * 1000;
+    _popupStartTime = millis();
+    _popupActive = true;
+}
+
+void UserInterface::DrawPopup() {
+    // coordinates
+    uint16_t w = 500;
+    uint16_t h = 200;
+    uint16_t x = (800 - w) / 2;
+    uint16_t y = (480 - h) / 2;
+
+    uint16_t color;
+    const char* title;
+
+    // Mapping of error codes to title
+    switch (_popupType) {
+        case ErrorCodes::ERROR:
+        case ErrorCodes::TIMEOUT:
+        case ErrorCodes::Overflow:
+            color = 0xF800; // Rot
+            title = "ERROR";
+            break;
+        case ErrorCodes::warning:
+        case ErrorCodes::invalid:
+            color = 0xFFE0; // Gelb
+            title = "WARNING";
+            break;
+        default:
+            color = 0x07E0; // Grün
+            title = "INFO";
+            break;
+    }
+
+    // shadow and background
+    display.fillRoundRect(x + 5, y + 5, w, h, 15, 0x0000);  // shadow
+    display.fillRoundRect(x, y, w, h, 15, BG_COLOR);        // Box
+    display.drawRoundRect(x, y, w, h, 15, color);           // border
+    display.drawRoundRect(x+1, y+1, w-2, h-2, 15, color);   // thick border
+
+    // Header
+    display.setTextColor(color);
+    display.setTextSize(4);
+    display.setCursor(x + 20, y + 20);
+    display.print(title);
+    display.drawLine(x + 10, y + 65, x + w - 10, y + 65, color);
+
+    // Message
+    display.setTextColor(TEXT_COLOR);
+    display.setTextSize(3);
+    display.setCursor(x + 20, y + 85);
+    display.print(_popupMsg);
+}
+
+
 #ifdef _MSC_VER
   #pragma endregion Messages
   #pragma region Update //------------------------------------------------------
@@ -774,6 +832,16 @@ void UserInterface::Update(){
             
 
             
+        }
+    }
+
+    if(_popupActive){
+        //check if time is up
+        if(millis() - _popupStartTime >= _popupDurationMs){
+            _popupActive = false;
+            lastState = RobotState(255);    //forces redraw
+        } else{
+            DrawPopup();
         }
     }
 }

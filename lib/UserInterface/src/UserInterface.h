@@ -106,6 +106,14 @@ private:
     static constexpr bool _BLE_ENABLED = false;
 
     uint8_t driveSpeed = 50;
+
+    // --- Pop-Up System ---
+    bool _popupActive = false;
+    uint32_t _popupStartTime = 0;
+    uint32_t _popupDurationMs = 0;
+    const char* _popupMsg = nullptr;
+    ErrorCodes _popupType = ErrorCodes::OK;
+    void DrawPopup();
     
     
     // --- Object Pointers ---
@@ -197,17 +205,15 @@ public:
     // POP-Ups / Error Messages ---------------------------------------------------------------------------------
 
     /**
-     * @brief Shows an Error Message on the Display
-     * @param error Error Code to Show
+     * @brief Erzeugt ein Pop-up Overlay über dem aktuellen Screen
+     * @param text displayed Text
+     * @param type ErrorCodes (ERROR / info / warning) 
+     * @param timeS shown duration (Default 5)
      */
-    void ShowErrorMsg(ErrorCodes error);
+    void ShowPopup(const char* text, ErrorCodes type, uint16_t timeS = 5);
 
-    /**
-     * @brief Shows an Error Message on the Display with a custom message
-     * @param error Error Code to Show
-     * @param message Custom message to display
-     */
-    void ShowErrorMsg(ErrorCodes error, String message);
+
+
 
     // SIGNALS ---------------------------------------------------------------------------------
 
