@@ -29,31 +29,27 @@ class Ejector {
 
         /**
         * @brief  Method to eject a certain amount of rescue kits with either the left or right Ejector.
-        * @param  side bool to specify the side (EJECT_LEFT, EJECT_RIGHT). left is equal to false, right equal to true.
+        * @param  side ErrorCodes: left / right
         * @param amount the number of rescure kits that will be ejected (1-5).
         * @return OK if no errors occured.
         *         UNKNOWN if a parameter was wrong.
         */
-        ErrorCodes Eject(bool side, uint8_t amount);
-
-        // Definitions
-        #define EJECT_LEFT false
-        #define EJECT_RIGHT true
+        ErrorCodes Eject(ErrorCodes side, uint8_t amount);
 
     private:
         // Pins
-        #define PIN_SERVO_LEFT 4
-        #define PIN_SERVO_RIGHT 7
+        static constexpr uint8_t PIN_SERVO_LEFT = 4;
+        static constexpr uint8_t PIN_SERVO_RIGHT= 7;
 
         // Positions
-        #define POS_CLOSED_LEFT 80
-        #define POS_OPEN_LEFT 0
-        #define POS_CLOSED_RIGHT 100
-        #define POS_OPEN_RIGHT 180
+        static constexpr int POS_CLOSED_LEFT    = 80;
+        static constexpr int POS_OPEN_LEFT      = 0;
+        static constexpr int POS_CLOSED_RIGHT   = 100;
+        static constexpr int POS_OPEN_RIGHT     = 180;
 
         // Timing
-        #define DELAY_OPEN 500
-        #define DELAY_CLOSE 250
+        static constexpr uint16_t DELAY_OPEN    = 500;
+        static constexpr uint16_t DELAY_CLOSE   = 250;
 
         // Objects
         Servo servoLeft;

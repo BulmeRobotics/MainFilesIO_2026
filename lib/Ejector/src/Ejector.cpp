@@ -7,6 +7,7 @@
 
 // Libraries
 #include "Ejector.h"
+#include <Driving.h>
 
 #ifdef _MSC_VER
     #pragma region Init //-------------------------------------------------------------------------------------------------------
@@ -25,10 +26,10 @@ void Ejector::Init(void) {
     #pragma endregion
     #pragma region Eject //------------------------------------------------------------------------------------------------------
 #endif
-ErrorCodes Ejector::Eject(bool side, uint8_t amount) {
+ErrorCodes Ejector::Eject(ErrorCodes side, uint8_t amount) {
 	amount = constrain(amount, 1, 5);
 
-	if (side == EJECT_LEFT) {
+	if (side == ErrorCodes::left) {
 		for (uint8_t i = 0; i < amount; i++) {
 			servoLeft.write(POS_OPEN_LEFT);
 			delay(DELAY_OPEN);
@@ -37,7 +38,7 @@ ErrorCodes Ejector::Eject(bool side, uint8_t amount) {
 		}
         return ErrorCodes::OK;
 	}
-	else if (side == EJECT_RIGHT) {
+	else if (side == ErrorCodes::right) {
 		for (uint8_t i = 0; i < amount; i++) {
 			servoRight.write(POS_OPEN_RIGHT);
 			delay(DELAY_OPEN);
@@ -46,5 +47,5 @@ ErrorCodes Ejector::Eject(bool side, uint8_t amount) {
 		}
         return ErrorCodes::OK;
 	}
-    return ErrorCodes::UNKNOWN;
+    return ErrorCodes::invalid;
 }
