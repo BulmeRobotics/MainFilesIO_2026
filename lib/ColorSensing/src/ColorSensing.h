@@ -127,9 +127,7 @@ class ColorSensing{
 
     // private Fields for storing current state of the sensors
         PoI_Type colorFront;
-        PoI_Type colorMiddle;
-
-        PoI_Type floorComb;
+        TileType colorMiddle;
 
         bool _ALERT;
         bool _FREEZE_SENSOR;
@@ -165,7 +163,7 @@ class ColorSensing{
 
         // @todo: check function
         PoI_Type checkFront();
-        PoI_Type checkMiddle();
+        TileType checkMiddle();
 
     public:
 
@@ -195,7 +193,7 @@ class ColorSensing{
          * @brief returns current floor type
          * @return current floor type as PoI_Type
          */
-        PoI_Type GetFloor();
+        TileType GetFloor();
 
         /**
          * @brief returns if the front sensor registers not White

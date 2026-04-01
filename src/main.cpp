@@ -175,7 +175,7 @@ while (true) {
 
     if (currentRunState == RunState::SETTILE) {
       UI.BuzzerSignal(5, 0, 1);
-			mapper.SetTile(tof.GetWalls(_RAMP_INFRONT, _RAMP_BEHIND), /*floor*/TileType::visited);
+			mapper.SetTile(tof.GetWalls(_RAMP_INFRONT, _RAMP_BEHIND), cs.GetFloor());
 			currentRunState = RunState::GET_INSTRUCTIONS;
 			robot.lastSetTile = millis();
     } 

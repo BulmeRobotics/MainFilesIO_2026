@@ -145,8 +145,11 @@ ErrorCodes ColorSensing::Update(){
     return ErrorCodes::disabled;
 }
 
-PoI_Type ColorSensing::GetFloor(){
-    return floorComb;
+TileType ColorSensing::GetFloor(){
+    if(_FREEZE_SENSOR) return TileType::obstacle;
+    //else if(!_ALERT) return TileType::visited;
+    else if(colorFront == PoI_Type::black) return TileType::black;
+    else return colorMiddle;
 }
 
 bool ColorSensing::GetAlert(){
@@ -201,7 +204,7 @@ PoI_Type ColorSensing::checkFront(){
     return PoI_Type::white; //TODO: Implement actual color checking
 }
 
-PoI_Type ColorSensing::checkMiddle(){
+TileType ColorSensing::checkMiddle(){
     //Read all channels
     TCA9548A(1);
     uint16_t colorRaw[10];
@@ -219,7 +222,7 @@ PoI_Type ColorSensing::checkMiddle(){
     //Only prints values when debugPort is set, otherwise does nothing
     printDebugData(colorRaw, 'M');
 
-    return PoI_Type::white; //TODO: Implement actual color checking
+    return TileType::visited; //TODO: Implement actual color checking
 }
 
 ErrorCodes ColorSensing::Calibrate(PoI_Type type){
