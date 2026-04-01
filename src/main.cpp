@@ -109,6 +109,9 @@ int main(void) {
   //Initialize Modules
     //User Interface
   UI.Initialize();
+
+  Wire1.setClock(I2C_CLOCK);
+
   UI.ConnectPointer(&currentMenuState, &cs, &mapper, &cameras);
     //Buttons
   attachInterrupt(digitalPinToInterrupt(BUTTON_BLACK), ISR_BTN_BLACK, RISING);
@@ -355,10 +358,10 @@ while (true) {
 
 void cyclicMainTask() {
   //Main cyclic tasks
-  ts_start = millis();
+  ts_lastCycle = ts_start;
   UI.Update();
+  Serial.print(millis() - ts_start);
   cs.Update();
-  Serial.println(millis() - ts_start);
 }
 void cyclicRunTask() {
   tof.Update();
