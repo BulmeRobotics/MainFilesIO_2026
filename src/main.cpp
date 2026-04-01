@@ -157,6 +157,11 @@ while (true) {
   if (currentMenuState == RobotState::RUN) {
     if (currentRunState == RunState::INITIAL) { //Initial Run Logic
       mapper.Reset();
+      robot.enableBumpers();	//Enable Bumpers
+			robot.startAlign();	//Start Aligning	
+			gyro.ResetAllAngles();	//Gyro angle zero
+			robot.maxRampIncline = 0;
+			robot.currentRobotHeight = 0;
       currentRunState = RunState::SETTILE;
     }
 
@@ -350,6 +355,11 @@ void cyclicMainTask() {
 }
 void cyclicRunTask() {
   tof.Update();
+
+  //Bumper Handling
+	if(currentRunState != RunState::INITIAL){
+		if(robot.bumperHandler() == ErrorCodes::BUMPER_WALL) currentRunState = RunState::SETTILE;
+	}
 }
 
 void ISR_BTN_BLACK() {
