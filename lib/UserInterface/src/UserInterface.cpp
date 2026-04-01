@@ -401,7 +401,7 @@ void UserInterface::ConstructSettingsMenu() {
     display.print("ColorSensor Calibration");
 
     //Hintergrund
-    display.drawRect(150,64,200,84, BTN_COLOR);
+    display.fillRect(150,64,200,84, BTN_COLOR);
 
     // Alle Buttons malen (Der Text wird durch die Klasse automatisch zentriert!)
     btnSpeedMinus.Draw(display, "-");
