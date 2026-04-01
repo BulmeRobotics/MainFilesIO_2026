@@ -159,6 +159,8 @@ private:
     static constexpr uint16_t MAP_AREA_WIDTH = 600;
     static constexpr uint8_t TILE_SIZE = 60; // Größe einer Kachel in Pixeln auf dem Display
 
+    bool _updateMap = false;
+
     void ConstructRunMenu();
     void UpdateRunMenu();
     void DrawMap();
@@ -266,4 +268,9 @@ public:
     void ShowCalibrationScreen(PoI_Type type);
     void UpdateCalibrationProgress(uint8_t step, uint8_t totalSteps);
     void FinishCalibration(bool success);
+
+    /**
+     * @brief called to update Map on Display
+     */
+    void UpdateMap() { _updateMap = true; };
 };

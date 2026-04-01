@@ -50,7 +50,7 @@
 #endif
 
 //Objects
-UserInterface UI(50); // Update Interval: 50ms
+UserInterface UI(75); // Update Interval: 50ms
 EEPROM eeprom;
 ColorSensing cs(&Serial);
 Gyro gyro;
@@ -178,6 +178,7 @@ while (true) {
     } 
 
     else if (currentRunState == RunState::GET_INSTRUCTIONS) {
+      UI.UpdateMap();
       //Get Instructions Logic
       switch (mapper.GetInstruction()) 
       {

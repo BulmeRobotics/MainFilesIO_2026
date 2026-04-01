@@ -249,6 +249,9 @@ void UserInterface::UpdateRunMenu() {
 }
 
 void UserInterface::DrawMap(){
+    if(!_updateMap) return;
+    _updateMap = false;
+    
     if (p_mapping == nullptr) return;
 
     //Get Tile Data
