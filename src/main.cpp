@@ -347,7 +347,9 @@ while (true) {
 
   }
 
-} return 0;}
+}
+return 0;
+}
 #ifdef _MSC_VER
   #pragma endregion Cyclic
   #pragma region Functions //----------------------------------------------------------------------

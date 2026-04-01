@@ -53,7 +53,9 @@ class Button{
             if (drawFunction != nullptr) drawFunction(display, x + width / 2, y + height / 2);
         }
         bool IsPressed(uint16_t touchX, uint16_t touchY){
-            return (touchX >= x && touchX <= (x + width) && touchY >= y && touchY <= (y + height));
+            uint16_t tx = touchY;
+            uint16_t ty = 480 - touchX; 
+            return (tx >= x && tx <= (x + width) && ty >= y && ty <= (y + height));
         }
 };
 
