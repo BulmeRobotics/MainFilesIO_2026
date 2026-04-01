@@ -232,6 +232,7 @@ ErrorCodes ColorSensing::Calibrate(PoI_Type type){
     while(!front.checkReadingProgress() && time + COLOR_TIMEOUT > millis()){
         delay(5);
     }
+
     TCA9548A(1);
     while(!middle.checkReadingProgress()&& time + COLOR_TIMEOUT > millis()){
         delay(5);
@@ -250,50 +251,47 @@ ErrorCodes ColorSensing::Calibrate(PoI_Type type){
     //Read new values
     for (uint8_t i = 0; i<RUNS_calibration; i++){
         time = millis();
-        frontReady = false;
-        middleReady = false;
 
+
+        //Middle Sensor --------------------------------------------------------
         TCA9548A(1);
         middle.startReading();
+        while (!middle.checkReadingProgress());
 
+        bufferMiddle[0] += middle.getChannel(AS7341_CHANNEL_415nm_F1);
+        bufferMiddle[1] += middle.getChannel(AS7341_CHANNEL_445nm_F2);
+        bufferMiddle[2] += middle.getChannel(AS7341_CHANNEL_480nm_F3);
+        bufferMiddle[3] += middle.getChannel(AS7341_CHANNEL_515nm_F4);
+        bufferMiddle[4] += middle.getChannel(AS7341_CHANNEL_555nm_F5);
+        bufferMiddle[5] += middle.getChannel(AS7341_CHANNEL_590nm_F6);
+        bufferMiddle[6] += middle.getChannel(AS7341_CHANNEL_630nm_F7);
+        bufferMiddle[7] += middle.getChannel(AS7341_CHANNEL_680nm_F8);
+        bufferMiddle[8] += middle.getChannel(AS7341_CHANNEL_CLEAR);
+        bufferMiddle[9] += middle.getChannel(AS7341_CHANNEL_NIR);
+        
+        //Middle Sensor --------------------------------------------------------
         TCA9548A(0);
         front.startReading();
 
-        while(!frontReady || !middleReady){
-            delay(5);
-            TCA9548A(0);
-            if(!frontReady && front.checkReadingProgress()){
-                bufferFront[0] += front.getChannel(AS7341_CHANNEL_415nm_F1);
-                bufferFront[1] += front.getChannel(AS7341_CHANNEL_445nm_F2);
-                bufferFront[2] += front.getChannel(AS7341_CHANNEL_480nm_F3);
-                bufferFront[3] += front.getChannel(AS7341_CHANNEL_515nm_F4);
-                bufferFront[4] += front.getChannel(AS7341_CHANNEL_555nm_F5);
-                bufferFront[5] += front.getChannel(AS7341_CHANNEL_590nm_F6);
-                bufferFront[6] += front.getChannel(AS7341_CHANNEL_630nm_F7);
-                bufferFront[7] += front.getChannel(AS7341_CHANNEL_680nm_F8);
-                bufferFront[8] += front.getChannel(AS7341_CHANNEL_CLEAR);
-                bufferFront[9] += front.getChannel(AS7341_CHANNEL_NIR);
-                frontReady = true;
-            }
-            TCA9548A(1);
-            if(!middleReady && middle.checkReadingProgress()){
-                bufferMiddle[0] += middle.getChannel(AS7341_CHANNEL_415nm_F1);
-                bufferMiddle[1] += middle.getChannel(AS7341_CHANNEL_445nm_F2);
-                bufferMiddle[2] += middle.getChannel(AS7341_CHANNEL_480nm_F3);
-                bufferMiddle[3] += middle.getChannel(AS7341_CHANNEL_515nm_F4);
-                bufferMiddle[4] += middle.getChannel(AS7341_CHANNEL_555nm_F5);
-                bufferMiddle[5] += middle.getChannel(AS7341_CHANNEL_590nm_F6);
-                bufferMiddle[6] += middle.getChannel(AS7341_CHANNEL_630nm_F7);
-                bufferMiddle[7] += middle.getChannel(AS7341_CHANNEL_680nm_F8);
-                bufferMiddle[8] += middle.getChannel(AS7341_CHANNEL_CLEAR);
-                bufferMiddle[9] += middle.getChannel(AS7341_CHANNEL_NIR);
-                middleReady = true;
-            }
-            if(time + COLOR_TIMEOUT < millis()) {
-                _ui->FinishCalibration(false);
-                return ErrorCodes::TIMEOUT;
-            }
+        while(!front.checkReadingProgress());
+
+        bufferFront[0] += front.getChannel(AS7341_CHANNEL_415nm_F1);
+        bufferFront[1] += front.getChannel(AS7341_CHANNEL_445nm_F2);
+        bufferFront[2] += front.getChannel(AS7341_CHANNEL_480nm_F3);
+        bufferFront[3] += front.getChannel(AS7341_CHANNEL_515nm_F4);
+        bufferFront[4] += front.getChannel(AS7341_CHANNEL_555nm_F5);
+        bufferFront[5] += front.getChannel(AS7341_CHANNEL_590nm_F6);
+        bufferFront[6] += front.getChannel(AS7341_CHANNEL_630nm_F7);
+        bufferFront[7] += front.getChannel(AS7341_CHANNEL_680nm_F8);
+        bufferFront[8] += front.getChannel(AS7341_CHANNEL_CLEAR);
+        bufferFront[9] += front.getChannel(AS7341_CHANNEL_NIR);
+        frontReady = true;
+
+        if(time + COLOR_TIMEOUT < millis()) {
+            _ui->FinishCalibration(false);
+            return ErrorCodes::TIMEOUT;
         }
+        
         _ui->UpdateCalibrationProgress(i + 2, RUNS_calibration + 1);
     }
     uint8_t floor = 0;
