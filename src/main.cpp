@@ -52,7 +52,7 @@
 //Objects
 UserInterface UI(75); // Update Interval: 50ms
 EEPROM eeprom;
-ColorSensing cs(&Serial);
+ColorSensing cs;
 Gyro gyro;
 Ejector ejector;
 TofSensors tof;
@@ -70,6 +70,7 @@ Vcameras cameras;
 RobotState currentMenuState;
 RunState currentRunState;
 uint32_t lastButtonPressGray;
+uint32_t ts_start = 0;
 
 uint8_t speedMod = 1;
 
@@ -143,7 +144,7 @@ int main(void) {
 
   //Camera
 
-  
+
   //Robot
   robot.init(&cs, &tof, &gyro, &mapper, &drivetrain);
   UI.AddInfoMsg("Driving", "OK", true);
@@ -354,8 +355,10 @@ while (true) {
 
 void cyclicMainTask() {
   //Main cyclic tasks
+  ts_start = millis();
   UI.Update();
   cs.Update();
+  Serial.println(millis() - ts_start);
 }
 void cyclicRunTask() {
   tof.Update();
