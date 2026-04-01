@@ -30,6 +30,7 @@ int16_t EEPROM::GetStartAddr(PoI_Type type, char sensor){
     default:
         break;
     }
+    return 0;
 }
 
 ErrorCodes EEPROM::ReadFromEEPROM(PoI_Type type, char sensor, uint16_t* buffer){
@@ -124,6 +125,7 @@ ErrorCodes ColorSensing::EnableRead(bool enable){
         }
         _READING = false;
     }
+    return ErrorCodes::OK;
 }
 
 ErrorCodes ColorSensing::Update(){
@@ -145,10 +147,6 @@ ErrorCodes ColorSensing::Update(){
 
 PoI_Type ColorSensing::GetFloor(){
     return floorComb;
-}
-
-void ColorSensing::Freeze(bool enable){
-    _FREEZE_SENSOR = enable;
 }
 
 bool ColorSensing::GetAlert(){
