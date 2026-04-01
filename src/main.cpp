@@ -42,6 +42,7 @@
 #include <Motor.h>
 #include <Ejector.h>
 #include <Driving.h>
+#include <Vcameras.h>
 
 #ifdef _MSC_VER
   #pragma endregion Includes
@@ -58,6 +59,7 @@ TofSensors tof;
 Mapping mapper;
 Drivetrain drivetrain;
 Driving robot;
+Vcameras cameras;
 
 #ifdef _MSC_VER
 #pragma endregion Objects
@@ -106,7 +108,7 @@ int main(void) {
   //Initialize Modules
     //User Interface
   UI.Initialize();
-  UI.ConnectPointer(&currentMenuState, &cs, &mapper);
+  UI.ConnectPointer(&currentMenuState, &cs, &mapper, &cameras);
     //Buttons
   attachInterrupt(digitalPinToInterrupt(BUTTON_BLACK), ISR_BTN_BLACK, RISING);
 	attachInterrupt(digitalPinToInterrupt(BUTTON_GRAY), ISR_BTN_GRAY, RISING);

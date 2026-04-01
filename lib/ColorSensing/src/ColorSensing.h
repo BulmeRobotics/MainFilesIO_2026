@@ -1,8 +1,10 @@
 #pragma once
+/**
+ * @author Vincent Rohkamm
+ * @date: 18.11.2025
+ * @description: User Interface for Robot
+ */
 
-// author: Vincent Rohkamm
-// date: 18.11.2025
-// description: User Interface for Robot
 
 #ifdef _MSC_VER
     #pragma region Includes //-----------------------------------------------------------------------
@@ -203,8 +205,16 @@ class ColorSensing{
         /**
          * @brief freezes the cs output to white, use on ramp, etc
          * @param enable: true...freeze; false...normal operation
+         * @return true...frozen, false...normal operation
          */
-        void Freeze(bool enable);
+        bool Freeze(bool enable){ return (_FREEZE_SENSOR = enable); }
+
+        /**
+         * @brief Gets Freeze status
+         * @return true...frozen, false...normal operation
+         */
+        bool Freeze(){ return _FREEZE_SENSOR; }
+        
 
         /**
          * @brief calibrates all color sensors to selected color

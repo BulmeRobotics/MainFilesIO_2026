@@ -1,7 +1,10 @@
 #pragma once
 #include <cstdint>
 
+#ifdef _MSC_VER
 #pragma region Robot States
+#endif
+
 enum class RobotState : uint8_t {
     BOOT, INFO_SENSOR, INFO_VISUAL, SETTINGS, ABOUT, CALIBRATION, RUN, BT, CHECKPOINT
 };
@@ -25,10 +28,14 @@ enum class ErrorCodes : uint8_t {
     SCAN_DRIVE,
     CHECK_RAMP,
     invalid, wall, straight, north, east, south, west, Overflow, //Mapping specific
-    disabled
+    disabled, left, right,
+    info,warning    //Popup System
 };
 
+#ifdef _MSC_VER
 #pragma region ToF
+#endif
+
 enum class TofType : uint8_t {
     LEFT_FRONT,
     LEFT_BACK,
@@ -62,8 +69,10 @@ struct PID_Coefficients {
 	float I;
 	float D;
 };
-
+#ifdef _MSC_VER
 #pragma region Gyro
+#endif
+
 struct GyroData {
 	float angle_abs;
 	float angle_car;
@@ -77,8 +86,9 @@ enum class GyroAxles : uint8_t {
 	Axis_Y,
 	Axis_Z
 };
-
+#ifdef _MSC_VER
 #pragma region Mapping
+#endif
 enum class Orientations : uint8_t {
     North, East, South, West
 };
@@ -97,7 +107,10 @@ enum class TileType : uint8_t {
     checkpoint, dangerZone, blue, black
 };
 
+#ifdef _MSC_VER
 #pragma region ColorSensor
+#endif
+
 struct rawColor {
 	uint16_t
 		F1		= 0,

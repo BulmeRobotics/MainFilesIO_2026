@@ -4,6 +4,7 @@
 
 #include "UserInterface.h"
 #include <ColorSensing.h>
+#include <Vcameras.h>
 
 // Definitionen der statischen Member
 constexpr char UserInterface::UI_VERSION[4];
@@ -17,6 +18,7 @@ bool UserInterface::NewContact = false;
 UserInterface::UserInterface(uint8_t updateInterval){
     UPDATE_INTERVAL = updateInterval;
 }
+
 
 #ifdef _MSC_VER
 
@@ -102,6 +104,248 @@ void UserInterface::HandleMainMenu(uint16_t tx, uint16_t ty) {
 
 #ifdef _MSC_VER
   #pragma endregion MainMenu 
+  #pragma region About Menu  
+#endif
+
+// ------------------------------------------------------------------
+// About Menu
+// ------------------------------------------------------------------
+
+void UserInterface::ConstructAboutMenu(){
+	//prepare font
+	display.setTextSize(10);
+	display.setTextColor(TEXT_COLOR);
+
+	//Robot Name
+	//display.fillRoundRect(130, 6, 400, 100, 20, BTN_COLOR);
+	display.setCursor(150, 21);
+	display.println("B.Robots");
+
+	//HTL BULME Graz-G�sting
+	display.setTextSize(TEXT_SIZE);
+	display.setCursor(150, display.getCursorY());
+	display.println("HTL Bulme Graz-Gosting");
+
+	//UI-Version
+	display.setTextSize(3);
+	display.setCursor(150, display.getCursorY());
+	display.print("\tUI Version ");
+	display.println(UI_VERSION);
+
+	//Team:
+	display.setCursor(150, display.getCursorY() + 15);
+	display.setTextSize(5);
+	display.println("Team:");
+	//Mentor
+	display.setTextSize(TEXT_SIZE);
+	display.setCursor(160, display.getCursorY() + 5);
+	display.drawLine(150, display.getCursorY() - 4, 750, display.getCursorY() - 4, TEXT_COLOR);
+	display.println("Mentor:");
+	display.setTextSize(3);
+	display.setCursor(175, display.getCursorY());
+	display.println("Peter Frauscher");
+
+	//Teammembers
+	display.setCursor(160, display.getCursorY() + 5);
+	display.setTextSize(TEXT_SIZE);
+	display.println("Members:");
+	display.setTextSize(3);
+	display.setCursor(175, display.getCursorY());
+	display.println("Paul Charusa | Florian Wiesner");
+	display.setCursor(175, display.getCursorY());
+	display.println("Thomas Rauch | Vincent Rohkamm");
+}
+
+#ifdef _MSC_VER
+  #pragma endregion About Menu 
+  #pragma region Run Menu 
+#endif
+
+// ------------------------------------------------------------------
+// Run Menu
+// ------------------------------------------------------------------
+
+void UserInterface::ConstructRunMenu() {
+    display.fillScreen(BG_COLOR); // Komplettes Display schwarz für die Karte
+    
+    // Trennlinie zeichnen (X = 600)
+    display.drawLine(MAP_AREA_WIDTH, 0, MAP_AREA_WIDTH, 480, HL_COLOR);
+    display.drawLine(MAP_AREA_WIDTH + 1, 0, MAP_AREA_WIDTH + 1, 480, HL_COLOR); // Bisschen dicker
+
+    // Hintergrund für das rechte Panel
+    display.fillRoundRect(MAP_AREA_WIDTH + 5, 5, 190, 470, 10, HL_COLOR);
+
+    // Statische Labels zeichnen
+    display.setTextSize(3);
+    display.setTextColor(TEXT_COLOR);
+
+    // --- Kamera Status ---
+    display.setCursor(MAP_AREA_WIDTH + 15, 20);
+    display.print("CAMERAS");
+    display.drawLine(MAP_AREA_WIDTH + 15, 45, 780, 45, TEXT_COLOR);
+    
+    display.setCursor(MAP_AREA_WIDTH + 15, 60);
+    display.print("Left:");
+    display.setCursor(MAP_AREA_WIDTH + 15, 120);
+    display.print("Right:");
+
+    // --- Color Sensor Status ---
+    display.setCursor(MAP_AREA_WIDTH + 15, 220);
+    display.print("COLOR SENS");
+    display.drawLine(MAP_AREA_WIDTH + 15, 245, 780, 245, TEXT_COLOR);
+    
+    display.setCursor(MAP_AREA_WIDTH + 15, 260);
+    display.print("State:");
+}
+
+void UserInterface::UpdateRunMenu() {
+    // 1. KAMERA STATUS UPDATEN
+    display.setTextSize(3);
+    
+    // Linke Kamera
+    display.setCursor(MAP_AREA_WIDTH + 15, 85);
+    if (!p_camera->IsEnabled(ErrorCodes::left)) {
+        display.setTextColor(0x7BEF, HL_COLOR); // Grau
+        display.print("DISABLED ");
+    } else if (p_camera->IsAlert(ErrorCodes::left)) {
+        display.setTextColor(0xF800, HL_COLOR); // Rot
+        display.print("ALERT!   ");
+    } else {
+        display.setTextColor(0x07E0, HL_COLOR); // Grün
+        display.print("CLEAR    ");
+    }
+
+    // Rechte Kamera
+    display.setCursor(MAP_AREA_WIDTH + 15, 145);
+    if (!p_camera->IsEnabled(ErrorCodes::right)) {
+        display.setTextColor(0x7BEF, HL_COLOR); 
+        display.print("DISABLED ");
+    } else if (p_camera->IsAlert(ErrorCodes::right)) {
+        display.setTextColor(0xF800, HL_COLOR); 
+        display.print("ALERT!   ");
+    } else {
+        display.setTextColor(0x07E0, HL_COLOR); 
+        display.print("CLEAR    ");
+    }
+
+    // 2. COLOR SENSOR STATUS UPDATEN
+    display.setCursor(MAP_AREA_WIDTH + 15, 285);
+    
+    if (p_colorSens != nullptr) {
+        if (p_colorSens->Freeze()) {
+            display.setTextColor(0x001F, HL_COLOR); // Blau für Freeze
+            display.print("FROZEN   ");
+        } else if (p_colorSens->GetAlert()) {
+            display.setTextColor(0xF800, HL_COLOR); // Rot für Alert
+            display.print("ALERT!   ");
+        } else {
+            display.setTextColor(0x07E0, HL_COLOR); // Grün für Normal
+            display.print("NORMAL   ");
+        }
+    }
+
+    // 3. KARTE ZEICHNEN
+    DrawMap();
+}
+
+void UserInterface::DrawMap(){
+    if(p_mapping == nullptr) return;
+
+    //Get Tile Data
+    Tile* tiles = p_mapping->GetTiles();
+    uint16_t currentPos = p_mapping->GetCurrentPosition();
+    Orientations currentOri = p_mapping->GetCurrentOrientation();
+
+    if (currentPos >= MAX_TILES || tiles[currentPos].type == TileType::inactive) return;
+
+    // get Robot Position
+    int16_t robX = tiles[currentPos].x;
+    int16_t robY = tiles[currentPos].y;
+    int16_t robZ = tiles[currentPos].z;
+
+    int16_t centerX = MAP_AREA_WIDTH / 2; // 300
+    int16_t centerY = 480 / 2;            // 240
+
+    for (int16_t yOffset = 3; yOffset >= -3; yOffset--) {
+        for (int16_t xOffset = -4; xOffset <= 4; xOffset++) {
+            
+            // get Target Tile
+            int16_t targetX = robX + xOffset;
+            int16_t targetY = robY + yOffset;
+            
+            // find Display space
+            int16_t drawX = centerX + (xOffset * TILE_SIZE) - (TILE_SIZE / 2);
+            int16_t drawY = centerY - (yOffset * TILE_SIZE) - (TILE_SIZE / 2);
+
+            // search for existing Tile
+            uint16_t foundIndex = UINT16_MAX;
+            for (uint16_t i = 0; i < MAX_TILES; i++) {
+                if (tiles[i].type != TileType::inactive && 
+                    tiles[i].x == targetX && 
+                    tiles[i].y == targetY && 
+                    tiles[i].z == robZ) { // only show current level
+                    foundIndex = i;
+                    break;
+                }
+            }
+
+            if (foundIndex != UINT16_MAX) {
+                // Tile found -> DRAW
+                Tile& t = tiles[foundIndex];
+                uint16_t tileColor = BG_COLOR;
+
+                // get color from type
+                switch (t.type) {
+                    case TileType::unexplored: tileColor = 0x3186;     break; // Dunkelgrau
+                    case TileType::visited:    tileColor = 0x7BEF;     break; // Hellgrau
+                    case TileType::obstacle:   tileColor = TEXT_COLOR; break; // Gelb
+                    case TileType::checkpoint: tileColor = 0x07E0;     break; // Grün
+                    case TileType::dangerZone: tileColor = 0xF800;     break; // Rot
+                    case TileType::blue:       tileColor = 0x001F;     break; // Blau
+                    case TileType::black:      tileColor = 0x0000;     break; // Schwarz
+                    default:                   tileColor = BG_COLOR;   break;
+                }
+
+                // draw Tile
+                display.fillRect(drawX + 1, drawY + 1, TILE_SIZE - 2, TILE_SIZE - 2, tileColor);
+
+                // Draw Walls (Wall = -1)
+                uint16_t wallColor = TEXT_COLOR; // Gelb (Kontraststark auf dunklen Displays)
+                uint8_t wallThickness = 4;
+
+                if (t.north == -1) display.fillRect(drawX, drawY, TILE_SIZE, wallThickness, wallColor);
+                if (t.south == -1) display.fillRect(drawX, drawY + TILE_SIZE - wallThickness, TILE_SIZE, wallThickness, wallColor);
+                if (t.east == -1)  display.fillRect(drawX + TILE_SIZE - wallThickness, drawY, wallThickness, TILE_SIZE, wallColor);
+                if (t.west == -1)  display.fillRect(drawX, drawY, wallThickness, TILE_SIZE, wallColor);
+
+            } else {
+                // No Tile -> overwrite
+                // Dies löscht alte Kacheln weg, wenn der Roboter sich bewegt (Anti-Flackern)
+                display.fillRect(drawX, drawY, TILE_SIZE, TILE_SIZE, BG_COLOR);
+            }
+        }
+    }
+
+    // 3. Roboter exakt in der Mitte zeichnen (als rotes Dreieck)
+    uint16_t rColor = 0xF800; // Rot
+    switch(currentOri) {
+        case Orientations::North: // Dreieck zeigt nach oben
+            display.fillTriangle(centerX, centerY - 15, centerX - 10, centerY + 10, centerX + 10, centerY + 10, rColor);
+            break;
+        case Orientations::East:  // Dreieck zeigt nach rechts
+            display.fillTriangle(centerX + 15, centerY, centerX - 10, centerY - 10, centerX - 10, centerY + 10, rColor);
+            break;
+        case Orientations::South: // Dreieck zeigt nach unten
+            display.fillTriangle(centerX, centerY + 15, centerX - 10, centerY - 10, centerX + 10, centerY - 10, rColor);
+            break;
+        case Orientations::West:  // Dreieck zeigt nach links
+            display.fillTriangle(centerX - 15, centerY, centerX + 10, centerY - 10, centerX + 10, centerY + 10, rColor);
+            break;
+    }
+}
+
+#ifdef _MSC_VER
+  #pragma endregion Run Menu 
   #pragma region Settings 
 #endif
 
@@ -289,9 +533,12 @@ void UserInterface::FinishCalibration(bool success){
 
 #ifdef _MSC_VER
   #pragma endregion Calibration
-  #pragma region Public Methods //------------------------------------------------------
+  #pragma region Init //------------------------------------------------------
 #endif    
 
+// ------------------------------------------------------------------
+// Initialization
+// ------------------------------------------------------------------
 
 void UserInterface::Initialize(){
     // Initialize NeoPixel
@@ -340,12 +587,23 @@ void UserInterface::Initialize(){
         }
     } else AddInfoMsg("Battery", "OK", true);
 }
-void UserInterface::ConnectPointer(RobotState* state, ColorSensing* cs, Mapping* mapping){
+
+void UserInterface::ConnectPointer(RobotState* state, ColorSensing* cs, Mapping* mapping, Vcameras* camera){
     p_state = state;
     p_colorSens = cs;
     p_mapping = mapping;
+    p_camera = camera;
     return;
 }
+
+#ifdef _MSC_VER
+  #pragma endregion Init
+  #pragma region Messages //------------------------------------------------------
+#endif   
+
+// ------------------------------------------------------------------
+// Info Message (Boot / BLE)
+// ------------------------------------------------------------------
 
 void UserInterface::AddInfoMsg(String Info, String Message, bool success){
     if (p_state != nullptr && *p_state == RobotState::BOOT) display.setCursor(15, display.getCursorY());
@@ -370,6 +628,73 @@ void UserInterface::AddInfoMsg(String Info, String Message, bool success){
 	display.setTextColor(TEXT_COLOR);
 }
 
+void UserInterface::ShowPopup(const char* text, ErrorCodes type, uint16_t timeS) {
+    _popupMsg = text;
+    _popupType = type;
+    _popupDurationMs = (uint32_t)timeS * 1000;
+    _popupStartTime = millis();
+    _popupActive = true;
+}
+
+void UserInterface::DrawPopup() {
+    // coordinates
+    uint16_t w = 500;
+    uint16_t h = 200;
+    uint16_t x = (800 - w) / 2;
+    uint16_t y = (480 - h) / 2;
+
+    uint16_t color;
+    const char* title;
+
+    // Mapping of error codes to title
+    switch (_popupType) {
+        case ErrorCodes::ERROR:
+        case ErrorCodes::TIMEOUT:
+        case ErrorCodes::Overflow:
+            color = 0xF800; // Rot
+            title = "ERROR";
+            break;
+        case ErrorCodes::warning:
+        case ErrorCodes::invalid:
+            color = 0xFFE0; // Gelb
+            title = "WARNING";
+            break;
+        default:
+            color = 0x07E0; // Grün
+            title = "INFO";
+            break;
+    }
+
+    // shadow and background
+    display.fillRoundRect(x + 5, y + 5, w, h, 15, 0x0000);  // shadow
+    display.fillRoundRect(x, y, w, h, 15, BG_COLOR);        // Box
+    display.drawRoundRect(x, y, w, h, 15, color);           // border
+    display.drawRoundRect(x+1, y+1, w-2, h-2, 15, color);   // thick border
+
+    // Header
+    display.setTextColor(color);
+    display.setTextSize(4);
+    display.setCursor(x + 20, y + 20);
+    display.print(title);
+    display.drawLine(x + 10, y + 65, x + w - 10, y + 65, color);
+
+    // Message
+    display.setTextColor(TEXT_COLOR);
+    display.setTextSize(3);
+    display.setCursor(x + 20, y + 85);
+    display.print(_popupMsg);
+}
+
+
+#ifdef _MSC_VER
+  #pragma endregion Messages
+  #pragma region Update //------------------------------------------------------
+#endif 
+
+// ------------------------------------------------------------------
+// Update
+// ------------------------------------------------------------------
+
 void UserInterface::Update(){
     uint32_t time = millis();
     if (time < lastUpdate + UPDATE_INTERVAL) return;
@@ -389,7 +714,9 @@ void UserInterface::Update(){
         case RobotState::ABOUT:
             ConstructAboutMenu();
             break;
-
+        case RobotState::RUN:
+            ConstructRunMenu();
+            break;
         
         default:
             break;
@@ -411,6 +738,7 @@ void UserInterface::Update(){
     // Handle Menus
     if(*p_state == RobotState::RUN){
         //RUN
+        UpdateRunMenu();
 
     } else if (*p_state == RobotState::INFO_VISUAL){
         //Info Visual
@@ -424,7 +752,6 @@ void UserInterface::Update(){
             BuzzerSignal(5,0,1);
         }
     } 
-    
     else if (*p_state == RobotState::SETTINGS){
         //Settings
 
@@ -507,52 +834,19 @@ void UserInterface::Update(){
             
         }
     }
+
+    if(_popupActive){
+        //check if time is up
+        if(millis() - _popupStartTime >= _popupDurationMs){
+            _popupActive = false;
+            lastState = RobotState(255);    //forces redraw
+        } else{
+            DrawPopup();
+        }
+    }
 }
 
-void UserInterface::ConstructAboutMenu(){
-	//prepare font
-	display.setTextSize(10);
-	display.setTextColor(TEXT_COLOR);
 
-	//Robot Name
-	//display.fillRoundRect(130, 6, 400, 100, 20, BTN_COLOR);
-	display.setCursor(150, 21);
-	display.println("B.Robots");
-
-	//HTL BULME Graz-G�sting
-	display.setTextSize(TEXT_SIZE);
-	display.setCursor(150, display.getCursorY());
-	display.println("HTL Bulme Graz-Gosting");
-
-	//UI-Version
-	display.setTextSize(3);
-	display.setCursor(150, display.getCursorY());
-	display.print("\tUI Version ");
-	display.println(UI_VERSION);
-
-	//Team:
-	display.setCursor(150, display.getCursorY() + 15);
-	display.setTextSize(5);
-	display.println("Team:");
-	//Mentor
-	display.setTextSize(TEXT_SIZE);
-	display.setCursor(160, display.getCursorY() + 5);
-	display.drawLine(150, display.getCursorY() - 4, 750, display.getCursorY() - 4, TEXT_COLOR);
-	display.println("Mentor:");
-	display.setTextSize(3);
-	display.setCursor(175, display.getCursorY());
-	display.println("Peter Frauscher");
-
-	//Teammembers
-	display.setCursor(160, display.getCursorY() + 5);
-	display.setTextSize(TEXT_SIZE);
-	display.println("Members:");
-	display.setTextSize(3);
-	display.setCursor(175, display.getCursorY());
-	display.println("Paul Charusa | Florian Wiesner");
-	display.setCursor(175, display.getCursorY());
-	display.println("Thomas Rauch | Vincent Rohkamm");
-}
 
 ErrorCodes UserInterface::CycleDriveMode(){
     if (driveMode != ErrorCodes::west) driveMode = (ErrorCodes)((uint8_t)driveMode + 1);

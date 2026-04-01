@@ -18,6 +18,7 @@
 #include <Mapping.h>
 
 class ColorSensing;
+class Vcameras;
 
 #ifdef _MSC_VER
     #pragma endregion Includes
@@ -110,6 +111,7 @@ private:
     // --- Object Pointers ---
     ColorSensing* p_colorSens = nullptr;
     Mapping* p_mapping = nullptr;
+    Vcameras* p_camera = nullptr;
 
     // --- States ---
     ErrorCodes driveMode;
@@ -145,12 +147,20 @@ private:
     void DrawMainMenuStatic();
     void HandleMainMenu(uint16_t tx, uint16_t ty);
 
+    // -- Run Menu --
+    static constexpr uint16_t MAP_AREA_WIDTH = 600;
+    static constexpr uint8_t TILE_SIZE = 60; // Größe einer Kachel in Pixeln auf dem Display
+
+    void ConstructRunMenu();
+    void UpdateRunMenu();
+    void DrawMap();
+
     // @brief Draws Battery Status on Display
     void DrawBattery();
 
     //Helper Functions for Constructing Menus
-    void ConstructAboutMenu();
     void ConstructSettingsMenu();
+    void ConstructAboutMenu();
 
 
 
@@ -174,7 +184,7 @@ public:
     /**
      * @brief Connects the other classes to the User Interface
      */
-    void ConnectPointer(RobotState* state, ColorSensing* cs, Mapping* mapping);
+    void ConnectPointer(RobotState* state, ColorSensing* cs, Mapping* mapping, Vcameras* camera);
 
     /**
      * @brief Adds an Information to the Message Log in startup or BLE screen
@@ -187,17 +197,15 @@ public:
     // POP-Ups / Error Messages ---------------------------------------------------------------------------------
 
     /**
-     * @brief Shows an Error Message on the Display
-     * @param error Error Code to Show
+     * @brief Erzeugt ein Pop-up Overlay über dem aktuellen Screen
+     * @param text displayed Text
+     * @param type ErrorCodes (ERROR / info / warning) 
+     * @param timeS shown duration (Default 5)
      */
-    void ShowErrorMsg(ErrorCodes error);
+    void ShowPopup(const char* text, ErrorCodes type, uint16_t timeS = 5);
 
-    /**
-     * @brief Shows an Error Message on the Display with a custom message
-     * @param error Error Code to Show
-     * @param message Custom message to display
-     */
-    void ShowErrorMsg(ErrorCodes error, String message);
+
+
 
     // SIGNALS ---------------------------------------------------------------------------------
 
