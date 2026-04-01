@@ -26,25 +26,68 @@ void Ejector::Init(void) {
     #pragma endregion
     #pragma region Eject //------------------------------------------------------------------------------------------------------
 #endif
-ErrorCodes Ejector::Eject(ErrorCodes side, uint8_t amount) {
+ErrorCodes Ejector::Eject(ErrorCodes side, uint8_t amount, Driving* robot) {
 	amount = constrain(amount, 1, 5);
 
-	if (side == ErrorCodes::left) {
-		for (uint8_t i = 0; i < amount; i++) {
+	if(remainingPacks <= 0) return ErrorCodes::empty;
+
+	//extract packs
+	uint8_t rLeft = remainingPacks >> 4;
+	uint8_t rRight = remainingPacks & 0x0f;
+	
+	if(side == ErrorCodes::left){
+		uint8_t priAmount = min(amount, rLeft);
+		uint8_t secAmount = min((uint8_t)(amount - priAmount), rRight);
+
+		//eject left
+		for (uint8_t i = 0; i < priAmount; i++)
+		{
 			servoLeft.write(POS_OPEN_LEFT);
 			delay(DELAY_OPEN);
 			servoLeft.write(POS_CLOSED_LEFT);
 			delay(DELAY_CLOSE);
 		}
+		if(secAmount>0){
+			//eject remaining right
+			robot->turn180Degree();
+			for (uint8_t i = 0; i < secAmount; i++) {
+				servoRight.write(POS_OPEN_RIGHT);
+				delay(DELAY_OPEN);
+				servoRight.write(POS_CLOSED_RIGHT);
+				delay(DELAY_CLOSE);
+			}
+			robot->turn180Degree();
+		}
+		rLeft -= priAmount;
+        rRight -= secAmount;
+        remainingPacks = (rLeft << 4) | (rRight & 0x0f);
         return ErrorCodes::OK;
-	}
-	else if (side == ErrorCodes::right) {
-		for (uint8_t i = 0; i < amount; i++) {
+	} else if(side == ErrorCodes::right){
+		uint8_t priAmount = min(amount, rRight);
+		uint8_t secAmount = min((uint8_t)(amount - priAmount), rLeft);
+
+		//eject right
+		for (uint8_t i = 0; i < priAmount; i++)
+		{
 			servoRight.write(POS_OPEN_RIGHT);
 			delay(DELAY_OPEN);
 			servoRight.write(POS_CLOSED_RIGHT);
 			delay(DELAY_CLOSE);
 		}
+		if(secAmount>0){
+			//eject remaining left
+			robot->turn180Degree();
+			for (uint8_t i = 0; i < secAmount; i++) {
+				servoLeft.write(POS_OPEN_LEFT);
+				delay(DELAY_OPEN);
+				servoLeft.write(POS_CLOSED_LEFT);
+				delay(DELAY_CLOSE);
+			}
+			robot->turn180Degree();
+		}
+		rRight -= priAmount;
+        rLeft -= secAmount;
+        remainingPacks = (rLeft << 4) | (rRight & 0x0f);
         return ErrorCodes::OK;
 	}
     return ErrorCodes::invalid;

@@ -6,6 +6,8 @@
 * @details: Header file for the ejector class
 */
 
+class Driving;
+
 #ifdef _MSC_VER
     #pragma region Libraries //--------------------------------------------------------------------------------------------------
 #endif
@@ -19,7 +21,12 @@
 class Ejector {
     public:
         // Constructor
-        Ejector() = default;
+        Ejector(uint8_t rescuePacks = 12){
+            if(rescuePacks > 14) rescuePacks = 14;
+            rescuePacks /= 2;
+            remainingPacks = rescuePacks;
+            remainingPacks |= rescuePacks << 4;
+        }
         
         // Methods
         /**
@@ -34,7 +41,7 @@ class Ejector {
         * @return OK if no errors occured.
         *         UNKNOWN if a parameter was wrong.
         */
-        ErrorCodes Eject(ErrorCodes side, uint8_t amount);
+        ErrorCodes Eject(ErrorCodes side, uint8_t amount, Driving* robot);
 
     private:
         // Pins
@@ -50,6 +57,10 @@ class Ejector {
         // Timing
         static constexpr uint16_t DELAY_OPEN    = 500;
         static constexpr uint16_t DELAY_CLOSE   = 250;
+
+        // Rescue Packs
+        uint8_t remainingPacks;    //b0-3 right, b4-7 left
+
 
         // Objects
         Servo servoLeft;

@@ -212,9 +212,6 @@ public:
      */
     void ShowPopup(const char* text, ErrorCodes type, uint16_t timeS = 5);
 
-
-
-
     // SIGNALS ---------------------------------------------------------------------------------
 
     /** 
