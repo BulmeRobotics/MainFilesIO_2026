@@ -249,7 +249,99 @@ void UserInterface::UpdateRunMenu() {
 }
 
 void UserInterface::DrawMap(){
-    
+    if(p_mapping == nullptr) return;
+
+    //Get Tile Data
+    Tile* tiles = p_mapping->GetTiles();
+    uint16_t currentPos = p_mapping->GetCurrentPosition();
+    Orientations currentOri = p_mapping->GetCurrentOrientation();
+
+    if (currentPos >= MAX_TILES || tiles[currentPos].type == TileType::inactive) return;
+
+    // get Robot Position
+    int16_t robX = tiles[currentPos].x;
+    int16_t robY = tiles[currentPos].y;
+    int16_t robZ = tiles[currentPos].z;
+
+    int16_t centerX = MAP_AREA_WIDTH / 2; // 300
+    int16_t centerY = 480 / 2;            // 240
+
+    for (int16_t yOffset = 3; yOffset >= -3; yOffset--) {
+        for (int16_t xOffset = -4; xOffset <= 4; xOffset++) {
+            
+            // get Target Tile
+            int16_t targetX = robX + xOffset;
+            int16_t targetY = robY + yOffset;
+            
+            // find Display space
+            int16_t drawX = centerX + (xOffset * TILE_SIZE) - (TILE_SIZE / 2);
+            int16_t drawY = centerY - (yOffset * TILE_SIZE) - (TILE_SIZE / 2);
+
+            // search for existing Tile
+            uint16_t foundIndex = UINT16_MAX;
+            for (uint16_t i = 0; i < MAX_TILES; i++) {
+                if (tiles[i].type != TileType::inactive && 
+                    tiles[i].x == targetX && 
+                    tiles[i].y == targetY && 
+                    tiles[i].z == robZ) { // only show current level
+                    foundIndex = i;
+                    break;
+                }
+            }
+
+            if (foundIndex != UINT16_MAX) {
+                // Tile found -> DRAW
+                Tile& t = tiles[foundIndex];
+                uint16_t tileColor = BG_COLOR;
+
+                // get color from type
+                switch (t.type) {
+                    case TileType::unexplored: tileColor = 0x3186;     break; // Dunkelgrau
+                    case TileType::visited:    tileColor = 0x7BEF;     break; // Hellgrau
+                    case TileType::obstacle:   tileColor = TEXT_COLOR; break; // Gelb
+                    case TileType::checkpoint: tileColor = 0x07E0;     break; // Grün
+                    case TileType::dangerZone: tileColor = 0xF800;     break; // Rot
+                    case TileType::blue:       tileColor = 0x001F;     break; // Blau
+                    case TileType::black:      tileColor = 0x0000;     break; // Schwarz
+                    default:                   tileColor = BG_COLOR;   break;
+                }
+
+                // draw Tile
+                display.fillRect(drawX + 1, drawY + 1, TILE_SIZE - 2, TILE_SIZE - 2, tileColor);
+
+                // Draw Walls (Wall = -1)
+                uint16_t wallColor = TEXT_COLOR; // Gelb (Kontraststark auf dunklen Displays)
+                uint8_t wallThickness = 4;
+
+                if (t.north == -1) display.fillRect(drawX, drawY, TILE_SIZE, wallThickness, wallColor);
+                if (t.south == -1) display.fillRect(drawX, drawY + TILE_SIZE - wallThickness, TILE_SIZE, wallThickness, wallColor);
+                if (t.east == -1)  display.fillRect(drawX + TILE_SIZE - wallThickness, drawY, wallThickness, TILE_SIZE, wallColor);
+                if (t.west == -1)  display.fillRect(drawX, drawY, wallThickness, TILE_SIZE, wallColor);
+
+            } else {
+                // No Tile -> overwrite
+                // Dies löscht alte Kacheln weg, wenn der Roboter sich bewegt (Anti-Flackern)
+                display.fillRect(drawX, drawY, TILE_SIZE, TILE_SIZE, BG_COLOR);
+            }
+        }
+    }
+
+    // 3. Roboter exakt in der Mitte zeichnen (als rotes Dreieck)
+    uint16_t rColor = 0xF800; // Rot
+    switch(currentOri) {
+        case Orientations::North: // Dreieck zeigt nach oben
+            display.fillTriangle(centerX, centerY - 15, centerX - 10, centerY + 10, centerX + 10, centerY + 10, rColor);
+            break;
+        case Orientations::East:  // Dreieck zeigt nach rechts
+            display.fillTriangle(centerX + 15, centerY, centerX - 10, centerY - 10, centerX - 10, centerY + 10, rColor);
+            break;
+        case Orientations::South: // Dreieck zeigt nach unten
+            display.fillTriangle(centerX, centerY + 15, centerX - 10, centerY - 10, centerX + 10, centerY - 10, rColor);
+            break;
+        case Orientations::West:  // Dreieck zeigt nach links
+            display.fillTriangle(centerX - 15, centerY, centerX + 10, centerY - 10, centerX + 10, centerY + 10, rColor);
+            break;
+    }
 }
 
 #ifdef _MSC_VER
