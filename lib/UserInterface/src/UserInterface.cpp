@@ -609,6 +609,8 @@ void UserInterface::Initialize(){
 	
 	touchDetector.onDetect(gigaTouchHandler);
 
+    display.setCursor(15, display.getCursorY());
+
     //Check Battery at Startup
     if(GetCharge() <= 10) {
         AddInfoMsg("Battery", "LOW/ERROR!", false);
