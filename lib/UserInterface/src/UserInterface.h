@@ -105,15 +105,7 @@ private:
     uint32_t lastUpdate = 0;
     static constexpr bool _BLE_ENABLED = false;
 
-    uint8_t driveSpeed = 50;
-
-    // --- Pop-Up System ---
-    bool _popupActive = false;
-    uint32_t _popupStartTime = 0;
-    uint32_t _popupDurationMs = 0;
-    const char* _popupMsg = nullptr;
-    ErrorCodes _popupType = ErrorCodes::OK;
-    void DrawPopup();
+    uint8_t driveSpeed = 60;
     
     
     // --- Object Pointers ---
