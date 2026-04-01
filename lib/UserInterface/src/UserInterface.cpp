@@ -623,6 +623,8 @@ void UserInterface::Initialize(){
             BuzzerSignal(200,200,1);
         }
     } else AddInfoMsg("Battery", "OK", true);
+
+    driveMode = ErrorCodes::straight;
 }
 
 void UserInterface::ConnectPointer(RobotState* state, ColorSensing* cs, Mapping* mapping, Vcameras* camera){
