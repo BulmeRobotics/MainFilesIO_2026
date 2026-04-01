@@ -187,6 +187,13 @@ public:
      * @return returns if operation was succesful
      */
     ErrorCodes Bumper(void);
+
+#ifdef _MSC_VER
+#pragma region UI
+#endif
+    Tile* GetTiles() { return tiles; }
+    uint16_t GetCurrentPosition() { return currrentPosition; }
+    Orientations GetCurrentOrientation() { return currentOrientation; }
 };
 
 #endif
