@@ -333,6 +333,7 @@ while (true) {
       robot.endDrive();
       robot.disableBumpers();
       UI.LED_BUZZER_Signal(100,200,3);
+      currentMenuState = RobotState::ABOUT;
     }
   } 
   
