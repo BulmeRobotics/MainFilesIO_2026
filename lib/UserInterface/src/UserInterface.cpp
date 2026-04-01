@@ -249,7 +249,7 @@ void UserInterface::UpdateRunMenu() {
 }
 
 void UserInterface::DrawMap(){
-    if(p_mapping == nullptr) return;
+    if (p_mapping == nullptr) return;
 
     //Get Tile Data
     Tile* tiles = p_mapping->GetTiles();
@@ -266,16 +266,37 @@ void UserInterface::DrawMap(){
     int16_t centerX = MAP_AREA_WIDTH / 2; // 300
     int16_t centerY = 480 / 2;            // 240
 
-    for (int16_t yOffset = 3; yOffset >= -3; yOffset--) {
-        for (int16_t xOffset = -4; xOffset <= 4; xOffset++) {
+    // viewX = left/right from Robotview (-4 to +4)
+    // viewY = behind/front from Robotview (-3 to +3)
+    for (int16_t viewY = 3; viewY >= -3; viewY--) {
+        for (int16_t viewX = -4; viewX <= 4; viewX++) {
             
-            // get Target Tile
-            int16_t targetX = robX + xOffset;
-            int16_t targetY = robY + yOffset;
+            int16_t targetX = robX;
+            int16_t targetY = robY;
+
+            // 1. Coordinate transformation (depending on view-angle -> Orientation)
+            switch (currentOri) {
+                case Orientations::North:
+                    targetX += viewX;
+                    targetY += viewY;
+                    break;
+                case Orientations::East:
+                    targetX += viewY;
+                    targetY -= viewX;
+                    break;
+                case Orientations::South:
+                    targetX -= viewX;
+                    targetY -= viewY;
+                    break;
+                case Orientations::West:
+                    targetX -= viewY;
+                    targetY += viewX;
+                    break;
+            }
             
             // find Display space
-            int16_t drawX = centerX + (xOffset * TILE_SIZE) - (TILE_SIZE / 2);
-            int16_t drawY = centerY - (yOffset * TILE_SIZE) - (TILE_SIZE / 2);
+            int16_t drawX = centerX + (viewX * TILE_SIZE) - (TILE_SIZE / 2);
+            int16_t drawY = centerY - (viewY * TILE_SIZE) - (TILE_SIZE / 2);
 
             // search for existing Tile
             uint16_t foundIndex = UINT16_MAX;
@@ -309,39 +330,44 @@ void UserInterface::DrawMap(){
                 // draw Tile
                 display.fillRect(drawX + 1, drawY + 1, TILE_SIZE - 2, TILE_SIZE - 2, tileColor);
 
-                // Draw Walls (Wall = -1)
+                // transform walls
+                // get which wall has to be drawn where
+                bool drawTop = false, drawRight = false, drawBottom = false, drawLeft = false;
+
+                switch(currentOri) {
+                    case Orientations::North:
+                        drawTop = (t.north == -1); drawRight = (t.east == -1); drawBottom = (t.south == -1); drawLeft = (t.west == -1);
+                        break;
+                    case Orientations::East:
+                        drawTop = (t.east == -1); drawRight = (t.south == -1); drawBottom = (t.west == -1); drawLeft = (t.north == -1);
+                        break;
+                    case Orientations::South:
+                        drawTop = (t.south == -1); drawRight = (t.west == -1); drawBottom = (t.north == -1); drawLeft = (t.east == -1);
+                        break;
+                    case Orientations::West:
+                        drawTop = (t.west == -1); drawRight = (t.north == -1); drawBottom = (t.east == -1); drawLeft = (t.south == -1);
+                        break;
+                }
+
                 uint16_t wallColor = TEXT_COLOR; // Gelb (Kontraststark auf dunklen Displays)
                 uint8_t wallThickness = 4;
 
-                if (t.north == -1) display.fillRect(drawX, drawY, TILE_SIZE, wallThickness, wallColor);
-                if (t.south == -1) display.fillRect(drawX, drawY + TILE_SIZE - wallThickness, TILE_SIZE, wallThickness, wallColor);
-                if (t.east == -1)  display.fillRect(drawX + TILE_SIZE - wallThickness, drawY, wallThickness, TILE_SIZE, wallColor);
-                if (t.west == -1)  display.fillRect(drawX, drawY, wallThickness, TILE_SIZE, wallColor);
+                if (drawTop)    display.fillRect(drawX, drawY, TILE_SIZE, wallThickness, wallColor);
+                if (drawBottom) display.fillRect(drawX, drawY + TILE_SIZE - wallThickness, TILE_SIZE, wallThickness, wallColor);
+                if (drawRight)  display.fillRect(drawX + TILE_SIZE - wallThickness, drawY, wallThickness, TILE_SIZE, wallColor);
+                if (drawLeft)   display.fillRect(drawX, drawY, wallThickness, TILE_SIZE, wallColor);
 
             } else {
                 // No Tile -> overwrite
-                // Dies löscht alte Kacheln weg, wenn der Roboter sich bewegt (Anti-Flackern)
                 display.fillRect(drawX, drawY, TILE_SIZE, TILE_SIZE, BG_COLOR);
             }
         }
     }
 
-    // 3. Roboter exakt in der Mitte zeichnen (als rotes Dreieck)
+    // 3. Roboter exakt in der Mitte zeichnen
+    // Da sich die Map nun relativ dreht, zeigt der Roboter logischerweise IMMER nach oben ("vorwärts")!
     uint16_t rColor = 0xF800; // Rot
-    switch(currentOri) {
-        case Orientations::North: // Dreieck zeigt nach oben
-            display.fillTriangle(centerX, centerY - 15, centerX - 10, centerY + 10, centerX + 10, centerY + 10, rColor);
-            break;
-        case Orientations::East:  // Dreieck zeigt nach rechts
-            display.fillTriangle(centerX + 15, centerY, centerX - 10, centerY - 10, centerX - 10, centerY + 10, rColor);
-            break;
-        case Orientations::South: // Dreieck zeigt nach unten
-            display.fillTriangle(centerX, centerY + 15, centerX - 10, centerY - 10, centerX + 10, centerY - 10, rColor);
-            break;
-        case Orientations::West:  // Dreieck zeigt nach links
-            display.fillTriangle(centerX - 15, centerY, centerX + 10, centerY - 10, centerX + 10, centerY + 10, rColor);
-            break;
-    }
+    display.fillTriangle(centerX, centerY - 15, centerX - 10, centerY + 10, centerX + 10, centerY + 10, rColor);
 }
 
 #ifdef _MSC_VER

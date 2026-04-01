@@ -7,6 +7,7 @@
  */
 
 #include <CustomDatatypes.h>
+#include <Ejector.h>
 
 class Vcameras
 {
