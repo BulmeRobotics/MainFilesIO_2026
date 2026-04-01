@@ -157,7 +157,7 @@ void ColorSensing::printDebugData(uint16_t* rawColor, char sensor){
     if(_debugPort != nullptr){
         _debugPort->print(sensor);
         _debugPort->print("\t");
-        for (uint8_t i = 0; i < 12; i++)
+        for (uint8_t i = 0; i < 10; i++)
         {
             _debugPort->print(rawColor[i]);
             _debugPort->print("\t");
