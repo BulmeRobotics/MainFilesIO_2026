@@ -52,7 +52,7 @@
 //Objects
 UserInterface UI(100); // Update Interval: 50ms
 EEPROM eeprom;
-ColorSensing cs/*(&Serial)*/;
+ColorSensing cs(&Serial);
 Gyro gyro;
 Ejector ejector;
 TofSensors tof;
@@ -274,11 +274,12 @@ while (true) {
       UI.UpdateResetProgress("Start Ready ",2,4);
       while(_CHECKPOINT != ErrorCodes::start) delay(5);
 
+      delay(10);
       robot.enableBumpers();
       robot.startAlign();
 			gyro.ResetAllAngles(); //Reset Gyro => Robot has to look towards NORTH!
       UI.UpdateResetProgress("Reset Robot ",3,4);
-
+      delay(200);
       mapper.Reset();
       robot.robotTargetAngle = Orientations::North;
       UI.UpdateResetProgress("Reset Map   ",4,4);
