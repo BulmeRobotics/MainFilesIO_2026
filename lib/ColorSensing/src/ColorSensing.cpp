@@ -80,7 +80,7 @@ uint8_t ColorSensing::Init(TwoWire* wire, UserInterface* ui, EEPROM* eeprom){
         if (!middle.setLEDCurrent(LED_CURRENT))	    ebuff |= 1 << 3;
         if (!middle.enableLED(_ENABLE_LED_MIDDLE))	ebuff |= 1 << 3;
     }
-    if (!middle.setGain(AS7341_GAIN_128X))  ebuff |= 1 << 5;
+    if (!middle.setGain(AS7341_GAIN_256X))  ebuff |= 1 << 5;
     if (!middle.setATIME(ATIME_Middle))     ebuff |= 1 << 6;
     if (!middle.setASTEP(ASTEP_Middle))     ebuff |= 1 << 6;
 
