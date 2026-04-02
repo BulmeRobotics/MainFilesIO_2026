@@ -37,9 +37,7 @@ Motor::Motor(uint8_t pwmPin, uint8_t driver, uint8_t driverPinCW, uint8_t driver
 		cwPinB = driverPinCW;
 		ccwPinB = driverPinCCW;
 	}
-	else
-		Serial.println("Invalid motor driver name!");
-
+	
 	InitDriverPins(driverPinCW, driverPinCCW);
 }
 
