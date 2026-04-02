@@ -119,15 +119,16 @@ class ColorSensing{
         static constexpr float MOD_WHITE           = 1.5f;
 
     // --- History ---
-        #define WINDOW_SIZE 15
-        #define NOISE_THRESHOLD 1000
-        #define FLICKER_MIN_COUNT 6
+        #define WINDOW_SIZE 10
+        #define NOISE_THRESHOLD 500
+        #define FLICKER_MIN_COUNT 5
 
-        uint16_t clearHistory[WINDOW_SIZE];
+        uint16_t f5History[WINDOW_SIZE];
+        uint16_t f6History[WINDOW_SIZE];
+        uint16_t f7History[WINDOW_SIZE];
         uint8_t historyIndex = 0;
-        bool bufferFilled = false;
         bool _checkpoint = false;
-        void UpdateHistory(uint16_t clearVal);
+        void UpdateHistory(uint16_t f5, uint16_t f6, uint16_t f7);
 
     // --- Objects for CS ---
         EEPROM* _eeprom;
