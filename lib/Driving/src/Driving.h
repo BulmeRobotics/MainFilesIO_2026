@@ -146,12 +146,13 @@ public:
     bool 	_RAMP_BEHIND = false;
     bool	_RAMP_INFRONT = false;
     bool 	_RAMP_INSTRUCTION = false;
+    bool    _TURNING = true;
+    bool    _SLOW_SPEED = false;
 
     //Public Variables
     TOF_Optimal_Value 	sensor;
     uint16_t 			nextTargetDistance;
     uint16_t 			newValue;   //Actual distance to Target
-    bool                _SLOW_SPEED = false;
     Orientations        robotTargetAngle = Orientations::North;
 
     //PID
