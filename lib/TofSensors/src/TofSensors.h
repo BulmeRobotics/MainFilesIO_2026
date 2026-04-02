@@ -232,16 +232,20 @@ class TofSensors {
     #define I2C_ADDRESS_MLB 0x68
     #define I2C_ADDRESS_MRF 0x6C
     #define I2C_ADDRESS_MRB 0x70
-    #define I2C_ADDRESS_MF  0x74
-    #define I2C_ADDRESS_MB  0x78
+    #define I2C_ADDRESS_MFU  0x74
+    #define I2C_ADDRESS_MBU  0x78
+    #define I2C_ADDRESS_MFL  0x7C
+    #define I2C_ADDRESS_MBL  0x80
 
     // XSHUT pins for the sensors
     #define XSHUT_PIN_MLF A2
     #define XSHUT_PIN_MLB A5
     #define XSHUT_PIN_MRF A3
     #define XSHUT_PIN_MRB A4
-    #define XSHUT_PIN_MF  A7
-    #define XSHUT_PIN_MB  A6
+    #define XSHUT_PIN_MFU  A7
+    #define XSHUT_PIN_MBU  A6
+    #define XSHUT_PIN_MFL  32
+    #define XSHUT_PIN_MBL  26
 
     #ifdef OLD_ROBOT
         #define XSHUT_PIN_X64_FRONT 32  // only for old robot, to keep them in XSHUT
@@ -257,8 +261,10 @@ class TofSensors {
     TofVL53L4CD leftFront = TofVL53L4CD(I2C_ADDRESS_MLF, XSHUT_PIN_MLF);
     TofVL53L4CD rightFront = TofVL53L4CD(I2C_ADDRESS_MRF, XSHUT_PIN_MRF);
     TofVL53L4CD rightBack = TofVL53L4CD(I2C_ADDRESS_MRB, XSHUT_PIN_MRB);
-    TofVL53L4CD midFront = TofVL53L4CD(I2C_ADDRESS_MF, XSHUT_PIN_MF);
-    TofVL53L4CD midBack = TofVL53L4CD(I2C_ADDRESS_MB, XSHUT_PIN_MB);
+    TofVL53L4CD frontUpper = TofVL53L4CD(I2C_ADDRESS_MFU, XSHUT_PIN_MFU);
+    TofVL53L4CD backUpper = TofVL53L4CD(I2C_ADDRESS_MBU, XSHUT_PIN_MBU);
+    TofVL53L4CD frontLower = TofVL53L4CD(I2C_ADDRESS_MFL, XSHUT_PIN_MFL);
+    TofVL53L4CD backLower = TofVL53L4CD(I2C_ADDRESS_MBL, XSHUT_PIN_MBL);
 
     // Member
     bool updateEnabled = true;
