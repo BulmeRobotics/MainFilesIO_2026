@@ -397,8 +397,6 @@ void cyclicMainTask() {
   //Main cyclic tasks
   UI.Update();
   cs.Update();
-
-  Serial.println(String(gyro.GetAngle(GyroAxles::Axis_Y)) + "\t" + String(gyro.GetAngle(GyroAxles::Axis_Z)));
 }
 void cyclicRunTask() {
   tof.Update();
