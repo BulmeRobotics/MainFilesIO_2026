@@ -13,8 +13,9 @@ ErrorCodes Vcameras::Init(Ejector* ejector, Mapping* mapper, Driving* robot, Use
     _connected = false;
 
     _ifc->print("<I>");
-    if(Recieve() == ErrorCodes::OK){
-        if(_response.indexOf("OK") == -1) return ErrorCodes::ERROR;
+    if(Recieve() != ErrorCodes::OK || _response.indexOf("OK") == -1){
+        _connected = false;
+        return ErrorCodes::ERROR;
     }
     _connected = true;
     return ErrorCodes::OK;  
