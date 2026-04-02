@@ -12,6 +12,9 @@ ErrorCodes Vcameras::Init(Ejector* ejector, Mapping* mapper, Driving* robot, Use
     _ui = ui;
     _connected = false;
 
+    pinMode(CAMERAL_PIN_INT, INPUT);
+    pinMode(CAMERAR_PIN_INT, INPUT);
+
     _ifc->print("<I>");
     if(Recieve() != ErrorCodes::OK || _response.indexOf("OK") == -1){
         _connected = false;
