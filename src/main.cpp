@@ -71,8 +71,6 @@ RobotState currentMenuState;
 RunState currentRunState;
 uint32_t lastButtonPressGray;
 
-uint8_t speedMod = 1;
-
 //Flags
 bool _ROBOT_TURNING = false;
 bool _RAMP_INFRONT = false;
@@ -290,7 +288,7 @@ while (true) {
 
     else if (currentRunState == RunState::DRIVE) {
       //Control Logic
-      ErrorCodes driveSave = robot.controlDrive((UI.GetDriveSpeed() * speedMod), gyro.GetAngleFromOrientation(robot.robotTargetAngle));
+      ErrorCodes driveSave = robot.controlDrive((UI.GetDriveSpeed()), gyro.GetAngleFromOrientation(robot.robotTargetAngle));
 			if(driveSave == ErrorCodes::CHECK_DRIVE) currentRunState = RunState::CHECK_DRIVE;
 			else if (driveSave == ErrorCodes::TIMEOUT) {
         robot.timeoutDrive();
@@ -391,6 +389,13 @@ void cyclicRunTask() {
 		}
 		currentRunState = RunState::SETTILE;	//SetTile again
 	}
+
+  //Drive Slower if FRONT detects change
+	if(cs.GetAlert() && !cs.Freeze())
+		robot._SLOW_SPEED = true;
+
+  //Reset to std speed mod if nth is on ALERT
+  if(!cs.GetAlert() && !cameras.IsAlert(ErrorCodes::left) && !cameras.IsAlert(ErrorCodes::right)) robot._SLOW_SPEED = false;
 
   //Bumper Handling
 	if(currentRunState != RunState::INITIAL){

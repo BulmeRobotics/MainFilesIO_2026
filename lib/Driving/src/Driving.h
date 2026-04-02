@@ -151,7 +151,7 @@ public:
     TOF_Optimal_Value 	sensor;
     uint16_t 			nextTargetDistance;
     uint16_t 			newValue;   //Actual distance to Target
-    uint8_t 			speedMOD = stdSPEED_MOD;
+    bool                _SLOW_SPEED = false;
     Orientations        robotTargetAngle = Orientations::North;
 
     //PID

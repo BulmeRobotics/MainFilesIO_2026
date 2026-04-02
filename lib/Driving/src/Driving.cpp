@@ -553,6 +553,8 @@ ErrorCodes Driving::startDrive(void) {
 	return ErrorCodes::OK;
 }
 ErrorCodes Driving::controlDrive(int8_t driveSpeed, float angle) {
+	if (_SLOW_SPEED)
+		driveSpeed = 25;
 	p_gyro->GetAngle_advanced(angle, GyroAxles::Axis_X);	//Gyro auslesen, für akutellen Winkel und Fehler
 	int8_t leftRightError = p_tof->CalculateLeftRightError(p_gyro->data.angle_error, tof_sideWallThreshold, gap_robot_wall);
 	float error = -p_gyro->data.angle_error + (leftRightError * pid_LeftRightFactor);
