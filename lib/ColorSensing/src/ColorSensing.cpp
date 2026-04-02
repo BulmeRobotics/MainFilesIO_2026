@@ -194,7 +194,7 @@ PoI_Type ColorSensing::checkFront(){
     colorRaw[9] = front.getChannel(AS7341_CHANNEL_NIR);
 
     //Only prints values when debugPort is set, otherwise does nothing
-    printDebugData(colorRaw, 'F');
+    //printDebugData(colorRaw, 'F');
 
     // Silver Tile
     UpdateHistory(colorRaw[8]);
@@ -252,7 +252,7 @@ TileType ColorSensing::checkMiddle(){
     colorRaw[9] = middle.getChannel(AS7341_CHANNEL_NIR);
 
     //Only prints values when debugPort is set, otherwise does nothing
-    printDebugData(colorRaw, 'M');
+    //printDebugData(colorRaw, 'M');
     
     //Blau:
     if(colorRaw[8] < 40000){
@@ -352,30 +352,33 @@ ErrorCodes ColorSensing::Calibrate(PoI_Type type){
         break;
     }
 
-    frontColorsCalibrated[floor].F1     = (uint16_t)(bufferFront[0]/RUNS_calibration);
-    frontColorsCalibrated[floor].F2     = (uint16_t)(bufferFront[1]/RUNS_calibration);
-    frontColorsCalibrated[floor].F3     = (uint16_t)(bufferFront[2]/RUNS_calibration);
-    frontColorsCalibrated[floor].F4     = (uint16_t)(bufferFront[3]/RUNS_calibration);
-    frontColorsCalibrated[floor].F5     = (uint16_t)(bufferFront[4]/RUNS_calibration);
-    frontColorsCalibrated[floor].F6     = (uint16_t)(bufferFront[5]/RUNS_calibration);
-    frontColorsCalibrated[floor].F7     = (uint16_t)(bufferFront[6]/RUNS_calibration);
-    frontColorsCalibrated[floor].F8     = (uint16_t)(bufferFront[7]/RUNS_calibration);
-    frontColorsCalibrated[floor].Clear  = (uint16_t)(bufferFront[8]/RUNS_calibration);
-    frontColorsCalibrated[floor].NIR    = (uint16_t)(bufferFront[9]/RUNS_calibration);
+    frontColorsCalibrated[floor].F1     = (uint16_t)(bufferFront[0]/(uint32_t)RUNS_calibration);
+    frontColorsCalibrated[floor].F2     = (uint16_t)(bufferFront[1]/(uint32_t)RUNS_calibration);
+    frontColorsCalibrated[floor].F3     = (uint16_t)(bufferFront[2]/(uint32_t)RUNS_calibration);
+    frontColorsCalibrated[floor].F4     = (uint16_t)(bufferFront[3]/(uint32_t)RUNS_calibration);
+    frontColorsCalibrated[floor].F5     = (uint16_t)(bufferFront[4]/(uint32_t)RUNS_calibration);
+    frontColorsCalibrated[floor].F6     = (uint16_t)(bufferFront[5]/(uint32_t)RUNS_calibration);
+    frontColorsCalibrated[floor].F7     = (uint16_t)(bufferFront[6]/(uint32_t)RUNS_calibration);
+    frontColorsCalibrated[floor].F8     = (uint16_t)(bufferFront[7]/(uint32_t)RUNS_calibration);
+    frontColorsCalibrated[floor].Clear  = (uint16_t)(bufferFront[8]/(uint32_t)RUNS_calibration);
+    frontColorsCalibrated[floor].NIR    = (uint16_t)(bufferFront[9]/(uint32_t)RUNS_calibration);
     
-    middleColorsCalibrated[floor].F1     = (uint16_t)(bufferMiddle[0]/RUNS_calibration);
-    middleColorsCalibrated[floor].F2     = (uint16_t)(bufferMiddle[1]/RUNS_calibration);
-    middleColorsCalibrated[floor].F3     = (uint16_t)(bufferMiddle[2]/RUNS_calibration);
-    middleColorsCalibrated[floor].F4     = (uint16_t)(bufferMiddle[3]/RUNS_calibration);
-    middleColorsCalibrated[floor].F5     = (uint16_t)(bufferMiddle[4]/RUNS_calibration);
-    middleColorsCalibrated[floor].F6     = (uint16_t)(bufferMiddle[5]/RUNS_calibration);
-    middleColorsCalibrated[floor].F7     = (uint16_t)(bufferMiddle[6]/RUNS_calibration);
-    middleColorsCalibrated[floor].F8     = (uint16_t)(bufferMiddle[7]/RUNS_calibration);
-    middleColorsCalibrated[floor].Clear  = (uint16_t)(bufferMiddle[8]/RUNS_calibration);
-    middleColorsCalibrated[floor].NIR    = (uint16_t)(bufferMiddle[9]/RUNS_calibration);
+    middleColorsCalibrated[floor].F1     = (uint16_t)(bufferMiddle[0]/(uint32_t)RUNS_calibration);
+    middleColorsCalibrated[floor].F2     = (uint16_t)(bufferMiddle[1]/(uint32_t)RUNS_calibration);
+    middleColorsCalibrated[floor].F3     = (uint16_t)(bufferMiddle[2]/(uint32_t)RUNS_calibration);
+    middleColorsCalibrated[floor].F4     = (uint16_t)(bufferMiddle[3]/(uint32_t)RUNS_calibration);
+    middleColorsCalibrated[floor].F5     = (uint16_t)(bufferMiddle[4]/(uint32_t)RUNS_calibration);
+    middleColorsCalibrated[floor].F6     = (uint16_t)(bufferMiddle[5]/(uint32_t)RUNS_calibration);
+    middleColorsCalibrated[floor].F7     = (uint16_t)(bufferMiddle[6]/(uint32_t)RUNS_calibration);
+    middleColorsCalibrated[floor].F8     = (uint16_t)(bufferMiddle[7]/(uint32_t)RUNS_calibration);
+    middleColorsCalibrated[floor].Clear  = (uint16_t)(bufferMiddle[8]/(uint32_t)RUNS_calibration);
+    middleColorsCalibrated[floor].NIR    = (uint16_t)(bufferMiddle[9]/(uint32_t)RUNS_calibration);
 
     _eeprom->WriteToEEPROM(type, 'F', (uint16_t*)&frontColorsCalibrated[floor]);
     _eeprom->WriteToEEPROM(type, 'M', (uint16_t*)&middleColorsCalibrated[floor]);
+
+    printDebugData((uint16_t*)&middleColorsCalibrated[floor], 'C');
+    printDebugData((uint16_t*)&frontColorsCalibrated[floor], 'c');
 
     _ui->FinishCalibration(true);
     return ErrorCodes::OK;
