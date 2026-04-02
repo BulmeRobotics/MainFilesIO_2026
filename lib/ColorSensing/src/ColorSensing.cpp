@@ -156,8 +156,8 @@ ErrorCodes ColorSensing::Update(){
 
 TileType ColorSensing::GetFloor(){
     if(_FREEZE_SENSOR) return TileType::obstacle;
-    //else if(!_ALERT) return TileType::visited;
     else if(colorFront == PoI_Type::black) return TileType::black;
+    else if(_checkpoint) return TileType::checkpoint;
     else return colorMiddle;
 }
 
@@ -196,11 +196,39 @@ PoI_Type ColorSensing::checkFront(){
     //Only prints values when debugPort is set, otherwise does nothing
     printDebugData(colorRaw, 'F');
 
+    // Silver Tile
+    UpdateHistory(colorRaw[8]);
+    if (bufferFilled) {
+        int directionChanges = 0;
+        int lastDirection = 0; // 1 für steigend, -1 für fallend
+        for (int i = 1; i < WINDOW_SIZE; i++) {
+            // Um den Ringpuffer chronologisch zu lesen:
+            int currIdx = (historyIndex + i) % WINDOW_SIZE;
+            int prevIdx = (currIdx - 1 + WINDOW_SIZE) % WINDOW_SIZE;
+        
+            int diff = (int)clearHistory[currIdx] - (int)clearHistory[prevIdx];
+            if (diff > NOISE_THRESHOLD) {
+                if (lastDirection == -1) directionChanges++;
+                lastDirection = 1;
+            } else if (diff < -NOISE_THRESHOLD) {
+                if (lastDirection == 1) directionChanges++;
+                lastDirection = -1;
+            }
+        }
+        // Wenn es oft genug hin und her geschwankt ist -> Silber!
+        if (directionChanges >= FLICKER_MIN_COUNT) {
+            _checkpoint = true;
+            return PoI_Type::checkpoint;
+        }
+    }
+
+    // Not whiite
     if( colorRaw[4] <= frontColorsCalibrated[WHITE].F5 - FRONT_WHITE_RANGE_DOWN &&
         colorRaw[5] <= frontColorsCalibrated[WHITE].F6 - FRONT_WHITE_RANGE_DOWN &&
         colorRaw[6] <= frontColorsCalibrated[WHITE].F7 - FRONT_WHITE_RANGE_DOWN)
     {
         _ALERT = true;
+        
 
         //Check Black
         if( colorRaw[1] <= frontColorsCalibrated[WHITE].F2    + FRONT_BLACK_RANGE_UP / 2 &&
@@ -231,33 +259,6 @@ TileType ColorSensing::checkMiddle(){
     //Only prints values when debugPort is set, otherwise does nothing
     printDebugData(colorRaw, 'M');
     
-    // Silver detection
-    UpdateHistory(colorRaw[8]);
-    if (bufferFilled) {
-        int directionChanges = 0;
-        int lastDirection = 0; // 1 für steigend, -1 für fallend
-
-        for (int i = 1; i < WINDOW_SIZE; i++) {
-            // Um den Ringpuffer chronologisch zu lesen:
-            int currIdx = (historyIndex + i) % WINDOW_SIZE;
-            int prevIdx = (currIdx - 1 + WINDOW_SIZE) % WINDOW_SIZE;
-            
-            int diff = (int)clearHistory[currIdx] - (int)clearHistory[prevIdx];
-
-            if (diff > NOISE_THRESHOLD) {
-                if (lastDirection == -1) directionChanges++;
-                lastDirection = 1;
-            } else if (diff < -NOISE_THRESHOLD) {
-                if (lastDirection == 1) directionChanges++;
-                lastDirection = -1;
-            }
-        }
-
-        // Wenn es oft genug hin und her geschwankt ist -> Silber!
-        if (directionChanges >= FLICKER_MIN_COUNT) {
-            return TileType::checkpoint; // (Stelle sicher, dass SILVER in deinen Enums existiert)
-        }
-    }
     //Blau:
     if(colorRaw[1] > (colorRaw[7] * 2)){
         return TileType::blue;

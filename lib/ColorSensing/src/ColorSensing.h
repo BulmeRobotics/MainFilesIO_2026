@@ -126,6 +126,7 @@ class ColorSensing{
         uint16_t clearHistory[WINDOW_SIZE];
         uint8_t historyIndex = 0;
         bool bufferFilled = false;
+        bool _checkpoint = false;
         void UpdateHistory(uint16_t clearVal);
 
     // --- Objects for CS ---
@@ -241,5 +242,5 @@ class ColorSensing{
          */
         ErrorCodes Update();
 
-
+        void resetCheckpoint() { _checkpoint = false; }
 };

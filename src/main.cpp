@@ -176,6 +176,11 @@ while (true) {
     if (currentRunState == RunState::SETTILE) {
       UI.BuzzerSignal(5, 0, 1);
 			mapper.SetTile(tof.GetWalls(_RAMP_INFRONT, _RAMP_BEHIND), cs.GetFloor());
+
+      //Checkpoint handling
+      if(cs.GetFloor() == TileType::checkpoint) UI.ShowPopup("CHECKPOINT",ErrorCodes::info, 2);
+      cs.resetCheckpoint();
+
 			currentRunState = RunState::GET_INSTRUCTIONS;
 			robot.lastSetTile = millis();
     } 
@@ -231,8 +236,12 @@ while (true) {
         if (cs.GetFloor() == TileType::blue) {
           //Stoppen
           robot.endDrive();
-          UI.Update();
-          delay(5000);  //5 Sekunden warten
+          UI.ShowPopup("BLUE TILE", ErrorCodes::info);
+          uint32_t time = millis();
+          while(millis() <= time + 5000){
+            UI.Update();
+            delay(25);
+          }
           //Weiterfahren
         }
         currentRunState = RunState::CHECK_DRIVE;	//Start Drive
