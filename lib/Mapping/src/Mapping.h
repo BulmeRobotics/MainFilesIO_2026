@@ -34,7 +34,6 @@ struct Tile {
     int16_t x, y, z = 0;
     uint8_t weight = 1;
     TileType type = TileType::inactive;
-    PoI_Type poi = PoI_Type::undef;
     int16_t north = -1, east = -1, south = -1, west = -1, up = -1, down = -1;
     bool victim = false;
 };
@@ -167,11 +166,12 @@ public:
     ErrorCodes Turn(Orientations direction);
 
     /**
-     * @brief registers a ramp instead of moving robot horizontally, is called instead of Move
-     * @param info b0-b6...length in Tiles; b7...direction -> 1...up, 0...down
+     * @brief registers a ramp instead of moving robot horizontally, is called instead of Move / ONLY TO BE CALLED WHEN changing level!!!
+     * @param direction up / down
+     * @param length length in tiles
      * @return returns if operation is valid
      */
-    ErrorCodes Ramp(uint8_t info);
+    ErrorCodes Ramp(ErrorCodes direction, uint8_t length);
 
 #ifdef _MSC_VER
 #pragma region Error Handling

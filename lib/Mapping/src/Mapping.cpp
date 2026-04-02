@@ -263,37 +263,47 @@ ErrorCodes Mapping::Move(bool direction) {
     return ErrorCodes::OK;
 }
 
-ErrorCodes Mapping::Ramp(uint8_t info) {
+ErrorCodes Mapping::Ramp(ErrorCodes direction, uint8_t length) {
+    length = length - 0;
+
     uint16_t nextPos = findNextEmptyMemory();
 	if (nextPos == UINT16_MAX) return ErrorCodes::Overflow;   //No Memory left for new tile
 
     //Set Relation to tile
-    if (info & (1 << 7)) {   //UP
+    if (direction == ErrorCodes::up) {   //UP
         tiles[currrentPosition].up = nextPos;
         tiles[nextPos].down = currrentPosition;
         tiles[nextPos].z = tiles[currrentPosition].z + 1;
     }
-    else {    //DOWN
+    else if(direction == ErrorCodes::down){    //DOWN
         tiles[currrentPosition].down = nextPos;
         tiles[nextPos].up = currrentPosition;
         tiles[nextPos].z = tiles[currrentPosition].z - 1;
     }
+    
+    //Set Tiles as visited
+    tiles[currrentPosition].type = TileType::visited;
+    tiles[nextPos].type = TileType::visited;
 
-    //Set xy Coordinates
-    switch (currentOrientation) {
-    case Orientations::North:
-        tiles[nextPos].y = tiles[currrentPosition].y + (info & 0x07);
-        break;
-    case Orientations::East:
-        tiles[nextPos].x = tiles[currrentPosition].x + (info & 0x07);
-        break;
-    case Orientations::South:
-        tiles[nextPos].y = tiles[currrentPosition].y - (info & 0x07);
-        break;
-    case Orientations::West:
-        tiles[nextPos].x = tiles[currrentPosition].x - (info & 0x07);
-        break;
-    }
+    //Set weight
+    tiles[currrentPosition].weight = COST_RAMP;
+    tiles[nextPos].weight = COST_RAMP;
+
+    uint8_t wall = correctWallinfo(0x0E,currentOrientation);
+    uint16_t realPos = findNextEmptyMemory();
+
+    //Set real Pos
+    tiles[realPos].type = TileType::unexplored;
+    tiles[realPos].z = tiles[currrentPosition].z;
+
+        //Set right walls and Position (xy)
+    if(!(wall & (1<<0)))        {tiles[nextPos].north = realPos;    tiles[realPos].south = nextPos; tiles[realPos].x = tiles[nextPos].x;            tiles[realPos].y = tiles[nextPos].y + length;   }
+    else if(!(wall & (1<<1)))   {tiles[nextPos].east = realPos;     tiles[realPos].west = nextPos;  tiles[realPos].x = tiles[nextPos].x + length;   tiles[realPos].y = tiles[nextPos].y;            }
+    else if(!(wall & (1<<2)))   {tiles[nextPos].south = realPos;    tiles[realPos].north = nextPos; tiles[realPos].x = tiles[nextPos].x;            tiles[realPos].y = tiles[nextPos].y - length;   }
+    else if(!(wall & (1<<3)))   {tiles[nextPos].west = realPos;     tiles[realPos].east = nextPos;  tiles[realPos].x = tiles[nextPos].x - length;   tiles[realPos].y = tiles[nextPos].y;            }
+
+    currrentPosition = realPos; // Set current position as actual position
+
     return ErrorCodes::OK;
 }
 
