@@ -789,3 +789,7 @@ ErrorCodes Mapping::RestartCheckpoint() {
 
     return ErrorCodes::OK;
 }
+
+ErrorCodes Mapping::SetVictim(){
+    return ErrorCodes::OK;
+}
