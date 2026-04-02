@@ -17,10 +17,10 @@ class Vcameras
 {
 private:
     // --- Hardware Info ---
-    static constexpr uint8_t CAMERA1_PIN_INT = 40;
-    static constexpr uint8_t CAMERA1_PIN_RST = 42;
-    static constexpr uint8_t CAMERA2_PIN_INT = 41;
-    static constexpr uint8_t CAMERA2_PIN_RST = 43;
+    static constexpr uint8_t CAMERAL_PIN_INT = 40;
+    static constexpr uint8_t CAMERAL_PIN_RST = 42;
+    static constexpr uint8_t CAMERAR_PIN_INT = 41;
+    static constexpr uint8_t CAMERAR_PIN_RST = 43;
 
     // --- related Objects ---
     Ejector* _ejector = nullptr;
@@ -33,7 +33,8 @@ private:
 
     // --- State Fields ---
     bool _LeftEnabled, _RightEnabled;
-    bool _LeftAlert, _RightAlert;
+    bool _LeftAlert = false, _RightAlert = false;
+    bool _oldRed = false;
 
     // --- Response ---
     String _response = "";
@@ -66,7 +67,7 @@ public:
      * @brief camera handler has to be called periodically
      * @return ErrorCodes for debugging
      */
-    ErrorCodes Handler();
+    ErrorCodes Handler(bool onRed);
 
 
 

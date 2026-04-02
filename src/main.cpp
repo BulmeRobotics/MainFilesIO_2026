@@ -52,7 +52,7 @@
 //Objects
 UserInterface UI(100); // Update Interval: 50ms
 EEPROM eeprom;
-ColorSensing cs(&Serial);
+ColorSensing cs/*(&Serial)*/;
 Gyro gyro;
 Ejector ejector;
 TofSensors tof;
@@ -238,7 +238,7 @@ while (true) {
           uint32_t time = millis();
           while(millis() <= time + 5000){
             UI.Update();
-            delay(25);
+            delay(480);
           }
           //Weiterfahren
         }

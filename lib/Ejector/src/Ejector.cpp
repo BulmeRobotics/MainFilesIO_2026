@@ -27,6 +27,7 @@ void Ejector::Init(void) {
     #pragma region Eject //------------------------------------------------------------------------------------------------------
 #endif
 ErrorCodes Ejector::Eject(ErrorCodes side, uint8_t amount, Driving* robot) {
+	if(amount == 0) return ErrorCodes::OK;
 	amount = constrain(amount, 1, 5);
 
 	if(remainingPacks <= 0) return ErrorCodes::empty;
