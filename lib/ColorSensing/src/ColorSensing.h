@@ -75,51 +75,60 @@ class EEPROM {
 class ColorSensing{
     private:
     // --- Adressen & Hardware-Settings ---
-    static constexpr uint8_t MULTIPLEX_ADRESS = 0x70;
-    static constexpr uint8_t LED_CURRENT      = 10;
+        static constexpr uint8_t MULTIPLEX_ADRESS = 0x70;
+        static constexpr uint8_t LED_CURRENT      = 10;
 
     // --- Sensor Timings ---
     //  Total integration time will be (ATIME + 1) * (ASTEP + 1) * 2.78µS
-    static constexpr uint16_t ATIME_Front     = 100;
-    static constexpr uint16_t ASTEP_Front     = 150;
-    static constexpr uint16_t ATIME_Middle    = 150;
-    static constexpr uint16_t ASTEP_Middle    = 700;
+        static constexpr uint16_t ATIME_Front     = 100;
+        static constexpr uint16_t ASTEP_Front     = 150;
+        static constexpr uint16_t ATIME_Middle    = 150;
+        static constexpr uint16_t ASTEP_Middle    = 700;
  
     // --- Multiplikatoren ---
-    static constexpr uint8_t MULT_up          = 100;
-    static constexpr uint8_t MULT_down        = 100;
+        static constexpr uint8_t MULT_up          = 100;
+        static constexpr uint8_t MULT_down        = 100;
  
     // --- Schwellenwerte Middle Sensor ---
-    static constexpr uint16_t MIDDLE_BLACK_RANGE_UP   = 4000;
-    static constexpr uint16_t MIDDLE_WHITE_RANGE_DOWN = 20000;
-    static constexpr uint16_t MIDDLE_WHITE_RANGE_UP   = 3000;
-    static constexpr uint16_t MIDDLE_SILVER_RANGE_F5  = 10000;
-    static constexpr uint16_t MIDDLE_BLUE_RANGE_DOWN  = 2000;
-    static constexpr uint16_t MIDDLE_RED_RANGE_DOWN   = 10000;
+        static constexpr uint16_t MIDDLE_BLACK_RANGE_UP   = 4000;
+        static constexpr uint16_t MIDDLE_WHITE_RANGE_DOWN = 20000;
+        static constexpr uint16_t MIDDLE_WHITE_RANGE_UP   = 3000;
+        static constexpr uint16_t MIDDLE_SILVER_RANGE_F5  = 10000;
+        static constexpr uint16_t MIDDLE_BLUE_RANGE_DOWN  = 2000;
+        static constexpr uint16_t MIDDLE_RED_RANGE_DOWN   = 10000;
  
     // --- Schwellenwerte Front Sensor ---
-    static constexpr uint16_t FRONT_BLACK_RANGE_UP    = 1500;
-    static constexpr uint16_t FRONT_WHITE_RANGE_DOWN  = 1900;
-    static constexpr uint16_t FRONT_WHITE_RANGE_UP    = 200;
+        static constexpr uint16_t FRONT_BLACK_RANGE_UP    = 1500;
+        static constexpr uint16_t FRONT_WHITE_RANGE_DOWN  = 1900;
+        static constexpr uint16_t FRONT_WHITE_RANGE_UP    = 200;
  
     // --- Konfiguration ---
-    static constexpr uint8_t RUNS_calibration = 7;
-    static constexpr uint32_t COLOR_TIMEOUT   = 1000;
- 
+        static constexpr uint8_t RUNS_calibration = 7;
+        static constexpr uint32_t COLOR_TIMEOUT   = 1000;
+    
     // --- LEDs ---
-    static constexpr bool _ENABLE_LED_FRONT  = true;
-    static constexpr bool _ENABLE_LED_MIDDLE = true;
+        static constexpr bool _ENABLE_LED_FRONT  = true;
+        static constexpr bool _ENABLE_LED_MIDDLE = true;
 
     // --- Float-Modifikatoren ---
     // WICHTIG: Das 'f' am Ende macht daraus einen 32-bit float statt 64-bit double!
     // Das spart auf einem STM32 massiv Rechenzeit und Flash-Speicher.
-    static constexpr float MOD_FrontRead       = 1.0f;
-    static constexpr float MOD_MiddleRead      = 2.5f;
-    static constexpr float MOD_HIGH_WAVELENGTH = 2.5f;
-    static constexpr float MOD_WHITE           = 1.5f;
+        static constexpr float MOD_FrontRead       = 1.0f;
+        static constexpr float MOD_MiddleRead      = 2.5f;
+        static constexpr float MOD_HIGH_WAVELENGTH = 2.5f;
+        static constexpr float MOD_WHITE           = 1.5f;
 
-    #define MULTIPLEX_ADRESS 0x70
-    //Objects for CS
+    // --- History ---
+        #define WINDOW_SIZE 15
+        #define NOISE_THRESHOLD 1000
+        #define FLICKER_MIN_COUNT 6
+
+        uint16_t clearHistory[WINDOW_SIZE];
+        uint8_t historyIndex = 0;
+        bool bufferFilled = false;
+        void UpdateHistory(uint16_t clearVal);
+
+    // --- Objects for CS ---
         EEPROM* _eeprom;
         UserInterface* _ui;
         Adafruit_AS7341 front;
@@ -147,7 +156,8 @@ class ColorSensing{
         Stream* _debugPort;
         void printDebugData(uint16_t* rawColor, char sensor);
 
-    // Multiplexer Function
+    // --- Multiplexer ---
+        #define MULTIPLEX_ADRESS 0x70
         /**
          * @brief toggles between multiplexer channels; enables use of multiple CS
          * @param bus: 0...front; 1...middle
@@ -157,7 +167,6 @@ class ColorSensing{
             Wire.write(1 << bus);                   // send byte to select bus
             Wire.endTransmission();
         }
-
 
     // analyze Sensor Data
         // @todo: check function

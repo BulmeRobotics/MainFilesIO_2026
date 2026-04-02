@@ -228,7 +228,7 @@ while (true) {
       case Instructionset::D_Forward:
         //Drive Forward Logic
         //Blue Tile:
-        if (cs.GetFloor() == PoI_Type::blue) {
+        if (cs.GetFloor() == TileType::blue) {
           //Stoppen
           robot.endDrive();
           UI.Update();

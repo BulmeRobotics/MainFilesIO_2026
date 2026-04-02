@@ -80,7 +80,7 @@ uint8_t ColorSensing::Init(TwoWire* wire, UserInterface* ui, EEPROM* eeprom){
         if (!middle.setLEDCurrent(LED_CURRENT))	    ebuff |= 1 << 3;
         if (!middle.enableLED(_ENABLE_LED_MIDDLE))	ebuff |= 1 << 3;
     }
-    if (!middle.setGain(AS7341_GAIN_256X))  ebuff |= 1 << 5;
+    if (!middle.setGain(AS7341_GAIN_128X))  ebuff |= 1 << 5;
     if (!middle.setATIME(ATIME_Middle))     ebuff |= 1 << 6;
     if (!middle.setASTEP(ASTEP_Middle))     ebuff |= 1 << 6;
 
@@ -126,6 +126,15 @@ ErrorCodes ColorSensing::EnableRead(bool enable){
         _READING = false;
     }
     return ErrorCodes::OK;
+}
+
+void ColorSensing::UpdateHistory(uint16_t clearVal) {
+    clearHistory[historyIndex] = clearVal;
+    historyIndex++;
+    if (historyIndex >= WINDOW_SIZE) {
+        historyIndex = 0;
+        bufferFilled = true;
+    }
 }
 
 ErrorCodes ColorSensing::Update(){
@@ -221,6 +230,38 @@ TileType ColorSensing::checkMiddle(){
 
     //Only prints values when debugPort is set, otherwise does nothing
     printDebugData(colorRaw, 'M');
+    
+    // Silver detection
+    UpdateHistory(colorRaw[8]);
+    if (bufferFilled) {
+        int directionChanges = 0;
+        int lastDirection = 0; // 1 für steigend, -1 für fallend
+
+        for (int i = 1; i < WINDOW_SIZE; i++) {
+            // Um den Ringpuffer chronologisch zu lesen:
+            int currIdx = (historyIndex + i) % WINDOW_SIZE;
+            int prevIdx = (currIdx - 1 + WINDOW_SIZE) % WINDOW_SIZE;
+            
+            int diff = (int)clearHistory[currIdx] - (int)clearHistory[prevIdx];
+
+            if (diff > NOISE_THRESHOLD) {
+                if (lastDirection == -1) directionChanges++;
+                lastDirection = 1;
+            } else if (diff < -NOISE_THRESHOLD) {
+                if (lastDirection == 1) directionChanges++;
+                lastDirection = -1;
+            }
+        }
+
+        // Wenn es oft genug hin und her geschwankt ist -> Silber!
+        if (directionChanges >= FLICKER_MIN_COUNT) {
+            return TileType::checkpoint; // (Stelle sicher, dass SILVER in deinen Enums existiert)
+        }
+    }
+    //Blau:
+    if(colorRaw[1] > (colorRaw[7] * 2)){
+        return TileType::blue;
+    }
 
     return TileType::visited; //TODO: Implement actual color checking
 }
