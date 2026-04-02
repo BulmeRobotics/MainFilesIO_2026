@@ -90,21 +90,18 @@ ErrorCodes Driving::checkRamp(void){
     p_gyro->GetAngle_advanced(0, GyroAxles::Axis_Y);
     float sideTilt = p_gyro->data.angle_car;
 
-    bool freezeColor = false;
+    // bool freezeColor = false;
 
-	if (!_TURNING) {
-	    if (!p_colorSensing->Freeze()) {
-	        if (abs(incline) > 4 || abs(sideTilt) > 5) p_colorSensing->Freeze(true);
-	    } else {
-	        if (abs(incline) < 3 && abs(sideTilt) < 4) p_colorSensing->Freeze(false);
-	    }
-	} else {
-	    p_colorSensing->Freeze(false);
-	}
+	// if (!p_colorSensing->Freeze()) {
+	//     if (abs(incline) > 3 || abs(sideTilt) > 4) p_colorSensing->Freeze(true);
+	// }
+	// else {
+	//     if (abs(incline) < 2 && abs(sideTilt) < 3) p_colorSensing->Freeze(false);
+	// }
 
-    if (p_colorSensing->Freeze()) {
-        Serial.println(String(freezeColor) + "\tZ:" + String(incline) + "\tY:" + String(sideTilt));
-    }
+    // if (p_colorSensing->Freeze()) {
+    //     Serial.println(String(freezeColor) + "\tZ:" + String(incline) + "\tY:" + String(sideTilt));
+    // }
 	
     //Detect Ramps
 	if (!_ON_RAMP && (incline > rampThresholdAngle) && inclineCycleCounter == 0) {
@@ -141,6 +138,7 @@ ErrorCodes Driving::checkRamp(void){
 			disableBumpers();	//Disable Bumpers
 			p_drivetrain->ResetEncoder(0);	//Reset Encoder
 			p_drivetrain->EnableEncoder();	//Enable Motor Interrupts
+			p_colorSensing->Freeze(true);
 			return ErrorCodes::OK;
 
 		}
@@ -167,6 +165,7 @@ ErrorCodes Driving::checkRamp(void){
 			disableBumpers();	//Disable Bumpers
 			p_drivetrain->ResetEncoder(0);	//Reset Encoder
 			p_drivetrain->EnableEncoder();	//Enable Motor Interrupts
+			p_colorSensing->Freeze(true);
 			return ErrorCodes::OK;
 		}
 		else {
@@ -285,6 +284,7 @@ ErrorCodes Driving::rampHandler(void){
 			_RAMP_DOWN = false;
 			_STAIR = false;
 			_ON_RAMP = false;
+			p_colorSensing->Freeze(false);
 			arr_incline_index = 0;	//Reset the incline array index
 
 			#ifdef DEBUG_RAMP
@@ -421,8 +421,8 @@ ErrorCodes Driving::endTurn(){
 	enableBumpers();	//Enable Bumpers
 	_CAM_ALERT_TURN = false;
 	startAlign();
-	p_gyro->ResetAngle(GyroAxles::Axis_Y);
-	p_gyro->ResetAngle(GyroAxles::Axis_Z);
+	// p_gyro->ResetAngle(GyroAxles::Axis_Y);
+	// p_gyro->ResetAngle(GyroAxles::Axis_Z);
 
 	
 	p_mapSys->Turn(p_gyro->GetOrientationFromAngle());
