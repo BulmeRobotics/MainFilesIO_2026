@@ -365,6 +365,7 @@ ErrorCodes Driving::startTurn(float angle) {
 	if (!_CAM_ALERT_TURN) maxTurnTime = 3000;
 
 	_TURNING = true;
+	p_colorSensing->Freeze(true);
 
 	p_gyro->GetAngle_advanced(angle, GyroAxles::Axis_X);	//Get the gyro readings
 	if (abs(p_gyro->data.angle_error) > 150) _TURN_180_DEGREE = true;
@@ -434,6 +435,7 @@ ErrorCodes Driving::endTurn(){
 	
 	p_mapSys->Turn(p_gyro->GetOrientationFromAngle());
 	_TURNING = false;
+	p_colorSensing->Freeze(false);
 	//Check for ramps in front and back
 //!	// if (p_tof->x64.isRamp(&p_tof->x64.front)) {
 	// 	_RAMP_INFRONT = true;
