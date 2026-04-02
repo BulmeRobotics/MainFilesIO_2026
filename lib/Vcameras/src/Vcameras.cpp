@@ -10,11 +10,13 @@ ErrorCodes Vcameras::Init(Ejector* ejector, Mapping* mapper, Driving* robot, Use
     _mapper = mapper;
     _robot = robot;
     _ui = ui;
+    _connected = false;
 
     _ifc->print("<I>");
     if(Recieve() == ErrorCodes::OK){
         if(_response.indexOf("OK") == -1) return ErrorCodes::ERROR;
     }
+    _connected = true;
     return ErrorCodes::OK;  
 }
 
@@ -59,6 +61,7 @@ ErrorCodes Vcameras::Recieve(uint16_t timeout){
 //---------------------------------------------------------------------------------------------------------
 
 ErrorCodes Vcameras::Enable(bool en, ErrorCodes side){
+    if(!_connected) return ErrorCodes::no_connection;
     char cSide = (side == ErrorCodes::left) ? 'L' : 'R';
 
     if(en){ //Enable
@@ -89,6 +92,7 @@ ErrorCodes Vcameras::Enable(bool en, ErrorCodes side){
 //---------------------------------------------------------------------------------------------------------
 
 ErrorCodes Vcameras::Update(bool onRed){
+    if(!_connected) return ErrorCodes::no_connection;
     if(_oldRed && !onRed) {
         Enable(true, ErrorCodes::left);
         Enable(true, ErrorCodes::right);

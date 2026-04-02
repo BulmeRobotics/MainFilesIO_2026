@@ -31,7 +31,7 @@ enum class ErrorCodes : uint8_t {
     disabled, left, right,
     info,warning,    //Popup System
     empty,               //ejector
-    already_found 
+    already_found, no_connection
 };
 
 #ifdef _MSC_VER

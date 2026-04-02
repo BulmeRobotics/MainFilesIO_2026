@@ -30,9 +30,10 @@ private:
 
     // --- Interface ---
     Stream* _ifc = nullptr;
+    bool _connected = false;
 
     // --- State Fields ---
-    bool _LeftEnabled, _RightEnabled;
+    bool _LeftEnabled = false, _RightEnabled = false;
     bool _LeftAlert = false, _RightAlert = false;
     bool _oldRed = false;
 
