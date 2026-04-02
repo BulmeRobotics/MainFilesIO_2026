@@ -328,7 +328,7 @@ void UserInterface::DrawMap(){
                     case TileType::obstacle:   tileColor = TEXT_COLOR; break; // Gelb
                     case TileType::checkpoint: tileColor = 0x07E0;     break; // Grün
                     case TileType::dangerZone: tileColor = 0xF800;     break; // Rot
-                    case TileType::blue:       tileColor = 0x001F;     break; // Blau
+                    case TileType::blue:       tileColor = 0x1175;     break; // Blau
                     case TileType::black:      tileColor = 0x0000;     break; // Schwarz
                     default:                   tileColor = BG_COLOR;   break;
                 }
