@@ -89,18 +89,15 @@ ErrorCodes Driving::checkRamp(void){
 	float incline = -p_gyro->data.angle_car;
 	p_gyro->GetAngle_advanced(0, GyroAxles::Axis_Y);
 
+
     //freeze ColorSensor if not within Limits
-//!	// if(!p_colorSensing->_FREEZE_SENSORS && (incline > 3 || incline < -3)){
-	// 	p_colorSensing->Freeze(true);
-	// 	p_colorSensors->floorFront = PoI_Type::white;
-	// 	p_colorSensors->floorMiddle = PoI_Type::white;
-	// }
-	// else if(p_gyro->data.angle_car > 4 || p_gyro->data.angle_car < -4) {
-	// 	p_colorSensing->Freeze(true);
-	// 	p_colorSensors->floorFront = PoI_Type::white;
-	// 	p_colorSensors->floorMiddle = PoI_Type::white;
-	// }
-	// else if(p_colorSensors->_FREEZE_SENSORS) p_colorSensing->Freeze(false);
+	if (!p_colorSensing->Freeze() && (incline > 3 || incline < -3)){
+		p_colorSensing->Freeze(true);
+	}
+	else if(p_gyro->data.angle_car > 4 || p_gyro->data.angle_car < -4) {
+		p_colorSensing->Freeze(true);
+	}
+	else if(p_colorSensing->Freeze()) p_colorSensing->Freeze(false);
 
     //Detect Ramps
 	if (!_ON_RAMP && (incline > rampThresholdAngle) && inclineCycleCounter == 0) {
@@ -556,6 +553,8 @@ ErrorCodes Driving::startDrive(void) {
 	return ErrorCodes::OK;
 }
 ErrorCodes Driving::controlDrive(int8_t driveSpeed, float angle) {
+	if (_SLOW_SPEED)
+		driveSpeed = 25;
 	p_gyro->GetAngle_advanced(angle, GyroAxles::Axis_X);	//Gyro auslesen, für akutellen Winkel und Fehler
 	int8_t leftRightError = p_tof->CalculateLeftRightError(p_gyro->data.angle_error, tof_sideWallThreshold, gap_robot_wall);
 	float error = -p_gyro->data.angle_error + (leftRightError * pid_LeftRightFactor);
