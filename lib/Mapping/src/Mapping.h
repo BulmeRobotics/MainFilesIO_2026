@@ -35,8 +35,8 @@ struct Tile {
     uint8_t weight = 1;
     TileType type = TileType::inactive;
     PoI_Type poi = PoI_Type::undef;
-
     int16_t north = -1, east = -1, south = -1, west = -1, up = -1, down = -1;
+    bool victim = false;
 };
 
 struct OpenItem {

@@ -791,5 +791,8 @@ ErrorCodes Mapping::RestartCheckpoint() {
 }
 
 ErrorCodes Mapping::SetVictim(){
+    if(!(tiles[currrentPosition].type == TileType::visited || tiles[currrentPosition].type == TileType::unexplored)) return ErrorCodes::invalid;
+    if (tiles[currrentPosition].victim) return ErrorCodes::already_found;
+    tiles[currrentPosition].victim = true;
     return ErrorCodes::OK;
 }
