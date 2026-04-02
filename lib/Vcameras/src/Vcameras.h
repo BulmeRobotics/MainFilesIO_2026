@@ -69,11 +69,6 @@ public:
      */
     ErrorCodes Update(bool onRed);
 
-
-
-
-
-
     /**
      * @brief Getter if Cam is enabled
      * @param cam ErrorCodes::left / ErrorCodes::right
