@@ -59,10 +59,10 @@ ErrorCodes Vcameras::Recieve(uint16_t timeout){
 //---------------------------------------------------------------------------------------------------------
 
 ErrorCodes Vcameras::Enable(bool en, ErrorCodes side){
-
+    char cSide = (side == ErrorCodes::left) ? 'L' : 'R';
 
     if(en){ //Enable
-        _ifc->print("<E>");
+        _ifc->print("<E" + cSide + '>');
         if(Recieve() == ErrorCodes::OK){
             if(_response.indexOf("OK") == -1) return ErrorCodes::ERROR;
 
@@ -71,7 +71,7 @@ ErrorCodes Vcameras::Enable(bool en, ErrorCodes side){
             return ErrorCodes::OK;
         }
     } else {    //Disable
-        _ifc->print("<D>");
+        _ifc->print("<D" + cSide + '>');
         if(Recieve() == ErrorCodes::OK){
             if(_response.indexOf("OK") == -1) return ErrorCodes::ERROR;
 
@@ -80,7 +80,6 @@ ErrorCodes Vcameras::Enable(bool en, ErrorCodes side){
             return ErrorCodes::OK;
         }
     }
-
     _ui->ShowPopup("cams enable error", ErrorCodes::ERROR);
     return ErrorCodes::invalid;
 }
