@@ -215,7 +215,7 @@ class ColorSensing{
          * @param enable: true...freeze; false...normal operation
          * @return true...frozen, false...normal operation
          */
-        bool Freeze(bool enable){ return (_FREEZE_SENSOR = enable); }
+        bool Freeze(bool enable){ _checkpoint = false; return (_FREEZE_SENSOR = enable); }
 
         /**
          * @brief Gets Freeze status

@@ -222,17 +222,12 @@ PoI_Type ColorSensing::checkFront(){
         }
     }
 
-    // Not whiite
-    if( colorRaw[4] <= frontColorsCalibrated[WHITE].F5 - FRONT_WHITE_RANGE_DOWN &&
-        colorRaw[5] <= frontColorsCalibrated[WHITE].F6 - FRONT_WHITE_RANGE_DOWN &&
-        colorRaw[6] <= frontColorsCalibrated[WHITE].F7 - FRONT_WHITE_RANGE_DOWN)
-    {
+    // Not white
+    if( colorRaw[8] <= 13000){
         _ALERT = true;
         
-
         //Check Black
-        if( colorRaw[1] <= frontColorsCalibrated[WHITE].F2    + FRONT_BLACK_RANGE_UP / 2 &&
-            colorRaw[8] <= frontColorsCalibrated[WHITE].Clear + FRONT_BLACK_RANGE_UP)
+        if(colorRaw[8] <= 2000)
             return PoI_Type::black;
         else return PoI_Type::undef;
         
