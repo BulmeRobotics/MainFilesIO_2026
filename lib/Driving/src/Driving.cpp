@@ -1,5 +1,4 @@
 #include "Driving.h"
-#include "camera.h"
 
 #ifdef _MSC_VER
 #pragma region BUMPERS
@@ -254,22 +253,30 @@ ErrorCodes Driving::rampHandler(void){
 			if (_RAMP_UP && !_STAIR) {
 				rampEncoderDistance = rampEncoderDistance * rampUp_K + rampUp_d;
 				RAMP_ANGLE = maxRampIncline;
+				#ifdef DEBUG_RAMP
 				Serial.print("\tRAMP UP");
+				#endif
 			}
 			else if (_RAMP_DOWN && !_STAIR) {
 				rampEncoderDistance = rampEncoderDistance * rampDown_K + rampDown_d;
 				RAMP_ANGLE = maxRampIncline;
+				#ifdef DEBUG_RAMP
 				Serial.print("\tRAMP DOWN");
+				#endif
 			}
 			else if (_RAMP_UP && _STAIR) {
 				rampEncoderDistance = rampEncoderDistance * stairUp_K + stairUp_d;
 				RAMP_ANGLE = avgIncline + stairUp_angle_offset;
+				#ifdef DEBUG_RAMP
 				Serial.print("\tSTAIR UP");
+				#endif
 			}
 			else if (_RAMP_DOWN && _STAIR) {
 				rampEncoderDistance = rampEncoderDistance * stairDown_K + stairDown_d;
 				RAMP_ANGLE = avgIncline + stairDown_angle_offset;
+				#ifdef DEBUG_RAMP
 				Serial.print("\tSTAIR DOWN");
+				#endif
 			}
 			else rampEncoderDistance = 0;	//No Ramp detected
 
@@ -662,7 +669,6 @@ ErrorCodes Driving::startAdjustment(void) {
 	do {
 		p_tof->Update();
 		posError = p_tof->GetRange(TofType::FRONT) - adjust_wallDistance;
-		Serial.println(posError);
 		int8_t adjustSpeed = posError * adjustmentSpeedFactor;	//Calculate the adjustment speed
 
 		p_drivetrain->SetSpeed(adjustSpeed);
@@ -675,7 +681,6 @@ ErrorCodes Driving::reverseBlackTile(void) {
 	p_drivetrain->EnableEncoder();
 	p_drivetrain->ResetEncoder();
 	while (p_drivetrain->GetEncoderDistance() < 150) {	//Drive back 10cm
-		Serial.println(p_drivetrain->GetEncoderDistance());
 		p_drivetrain->SetSpeed(-30);
 	}
 	p_drivetrain->Stop();
