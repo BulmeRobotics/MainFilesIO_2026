@@ -44,8 +44,10 @@ enum class TofType : uint8_t {
     LEFT_BACK,
     RIGHT_FRONT,
     RIGHT_BACK,
-    FRONT,
-    BACK,
+    FRONT_UPPER,
+    FRONT_LOWER,
+    BACK_UPPER,
+    BACK_LOWER
 };
 
 enum class TofStatus : uint8_t{

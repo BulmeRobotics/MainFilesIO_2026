@@ -308,12 +308,10 @@ void TofSensors::DisableAll(void) {
     leftFront.Off();
     rightFront.Off();
     rightBack.Off();
-    midFront.Off();
-    midBack.Off();
-    #ifdef OLD_ROBOT
-        digitalWrite(XSHUT_PIN_X64_FRONT, LOW);     // only neccessary for old robot
-        digitalWrite(XSHUT_PIN_X64_FRONT, LOW);     // only neccessary for old robot
-    #endif
+    frontUpper.Off();
+    backUpper.Off();
+    frontLower.Off();
+    backLower.Off();
 }
 
 ErrorCodes TofSensors::Init(void) {
@@ -322,7 +320,8 @@ ErrorCodes TofSensors::Init(void) {
     delay(50);
 
     if (leftBack.Init() == true && leftFront.Init() == true && rightFront.Init() == true 
-        && rightBack.Init() == true && midBack.Init() == true && midFront.Init() == true)
+        && rightBack.Init() == true && backUpper.Init() == true && frontUpper.Init() == true
+        /*&& backLower.Init() == true && frontLower.Init() == true*/)
         return ErrorCodes::OK;
     else 
         return ErrorCodes::ERROR;
@@ -335,12 +334,15 @@ ErrorCodes TofSensors::Update(void) {
     ErrorCodes errLF = leftFront.Read();
     ErrorCodes errRF = rightFront.Read();
     ErrorCodes errRB = rightBack.Read();
-    ErrorCodes errMB = midBack.Read();
-    ErrorCodes errMF = midFront.Read();
+    ErrorCodes errBU = backUpper.Read();
+    ErrorCodes errFU = frontUpper.Read();
+    // ErrorCodes errBL = backLower.Read();
+    // ErrorCodes errFL = frontLower.Read();
 
     if (errLB == ErrorCodes::NEW_DATA || errLF == ErrorCodes::NEW_DATA ||
         errRF == ErrorCodes::NEW_DATA || errRB == ErrorCodes::NEW_DATA ||
-        errMB == ErrorCodes::NEW_DATA || errMF == ErrorCodes::NEW_DATA)
+        errBU == ErrorCodes::NEW_DATA || errFU == ErrorCodes::NEW_DATA /*||
+        errBL == ErrorCodes::NEW_DATA || errFL == ErrorCodes::NEW_DATA*/)
     {
         return ErrorCodes::NEW_DATA;
     }
@@ -348,11 +350,9 @@ ErrorCodes TofSensors::Update(void) {
     return ErrorCodes::NO_NEW_DATA;
 }
 
-
 void TofSensors::DisableUpdate(void) {
     updateEnabled = false;
 }
-
 
 void TofSensors::EnableUpdate(void) {
     updateEnabled = true;
@@ -379,12 +379,20 @@ uint16_t TofSensors::GetRange(TofType sensor) {
         return rightBack.GetRange();
         break;
 
-    case TofType::BACK:
-        return midBack.GetRange();
+    case TofType::BACK_UPPER:
+        return backUpper.GetRange();
         break;
     
-    case TofType::FRONT:
-        return midFront.GetRange();
+    case TofType::FRONT_UPPER:
+        return frontUpper.GetRange();
+        break;
+
+    case TofType::BACK_LOWER:
+        return backLower.GetRange();
+        break;
+    
+    case TofType::FRONT_LOWER:
+        return frontLower.GetRange();
         break;
     
     default:
@@ -414,12 +422,20 @@ TofStatus TofSensors::GetStatus(TofType sensor) {
         return rightBack.GetStatus();
         break;
 
-    case TofType::BACK:
-        return midBack.GetStatus();
+    case TofType::BACK_UPPER:
+        return backUpper.GetStatus();
         break;
     
-    case TofType::FRONT:
-        return midFront.GetStatus();
+    case TofType::FRONT_UPPER:
+        return frontUpper.GetStatus();
+        break;
+
+    case TofType::BACK_LOWER:
+        return backLower.GetStatus();
+        break;
+    
+    case TofType::FRONT_LOWER:
+        return frontLower.GetStatus();
         break;
     
     default:
@@ -449,12 +465,20 @@ bool TofSensors::IsDataNew(TofType sensor) {
         return rightBack.IsDataNew();
         break;
 
-    case TofType::BACK:
-        return midBack.IsDataNew();
+    case TofType::BACK_UPPER:
+        return backUpper.IsDataNew();
         break;
     
-    case TofType::FRONT:
-        return midFront.IsDataNew();
+    case TofType::FRONT_UPPER:
+        return frontUpper.IsDataNew();
+        break;
+
+    case TofType::BACK_LOWER:
+        return backLower.IsDataNew();
+        break;
+    
+    case TofType::FRONT_LOWER:
+        return frontLower.IsDataNew();
         break;
     
     default:
@@ -465,7 +489,7 @@ bool TofSensors::IsDataNew(TofType sensor) {
 
 bool TofSensors::AnyTimeoutOccured(void) {
     if (leftBack.TimeoutOccured() || leftFront.TimeoutOccured() || rightFront.TimeoutOccured() 
-        || rightBack.TimeoutOccured() || midFront.TimeoutOccured() || midBack.TimeoutOccured())
+        || rightBack.TimeoutOccured() || frontUpper.TimeoutOccured() || backUpper.TimeoutOccured())
         return true;
     else 
         return false;
@@ -492,8 +516,8 @@ uint8_t TofSensors::GetWalls(bool rampInfront, bool rampBehind) {
 		&& leftFront.GetRange() < 150) wallInfo |= (1<<3);	//Left
 	if (rightBack.GetRange() < 150
 		&& rightFront.GetRange() < 150) wallInfo |= (1<<1);	//Right
-	if (midBack.GetRange() < 150 && !rampBehind) wallInfo |= (1<<2);	//Back
-	if (midFront.GetRange() < 150 && !rampInfront) wallInfo |= (1<<0);	//Front
+	if (backUpper.GetRange() < 150 && !rampBehind) wallInfo |= (1<<2);	//Back
+	if (frontUpper.GetRange() < 150 && !rampInfront) wallInfo |= (1<<0);	//Front
 
     #ifdef DEBUG_SCAN
         Serial.print("Wall Info: ");
@@ -507,9 +531,9 @@ uint8_t TofSensors::GetWalls(bool rampInfront, bool rampBehind) {
         Serial.print("\tRB: ");
         Serial.print(rightBack.GetRange());
         Serial.print("\tMF: ");
-        Serial.print(midFront.GetRange());
+        Serial.print(frontUpper.GetRange());
         Serial.print("\tMB: ");
-        Serial.println(midBack.GetRange());
+        Serial.println(backUpper.GetRange());
     #endif
 
 	return wallInfo;
