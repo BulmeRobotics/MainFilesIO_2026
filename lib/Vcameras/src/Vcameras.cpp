@@ -11,13 +11,8 @@ ErrorCodes Vcameras::Init(Ejector* ejector, Mapping* mapper, Driving* robot, Use
     _robot = robot;
     _ui = ui;
 
-    _camL->print("<I>");
-    if(Recieve(_camL) == ErrorCodes::OK){
-        if(_response.indexOf("OK") == -1) return ErrorCodes::ERROR;
-    }
-
-    _camR->print("<I>");
-    if(Recieve(_camR) == ErrorCodes::OK){
+    _ifc->print("<I>");
+    if(Recieve() == ErrorCodes::OK){
         if(_response.indexOf("OK") == -1) return ErrorCodes::ERROR;
     }
     return ErrorCodes::OK;  
@@ -27,14 +22,14 @@ ErrorCodes Vcameras::Init(Ejector* ejector, Mapping* mapper, Driving* robot, Use
 // Recieve UART
 //---------------------------------------------------------------------------------------------------------
 
-ErrorCodes Vcameras::Recieve(Stream* ifc, uint16_t timeout){
+ErrorCodes Vcameras::Recieve(uint16_t timeout){
     uint32_t start = millis();
     String buffer;
 
     // Read until timeout or until we have at least one complete token <...>
     while (millis() - start <= timeout) {
-        while (ifc->available()) {
-            int c = ifc->read();
+        while (_ifc->available()) {
+            int c = _ifc->read();
             if (c < 0) break;
             buffer += (char)c;
         }
@@ -64,11 +59,11 @@ ErrorCodes Vcameras::Recieve(Stream* ifc, uint16_t timeout){
 //---------------------------------------------------------------------------------------------------------
 
 ErrorCodes Vcameras::Enable(bool en, ErrorCodes side){
-    Stream* ifc = (side == ErrorCodes::left) ? _camL : _camR;
+
 
     if(en){ //Enable
-        ifc->print("<E>");
-        if(Recieve(ifc) == ErrorCodes::OK){
+        _ifc->print("<E>");
+        if(Recieve() == ErrorCodes::OK){
             if(_response.indexOf("OK") == -1) return ErrorCodes::ERROR;
 
             if(side == ErrorCodes::left) _LeftEnabled = true;
@@ -76,8 +71,8 @@ ErrorCodes Vcameras::Enable(bool en, ErrorCodes side){
             return ErrorCodes::OK;
         }
     } else {    //Disable
-        ifc->print("<D>");
-        if(Recieve(ifc) == ErrorCodes::OK){
+        _ifc->print("<D>");
+        if(Recieve() == ErrorCodes::OK){
             if(_response.indexOf("OK") == -1) return ErrorCodes::ERROR;
 
             if(side == ErrorCodes::left) _LeftEnabled = false;

@@ -257,7 +257,7 @@ TileType ColorSensing::checkMiddle(){
     //Blau:
     if(colorRaw[8] < 40000){
         return TileType::blue;
-    } else if(colorRaw[8 < 60000]){
+    } else if(colorRaw[8] < 60000){
         return TileType::dangerZone;
     }
     return TileType::visited; //TODO: Implement actual color checking
