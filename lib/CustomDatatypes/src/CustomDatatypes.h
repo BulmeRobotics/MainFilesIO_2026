@@ -30,7 +30,8 @@ enum class ErrorCodes : uint8_t {
     invalid, wall, straight, north, east, south, west, Overflow, //Mapping specific
     disabled, left, right,
     info,warning,    //Popup System
-    empty               //ejector
+    empty,               //ejector
+    already_found 
 };
 
 #ifdef _MSC_VER

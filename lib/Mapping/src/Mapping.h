@@ -138,6 +138,12 @@ public:
      */
     ErrorCodes SetTile(uint8_t walls, TileType floor);
 
+    /**
+     * @brief Called when victim is detected
+     * @return already_found / OK / ERROR
+     */
+    ErrorCodes SetVictim();
+
     // /**
     //  * @brief Druckt die intern gespeicherte Karte des Roboters in die Konsole
     //  */

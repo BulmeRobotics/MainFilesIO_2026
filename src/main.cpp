@@ -238,7 +238,7 @@ while (true) {
           uint32_t time = millis();
           while(millis() <= time + 5000){
             UI.Update();
-            delay(25);
+            delay(480);
           }
           //Weiterfahren
         }
