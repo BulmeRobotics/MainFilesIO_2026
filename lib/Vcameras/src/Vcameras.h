@@ -66,7 +66,7 @@ public:
      * @brief camera handler has to be called periodically
      * @return ErrorCodes for debugging
      */
-    ErrorCodes Handler();
+    ErrorCodes Handler(bool onRed);
 
 
 

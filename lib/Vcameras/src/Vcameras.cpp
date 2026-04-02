@@ -88,6 +88,8 @@ ErrorCodes Vcameras::Enable(bool en, ErrorCodes side){
 // Enable
 //---------------------------------------------------------------------------------------------------------
 
-ErrorCodes Vcameras::Handler(){
+ErrorCodes Vcameras::Handler(bool onRed){
+
+
     return ErrorCodes::OK;
 }

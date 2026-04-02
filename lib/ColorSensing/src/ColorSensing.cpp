@@ -194,7 +194,7 @@ PoI_Type ColorSensing::checkFront(){
     colorRaw[9] = front.getChannel(AS7341_CHANNEL_NIR);
 
     //Only prints values when debugPort is set, otherwise does nothing
-    //printDebugData(colorRaw, 'F');
+    printDebugData(colorRaw, 'F');
 
     // Silver Tile
     UpdateHistory(colorRaw[8]);
@@ -252,7 +252,7 @@ TileType ColorSensing::checkMiddle(){
     colorRaw[9] = middle.getChannel(AS7341_CHANNEL_NIR);
 
     //Only prints values when debugPort is set, otherwise does nothing
-    //printDebugData(colorRaw, 'M');
+    printDebugData(colorRaw, 'M');
     
     //Blau:
     if(colorRaw[8] < 40000){
