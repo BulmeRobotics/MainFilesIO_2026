@@ -493,7 +493,6 @@ bool UserInterface::GetValidTouch(uint16_t &touchX, uint16_t &touchY){
 
 void UserInterface::ShowCalibrationScreen(PoI_Type type){
     uint16_t popX = 150, popY = 150, popW = 500, popH = 180;
-    display.fillRoundRect(popX + 5, popY + 5, popW, popH, 15, 0x0000); 
     display.fillRoundRect(popX, popY, popW, popH, 15, BG_COLOR);
     display.drawRoundRect(popX, popY, popW, popH, 15, HL_COLOR);
     display.drawRoundRect(popX+1, popY+1, popW-2, popH-2, 15, HL_COLOR); // Dickerer Rahmen
@@ -564,6 +563,65 @@ void UserInterface::FinishCalibration(bool success){
     // Wenn alles vorbei ist, zwingen wir das UI, das Settings-Menü neu zu zeichnen
     *p_state = RobotState::SETTINGS;
     lastState = RobotState::CALIBRATION;
+}
+
+
+void UserInterface::ShowResetScreen(){
+    uint16_t popX = 150, popY = 150, popW = 500, popH = 180;
+    display.fillRoundRect(popX, popY, popW, popH, 15, BG_COLOR);
+    display.drawRoundRect(popX, popY, popW, popH, 15, HL_COLOR);
+    display.drawRoundRect(popX+1, popY+1, popW-2, popH-2, 15, HL_COLOR); // Dickerer Rahmen
+    
+    // Titel schreiben
+    display.setTextColor(TEXT_COLOR);
+    display.setTextSize(4);
+    display.setCursor(popX + 20, popY + 20);
+    display.print("Reset to Checkpoint");
+        
+    // Trennlinie
+    display.drawLine(popX, popY + 60, popX + popW, popY + 60, HL_COLOR);
+    
+    // Initiale Progress-Anzeige
+    display.setTextSize(3);
+    display.setCursor(popX + 20, popY + 80);
+    display.print("x:");
+}
+void UserInterface::UpdateResetProgress(char* message, uint8_t step, uint8_t totalSteps){
+    uint16_t popX = 150, popY = 150;
+    
+    // Prozentzahl überschreiben (Dank BG_COLOR schmiert der Text nicht!)
+    display.setTextColor(TEXT_COLOR, BG_COLOR); 
+    display.setTextSize(3);
+    display.setCursor(popX + 20, popY + 80);
+    display.print(message);
+    
+    // Dynamischen Fortschrittsbalken zeichnen
+    display.fillRoundRect(popX + 20, popY + 130, (460 * step) / totalSteps, 20, 5, BTN_COLOR);
+}
+void UserInterface::FinishReset(bool success){
+    uint16_t popX = 150, popY = 150;
+    
+    // Status-Text in Grün (Erfolg) oder Rot (Fehler) überschreiben
+    display.setTextColor(success ? 0x07E0 : 0xF800, BG_COLOR); 
+    display.setTextSize(3);
+    display.setCursor(popX + 20, popY + 80);
+    display.print(success ? "START       " : "FEHLER!    ");
+    
+    // --- Warten: 3 Sekunden oder Touch ---
+    uint32_t start = millis();
+    NewContact = false; // Touch-Flag sicherheitshalber resetten
+    
+    while (millis() - start < 1000) {
+        if (NewContact) {
+            NewContact = false;
+            BuzzerSignal(5, 0, 1);
+            break; // Beendet das Warten sofort bei Touch
+        }
+        delay(10); // Verhindert Watchdog-Crashes
+    }
+    
+    // Wenn alles vorbei ist, zwingen wir das UI, das Settings-Menü neu zu zeichnen
+    lastState = RobotState::BOOT;
 }
 
 #ifdef _MSC_VER

@@ -75,6 +75,7 @@ uint32_t lastButtonPressGray;
 bool _ROBOT_TURNING = false;
 bool _RAMP_INFRONT = false;
 bool _RAMP_BEHIND = false;
+ErrorCodes _CHECKPOINT = ErrorCodes::OK;
 
 #ifdef _MSC_VER
   #pragma endregion Variables
@@ -262,6 +263,28 @@ while (true) {
     
     else if (currentRunState == RunState::CHECKPOINT_RESET) {
       //Checkpoint Reset Logic
+      UI.ShowResetScreen();
+      robot.endDrive();
+      robot.disableBumpers();
+      UI.UpdateResetProgress("disable Bump",1,4);
+      cam.Enable(false, ErrorCodes::left);
+      cam.Enable(false, ErrorCodes::right);
+
+      _CHECKPOINT = ErrorCodes::ready;
+      UI.UpdateResetProgress("Start Ready ",2,4);
+      while(_CHECKPOINT != ErrorCodes::start) delay(5);
+
+      robot.enableBumpers();
+      robot.startAlign();
+			gyro.ResetAllAngles(); //Reset Gyro => Robot has to look towards NORTH!
+      UI.UpdateResetProgress("Reset Robot ",3,4);
+
+      mapper.Reset();
+      robot.robotTargetAngle = Orientations::North;
+      UI.UpdateResetProgress("Reset Map   ",4,4);
+      _CHECKPOINT = ErrorCodes::OK;
+      currentRunState = RunState::SETTILE;
+      UI.FinishReset(true);
     } 
     
     else if (currentRunState == RunState::TURN) {
@@ -412,10 +435,22 @@ void cyclicRunTask() {
 	}
 }
 
+  //Button for Starting and Checkpoint
 void ISR_BTN_BLACK() {
-	//Button for Starting and Checkpoint
-  currentRunState = RunState::INITIAL;
-  currentMenuState = RobotState::RUN;
+
+  if(currentMenuState != RobotState::RUN){
+    currentMenuState = RobotState::RUN;
+    currentRunState = RunState::INITIAL;
+  } else if(currentMenuState == RobotState::RUN && currentRunState != RunState::INITIAL){
+    if(_CHECKPOINT == ErrorCodes::OK){
+      _CHECKPOINT = ErrorCodes::stop;
+      currentRunState = RunState::CHECKPOINT_RESET;
+    } else if(_CHECKPOINT == ErrorCodes::ready){
+      _CHECKPOINT = ErrorCodes::start;
+    }
+  }
+  
+  
 
 }
 void ISR_BTN_GRAY() {

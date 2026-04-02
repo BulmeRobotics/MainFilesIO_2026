@@ -31,7 +31,8 @@ enum class ErrorCodes : uint8_t {
     disabled, left, right,
     info,warning,    //Popup System
     empty,               //ejector
-    already_found, no_connection
+    already_found, no_connection,
+    start, stop, ready //Checkpoint
 };
 
 #ifdef _MSC_VER

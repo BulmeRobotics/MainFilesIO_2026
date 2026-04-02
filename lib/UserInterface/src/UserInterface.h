@@ -271,6 +271,11 @@ public:
     void UpdateCalibrationProgress(uint8_t step, uint8_t totalSteps);
     void FinishCalibration(bool success);
 
+    // --- Reset To Checkpoint Overlay ---
+    void ShowResetScreen();
+    void UpdateResetProgress(char* message, uint8_t step, uint8_t totalSteps);
+    void FinishReset(bool success);
+
     /**
      * @brief called to update Map on Display
      */
