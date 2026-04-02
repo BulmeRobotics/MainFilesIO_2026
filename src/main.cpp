@@ -170,6 +170,7 @@ while (true) {
 			gyro.ResetAllAngles();	  //Gyro angle zero
 			robot.maxRampIncline = 0;
 			robot.currentRobotHeight = 0;
+      delay(250);
       currentRunState = RunState::SETTILE;
     }
 
@@ -436,7 +437,6 @@ void cyclicRunTask() {
 
   //Button for Starting and Checkpoint
 void ISR_BTN_BLACK() {
-
   if(currentMenuState != RobotState::RUN){
     currentMenuState = RobotState::RUN;
     currentRunState = RunState::INITIAL;
@@ -448,9 +448,6 @@ void ISR_BTN_BLACK() {
       _CHECKPOINT = ErrorCodes::start;
     }
   }
-  
-  
-
 }
 
 void ISR_BTN_GRAY() {
