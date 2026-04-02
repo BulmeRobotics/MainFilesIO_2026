@@ -98,6 +98,7 @@ ErrorCodes Driving::checkRamp(void){
 		p_colorSensing->Freeze(true);
 	}
 	else if(p_colorSensing->Freeze()) p_colorSensing->Freeze(false);
+	Serial.println(p_colorSensing->Freeze() + "\t" + String(incline) + "\t" + String(p_gyro->data.angle_car));
 
     //Detect Ramps
 	if (!_ON_RAMP && (incline > rampThresholdAngle) && inclineCycleCounter == 0) {
