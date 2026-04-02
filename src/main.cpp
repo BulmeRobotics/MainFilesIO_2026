@@ -59,7 +59,7 @@ TofSensors tof;
 Mapping mapper;
 Drivetrain drivetrain;
 Driving robot;
-Vcameras cameras;
+Vcameras cameras();
 
 #ifdef _MSC_VER
 #pragma endregion Objects

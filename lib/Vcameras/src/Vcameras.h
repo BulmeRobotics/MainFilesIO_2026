@@ -46,7 +46,7 @@ public:
      * @param camL ifc for left Cam
      * @param camR ifc for right Cam
      */
-    Vcameras(Stream* ifc) : _ifc(ifc) {}
+    Vcameras(Stream* ifc = &Serial3) : _ifc(ifc) {}
 
     /**
      * @brief Initializes Cam class. Tries connecting to cameras
