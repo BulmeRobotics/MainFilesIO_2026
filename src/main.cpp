@@ -274,7 +274,7 @@ while (true) {
 
       _CHECKPOINT = ErrorCodes::ready;
       UI.UpdateResetProgress("Start Ready ",2,4);
-      while(_CHECKPOINT != ErrorCodes::start) {delay(5); cs.Update()}
+      while(_CHECKPOINT != ErrorCodes::start) {delay(5); cs.Update();}
 
       delay(10);
       robot.enableBumpers();
