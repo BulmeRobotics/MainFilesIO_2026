@@ -227,7 +227,7 @@ PoI_Type ColorSensing::checkFront(){
         _ALERT = true;
         
         //Check Black
-        if(colorRaw[8] <= 2000)
+        if(colorRaw[8] <= 2500 && colorRaw[1] <= 1000)
             return PoI_Type::black;
         else return PoI_Type::undef;
         
