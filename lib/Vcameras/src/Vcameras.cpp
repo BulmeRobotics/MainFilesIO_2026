@@ -88,7 +88,7 @@ ErrorCodes Vcameras::Enable(bool en, ErrorCodes side){
 // Enable
 //---------------------------------------------------------------------------------------------------------
 
-ErrorCodes Vcameras::Handler(bool onRed){
+ErrorCodes Vcameras::Update(bool onRed){
     if(_oldRed && !onRed) {
         Enable(true, ErrorCodes::left);
         Enable(true, ErrorCodes::right);
