@@ -119,9 +119,9 @@ class ColorSensing{
         static constexpr float MOD_WHITE           = 1.5f;
 
     // --- History ---
-        #define WINDOW_SIZE 10
-        #define NOISE_THRESHOLD 500
-        #define FLICKER_MIN_COUNT 6
+        #define WINDOW_SIZE 7
+        #define NOISE_THRESHOLD 600
+        #define FLICKER_MIN_COUNT 4
 
         uint16_t f5History[WINDOW_SIZE];
         uint16_t f6History[WINDOW_SIZE];
