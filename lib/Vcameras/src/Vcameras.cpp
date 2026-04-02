@@ -89,7 +89,57 @@ ErrorCodes Vcameras::Enable(bool en, ErrorCodes side){
 //---------------------------------------------------------------------------------------------------------
 
 ErrorCodes Vcameras::Handler(bool onRed){
+    if(_oldRed && !onRed) {
+        Enable(true, ErrorCodes::left);
+        Enable(true, ErrorCodes::right);
+    } else if (!_oldRed && onRed){
+        Enable(false, ErrorCodes::left);
+        Enable(false, ErrorCodes::right);
+    }
 
+    //Abfrage auf alert
+    if(_LeftEnabled) _LeftAlert = digitalRead(CAMERAL_PIN_INT);
+    if(_RightEnabled) _RightAlert = digitalRead(CAMERAR_PIN_INT);
 
+    //Continue when no camera is reporting
+    if(!_LeftAlert && !_RightAlert) return ErrorCodes::OK;
+
+    //Check for new Data
+    ErrorCodes err = Recieve();
+    if(err != ErrorCodes::OK) return err;
+
+    //Dissect to side, and Victim Type
+    char victim = _response[0];
+    ErrorCodes side = (_response[1] == 'L') ? ErrorCodes::left : ErrorCodes::right;
+
+    //Mapping call
+    err = _mapper->SetVictim();
+    if(err != ErrorCodes::OK) return err;
+
+    _robot->endDrive(); //Stops robot
+
+    //Get Amount of dropped Rescue Packs
+    uint8_t amount;
+    switch (victim) {
+    case 'H':   //Harmed
+        amount = 2;
+        break;
+    case 'S':   //Stable
+        amount = 1;
+        break;
+    default:    //Unharmed / alles andere
+        amount = 0;
+        break;
+    }
+
+    _ui->ShowPopup("VICTIM Detected:" + victim, ErrorCodes::info);
+    _ui->Update();
+    _ejector->Eject(side, amount, _robot);
+    _ui->LED_BUZZER_Signal(500,500,5);
+    _ui->Update();
+
+    //2RC - Harmed
+    //1RC - Stable
+    //0RC - Unharmed
     return ErrorCodes::OK;
 }
