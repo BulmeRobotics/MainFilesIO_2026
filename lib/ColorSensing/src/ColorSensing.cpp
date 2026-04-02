@@ -325,7 +325,6 @@ ErrorCodes ColorSensing::Calibrate(PoI_Type type){
 
         if((uint32_t)(time + COLOR_TIMEOUT) < millis()) {
             _ui->FinishCalibration(false);
-            Serial.println("Error1");
             return ErrorCodes::TIMEOUT;
         }
         
