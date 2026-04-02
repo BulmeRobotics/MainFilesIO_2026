@@ -13,8 +13,9 @@ ErrorCodes Vcameras::Init(Ejector* ejector, Mapping* mapper, Driving* robot, Use
     _connected = false;
 
     _ifc->print("<I>");
-    if(Recieve() == ErrorCodes::OK){
-        if(_response.indexOf("OK") == -1) return ErrorCodes::ERROR;
+    if(Recieve() != ErrorCodes::OK || _response.indexOf("OK") == -1){
+        _connected = false;
+        return ErrorCodes::ERROR;
     }
     _connected = true;
     return ErrorCodes::OK;  
@@ -24,7 +25,6 @@ ErrorCodes Vcameras::Init(Ejector* ejector, Mapping* mapper, Driving* robot, Use
 // Recieve UART
 //---------------------------------------------------------------------------------------------------------
 
-ErrorCodes Vcameras::Recieve(uint16_t timeout){
     if(!_connected) return ErrorCodes::no_connection;
     uint32_t start = millis();
     String buffer;
