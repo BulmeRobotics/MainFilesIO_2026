@@ -375,6 +375,23 @@ void cyclicMainTask() {
 void cyclicRunTask() {
   tof.Update();
 
+  //Black Tile Handling
+	if(cs.GetFloor() == TileType::black) {
+		robot.endDrive();	//Stop Robot
+		//UI.signal.buzzer_pulse(5, 3);	//Signal BLACK
+    mapper.Move(true);
+		mapper.SetTile(0x0F, TileType::black);
+		mapper.Move(false);	//Move robot Backwards
+
+		//DRIVE BACKWARDS FUNCTION
+		robot.reverseBlackTile();
+		for(uint8_t i = 0; i < 5; i++){
+			cs.Update();	//Update ColorSensors
+			delay(5);
+		}
+		currentRunState = RunState::SETTILE;	//SetTile again
+	}
+
   //Bumper Handling
 	if(currentRunState != RunState::INITIAL){
 		if(robot.bumperHandler() == ErrorCodes::BUMPER_WALL) currentRunState = RunState::SETTILE;
