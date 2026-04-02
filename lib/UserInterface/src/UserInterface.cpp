@@ -47,11 +47,11 @@ void UserInterface::DrawIconSettings(GigaDisplay_GFX& display, uint16_t cx, uint
 	display.fillCircle(cx-30, cy, 10, 0);	//Horizontal
 	display.fillCircle(cx+30, cy, 10, 0);
 
-	display.fillCircle(cx+21, cy-21, 10, 0);
-	display.fillCircle(cx+9, cy-21, 10, 0);
+	display.fillCircle(cx+21, cy-21, 10, 0);    //Rechtsoben
+	display.fillCircle(cx-21, cy-21, 10, 0);     //Links oben
 
-	display.fillCircle(cx-21, cy+21, 10, 0);
-	display.fillCircle(cx-9, cy+21, 10, 0);
+	display.fillCircle(cx+21, cy+21, 10, 0);    //Rechts unten
+	display.fillCircle(cx-21, cy+21, 10, 0);     //Links unten
 	display.fillCircle(cx, cy, 19, BTN_COLOR);
 }
 void UserInterface::DrawIconAbout(GigaDisplay_GFX& display, uint16_t cx, uint16_t cy){
