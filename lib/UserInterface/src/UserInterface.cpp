@@ -708,8 +708,8 @@ void UserInterface::AddInfoMsg(String Info, String Message, bool success){
 	else if(p_state != nullptr && *p_state == RobotState::CHECKPOINT) display.setCursor(10, display.getCursorY());
     
     display.setTextSize(3);
-	display.print(Info);
-	display.setCursor(800 - (68 + 24 * Message.length()), display.getCursorY());
+	display.print(Info);          
+	display.setCursor(800 - (68 + /*24 ursprünglich*/18 * Message.length()), display.getCursorY());
 	
     if(success)	display.setTextColor(0x0fc0);
 	else display.setTextColor(0xf800);
