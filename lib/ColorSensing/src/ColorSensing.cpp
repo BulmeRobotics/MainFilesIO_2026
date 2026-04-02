@@ -128,12 +128,34 @@ ErrorCodes ColorSensing::EnableRead(bool enable){
     return ErrorCodes::OK;
 }
 
-void ColorSensing::UpdateHistory(uint16_t clearVal) {
-    clearHistory[historyIndex] = clearVal;
+void ColorSensing::UpdateHistory(uint16_t f5, uint16_t f6, uint16_t f7) {
+    f5History[historyIndex] = f5;
+    f6History[historyIndex] = f6;
+    f7History[historyIndex] = f7;
     historyIndex++;
+
+    // check for Checkpoint
     if (historyIndex >= WINDOW_SIZE) {
         historyIndex = 0;
-        bufferFilled = true;
+        int8_t changes = 0;
+
+        for (int i = 1; i < WINDOW_SIZE; i++) {
+            // Read buffer                    
+            int diff5 = (int)f5History[i] - (int)f5History[i-1];
+            int diff6 = (int)f6History[i] - (int)f6History[i-1];
+            int diff7 = (int)f7History[i] - (int)f7History[i-1];
+            
+
+            if (diff5 > NOISE_THRESHOLD || diff6 > NOISE_THRESHOLD || diff7 > NOISE_THRESHOLD) {
+                changes++;
+            } else if (diff5 < -NOISE_THRESHOLD || diff6 < -NOISE_THRESHOLD || diff7 < -NOISE_THRESHOLD) {
+                changes++;
+            }
+        }
+        // Wenn es oft genug hin und her geschwankt ist -> Silber!
+        if (changes >= FLICKER_MIN_COUNT) {
+            _checkpoint = true;
+        }
     }
 }
 
@@ -197,30 +219,7 @@ PoI_Type ColorSensing::checkFront(){
     printDebugData(colorRaw, 'F');
 
     // Silver Tile
-    UpdateHistory(colorRaw[8]);
-    if (bufferFilled) {
-        int directionChanges = 0;
-        int lastDirection = 0; // 1 für steigend, -1 für fallend
-        for (int i = 1; i < WINDOW_SIZE; i++) {
-            // Um den Ringpuffer chronologisch zu lesen:
-            int currIdx = (historyIndex + i) % WINDOW_SIZE;
-            int prevIdx = (currIdx - 1 + WINDOW_SIZE) % WINDOW_SIZE;
-        
-            int diff = (int)clearHistory[currIdx] - (int)clearHistory[prevIdx];
-            if (diff > NOISE_THRESHOLD) {
-                if (lastDirection == -1) directionChanges++;
-                lastDirection = 1;
-            } else if (diff < -NOISE_THRESHOLD) {
-                if (lastDirection == 1) directionChanges++;
-                lastDirection = -1;
-            }
-        }
-        // Wenn es oft genug hin und her geschwankt ist -> Silber!
-        if (directionChanges >= FLICKER_MIN_COUNT) {
-            _checkpoint = true;
-            return PoI_Type::checkpoint;
-        }
-    }
+    UpdateHistory(colorRaw[4], colorRaw[5], colorRaw[6]);
 
     // Not white
     if( colorRaw[8] <= 13000){
