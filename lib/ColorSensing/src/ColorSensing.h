@@ -121,7 +121,7 @@ class ColorSensing{
     // --- History ---
         #define WINDOW_SIZE 10
         #define NOISE_THRESHOLD 500
-        #define FLICKER_MIN_COUNT 5
+        #define FLICKER_MIN_COUNT 6
 
         uint16_t f5History[WINDOW_SIZE];
         uint16_t f6History[WINDOW_SIZE];

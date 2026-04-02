@@ -268,18 +268,21 @@ while (true) {
       robot.endDrive();
       robot.disableBumpers();
       UI.UpdateResetProgress("disable Bump",1,4);
+      cs.Freeze(true);
       cam.Enable(false, ErrorCodes::left);
       cam.Enable(false, ErrorCodes::right);
 
       _CHECKPOINT = ErrorCodes::ready;
       UI.UpdateResetProgress("Start Ready ",2,4);
-      while(_CHECKPOINT != ErrorCodes::start) delay(5);
+      while(_CHECKPOINT != ErrorCodes::start) {delay(5); cs.Update()}
 
       delay(10);
       robot.enableBumpers();
       robot.startAlign();
 			gyro.ResetAllAngles(); //Reset Gyro => Robot has to look towards NORTH!
       UI.UpdateResetProgress("Reset Robot ",3,4);
+      cs.Freeze(false);
+      cs.Update();
       delay(200);
       mapper.Reset();
       robot.robotTargetAngle = Orientations::North;
