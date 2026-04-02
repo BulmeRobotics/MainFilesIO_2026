@@ -106,7 +106,10 @@ ErrorCodes Vcameras::Update(bool onRed){
 
     //Check for new Data
     ErrorCodes err = Recieve();
-    if(err != ErrorCodes::OK) return err;
+    if(err != ErrorCodes::OK){
+        _ui->ShowPopup("Victim:" + (err == ErrorCodes::invalid) ? "invalid" : "Already Found", (err == ErrorCodes::invalid) ? ErrorCodes::ERROR : ErrorCodes::info);
+        return err;
+    }
 
     //Dissect to side, and Victim Type
     char victim = _response[0];
