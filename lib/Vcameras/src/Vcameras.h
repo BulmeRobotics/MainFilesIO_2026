@@ -67,12 +67,7 @@ public:
      * @brief camera handler has to be called periodically
      * @return ErrorCodes for debugging
      */
-    ErrorCodes Handler(bool onRed);
-
-
-
-
-
+    ErrorCodes Update(bool onRed);
 
     /**
      * @brief Getter if Cam is enabled

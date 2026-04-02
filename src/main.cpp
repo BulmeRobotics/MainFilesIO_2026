@@ -59,7 +59,7 @@ TofSensors tof;
 Mapping mapper;
 Drivetrain drivetrain;
 Driving robot;
-Vcameras cameras;
+Vcameras cam;
 
 #ifdef _MSC_VER
 #pragma endregion Objects
@@ -109,7 +109,7 @@ int main(void) {
 
   Wire1.setClock(I2C_CLOCK);
 
-  UI.ConnectPointer(&currentMenuState, &cs, &mapper, &cameras);
+  UI.ConnectPointer(&currentMenuState, &cs, &mapper, &cam);
     //Buttons
   attachInterrupt(digitalPinToInterrupt(BUTTON_BLACK), ISR_BTN_BLACK, RISING);
 	attachInterrupt(digitalPinToInterrupt(BUTTON_GRAY), ISR_BTN_GRAY, RISING);
@@ -143,7 +143,7 @@ int main(void) {
   UI.AddInfoMsg("Drivetrain", "OK", true);
 
   //Camera
-
+  cam.Init(&ejector, &mapper, &robot, &UI);
 
   //Robot
   robot.init(&cs, &tof, &gyro, &mapper, &drivetrain);
@@ -161,9 +161,11 @@ while (true) {
   if (currentMenuState == RobotState::RUN) {
     if (currentRunState == RunState::INITIAL) { //Initial Run Logic
       mapper.Reset();
-      robot.enableBumpers();	//Enable Bumpers
-			robot.startAlign();	//Start Aligning	
-			gyro.ResetAllAngles();	//Gyro angle zero
+      cam.Enable(true, ErrorCodes::left);
+      cam.Enable(true, ErrorCodes::right);
+      robot.enableBumpers();	  //Enable Bumpers
+			robot.startAlign();	      //Start Aligning
+			gyro.ResetAllAngles();	  //Gyro angle zero
 			robot.maxRampIncline = 0;
 			robot.currentRobotHeight = 0;
       currentRunState = RunState::SETTILE;
@@ -338,7 +340,9 @@ while (true) {
       //End of Run Logic
       robot.endDrive();
       robot.disableBumpers();
-      UI.LED_BUZZER_Signal(100,200,3);
+      cam.Enable(false, ErrorCodes::left);
+      cam.Enable(false, ErrorCodes::right);
+      UI.LED_BUZZER_Signal(100,500,3);
       currentMenuState = RobotState::ABOUT;
     }
   } 
@@ -375,6 +379,8 @@ void cyclicMainTask() {
 void cyclicRunTask() {
   tof.Update();
 
+  cam.Update((cs.GetFloor() == TileType::dangerZone));
+
   //Black Tile Handling
 	if(cs.GetFloor() == TileType::black) {
 		robot.endDrive();	//Stop Robot
@@ -397,7 +403,7 @@ void cyclicRunTask() {
 		robot._SLOW_SPEED = true;
 
   //Reset to std speed mod if nth is on ALERT
-  if(!cs.GetAlert() && !cameras.IsAlert(ErrorCodes::left) && !cameras.IsAlert(ErrorCodes::right)) robot._SLOW_SPEED = false;
+  if(!cs.GetAlert() && !cam.IsAlert(ErrorCodes::left) && !cam.IsAlert(ErrorCodes::right)) robot._SLOW_SPEED = false;
 
   //Bumper Handling
 	if(currentRunState != RunState::INITIAL){
