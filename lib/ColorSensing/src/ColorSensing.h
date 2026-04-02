@@ -74,6 +74,9 @@ class EEPROM {
 
 class ColorSensing{
     private:
+    // --- reflective Sensor ---
+        static constexpr uint8_t REFLECTIVE_PIN = A0;
+
     // --- Adressen & Hardware-Settings ---
         static constexpr uint8_t MULTIPLEX_ADRESS = 0x70;
         static constexpr uint8_t LED_CURRENT      = 10;
