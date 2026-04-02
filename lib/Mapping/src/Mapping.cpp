@@ -264,7 +264,17 @@ ErrorCodes Mapping::Move(bool direction) {
 }
 
 ErrorCodes Mapping::Ramp(ErrorCodes direction, uint8_t length) {
-    length = length - 0;
+    //Try using existing ramp:
+    if(tiles[currrentPosition].down != -1){
+        currrentPosition = tiles[currrentPosition].down;
+        Move(true);
+    } else if(tiles[currrentPosition].up != -1){
+        currrentPosition = tiles[currrentPosition].up;
+        Move(true);
+    }
+
+
+    length = length - 1;
 
     uint16_t nextPos = findNextEmptyMemory();
 	if (nextPos == UINT16_MAX) return ErrorCodes::Overflow;   //No Memory left for new tile
