@@ -324,6 +324,10 @@ ErrorCodes Mapping::SetTile(uint8_t walls, TileType floor) {
 
     //Check if tile was already visited:
     if (tiles[currrentPosition].type != TileType::unexplored) {   //already visited
+        if(floor == TileType::blue){
+            tiles[currrentPosition].type = TileType::blue;
+            tiles[currrentPosition].weight = COST_BLUE;
+        }
         return compareWalls(absWalls);
     }
 
