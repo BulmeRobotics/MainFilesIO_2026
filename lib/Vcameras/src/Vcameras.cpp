@@ -95,5 +95,5 @@ ErrorCodes Vcameras::Enable(bool en, ErrorCodes side){
 //---------------------------------------------------------------------------------------------------------
 
 ErrorCodes Vcameras::Handler(){
-
+    return ErrorCodes::OK;
 }

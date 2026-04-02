@@ -286,9 +286,6 @@ ErrorCodes ColorSensing::Calibrate(PoI_Type type){
     uint32_t bufferFront[10] = {0};
     uint32_t bufferMiddle[10] = {0};
 
-    bool frontReady;
-    bool middleReady;
-
     //Read new values
     for (uint8_t i = 0; i<RUNS_calibration; i++){
         time = millis();
@@ -325,7 +322,6 @@ ErrorCodes ColorSensing::Calibrate(PoI_Type type){
         bufferFront[7] += front.getChannel(AS7341_CHANNEL_680nm_F8);
         bufferFront[8] += front.getChannel(AS7341_CHANNEL_CLEAR);
         bufferFront[9] += front.getChannel(AS7341_CHANNEL_NIR);
-        frontReady = true;
 
         if((uint32_t)(time + COLOR_TIMEOUT) < millis()) {
             _ui->FinishCalibration(false);
