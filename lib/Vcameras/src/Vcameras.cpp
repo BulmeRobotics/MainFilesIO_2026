@@ -25,6 +25,7 @@ ErrorCodes Vcameras::Init(Ejector* ejector, Mapping* mapper, Driving* robot, Use
 //---------------------------------------------------------------------------------------------------------
 
 ErrorCodes Vcameras::Recieve(uint16_t timeout){
+    if(!_connected) return ErrorCodes::no_connection;
     uint32_t start = millis();
     String buffer;
 
