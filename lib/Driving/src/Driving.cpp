@@ -84,22 +84,28 @@ ErrorCodes Driving::bumperHandler(void){
 #pragma region RAMPS
 #endif
 ErrorCodes Driving::checkRamp(void){
-    //Read gyro Z-Axis kartesisch
     p_gyro->GetAngle_advanced(0, GyroAxles::Axis_Z);
-	float incline = -p_gyro->data.angle_car;
-	p_gyro->GetAngle_advanced(0, GyroAxles::Axis_Y);
+    float incline = -p_gyro->data.angle_car;
 
+    p_gyro->GetAngle_advanced(0, GyroAxles::Axis_Y);
+    float sideTilt = p_gyro->data.angle_car;
 
-    //freeze ColorSensor if not within Limits
-	if (!p_colorSensing->Freeze() && (incline > 3 || incline < -3)){
-		p_colorSensing->Freeze(true);
+    bool freezeColor = false;
+
+	if (!_TURNING) {
+	    if (!p_colorSensing->Freeze()) {
+	        if (abs(incline) > 4 || abs(sideTilt) > 5) p_colorSensing->Freeze(true);
+	    } else {
+	        if (abs(incline) < 3 && abs(sideTilt) < 4) p_colorSensing->Freeze(false);
+	    }
+	} else {
+	    p_colorSensing->Freeze(false);
 	}
-	else if(p_gyro->data.angle_car > 4 || p_gyro->data.angle_car < -4) {
-		p_colorSensing->Freeze(true);
-	}
-	else if(p_colorSensing->Freeze()) p_colorSensing->Freeze(false);
-	Serial.println(p_colorSensing->Freeze() + "\t" + String(incline) + "\t" + String(p_gyro->data.angle_car));
 
+    if (p_colorSensing->Freeze()) {
+        Serial.println(String(freezeColor) + "\tZ:" + String(incline) + "\tY:" + String(sideTilt));
+    }
+	
     //Detect Ramps
 	if (!_ON_RAMP && (incline > rampThresholdAngle) && inclineCycleCounter == 0) {
 		rampStartTime = millis();
@@ -351,6 +357,8 @@ ErrorCodes Driving::startTurn(float angle) {
 
 	if (!_CAM_ALERT_TURN) maxTurnTime = 3000;
 
+	_TURNING = true;
+
 	p_gyro->GetAngle_advanced(angle, GyroAxles::Axis_X);	//Get the gyro readings
 	if (abs(p_gyro->data.angle_error) > 150) _TURN_180_DEGREE = true;
 	else _TURN_180_DEGREE = false;	//Check if the turn is a 180 degree turn
@@ -396,6 +404,7 @@ ErrorCodes Driving::controlTurn(float angle) {
 	else {
 		//Stop all motors
 		p_drivetrain->Stop();
+		_TURNING = false;
 
 		#ifdef DEBUG_TURN
 			Serial.print("Final angle: ");
@@ -411,12 +420,13 @@ ErrorCodes Driving::controlTurn(float angle) {
 ErrorCodes Driving::endTurn(){
 	enableBumpers();	//Enable Bumpers
 	_CAM_ALERT_TURN = false;
-	// if (robotTargetAngle == Orientations::North) {
-	// 	startAlign();
-	// 	p_gyro->resetAllAngles();
-	// }
+	startAlign();
+	p_gyro->ResetAngle(GyroAxles::Axis_Y);
+	p_gyro->ResetAngle(GyroAxles::Axis_Z);
+
 	
 	p_mapSys->Turn(p_gyro->GetOrientationFromAngle());
+	_TURNING = false;
 	//Check for ramps in front and back
 //!	// if (p_tof->x64.isRamp(&p_tof->x64.front)) {
 	// 	_RAMP_INFRONT = true;
@@ -443,7 +453,8 @@ ErrorCodes Driving::turn180Degree(void) {
 }
 ErrorCodes Driving::startAlign(void) {
 	//Reading all short TOFs on the side of the robot
-	uint16_t startTime = millis();	
+	uint16_t startTime = millis();
+	_TURNING = true;	
 	p_tof->Update();
 	uint16_t sumDistanceLeft 	= p_tof->GetRange(TofType::LEFT_BACK) + p_tof->GetRange(TofType::LEFT_FRONT);
 	uint16_t sumDistanceRight 	= p_tof->GetRange(TofType::RIGHT_BACK) + p_tof->GetRange(TofType::RIGHT_FRONT);
@@ -514,9 +525,10 @@ ErrorCodes Driving::startAlign(void) {
 		//turning the robot with the calculated speed, in first cycle = 0
 		p_drivetrain->SetSpeed_Left(turnSpeed_align * coeff_side);
 		p_drivetrain->SetSpeed_Right(-turnSpeed_align * coeff_side);
-	} while (abs(distanceError) < 5 && millis() - startTime < 1500);
+	} while (abs(distanceError) >= 5 && millis() - startTime < 1500);
 	//stoping all motors
 	p_drivetrain->Stop();
+	_TURNING = false;	
 	return ErrorCodes::OK;
 }
 #ifdef _MSC_VER
