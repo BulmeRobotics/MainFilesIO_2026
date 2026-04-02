@@ -165,6 +165,7 @@ uint16_t Mapping::findNextTarget() {
                 tiles[current].type == TileType::checkpoint ||
                 tiles[current].type == TileType::blue ||
                 tiles[current].type == TileType::dangerZone ||
+                tiles[current].type == TileType::obstacle ||
                 current == currrentPosition)
             {
                 // Alle 6 möglichen Nachbarn (inkl. Rampen) prüfen
@@ -181,8 +182,7 @@ uint16_t Mapping::findNextTarget() {
                     // und es kein schwarzes Feld oder statisches Hindernis ist:
                     if (n != -1 && !visited[n] &&
                         tiles[n].type != TileType::inactive &&
-                        tiles[n].type != TileType::black &&
-                        tiles[n].type != TileType::obstacle)
+                        tiles[n].type != TileType::black)
                     {
                         visited[n] = true;     // Als besucht markieren
                         queue[tail++] = n;     // Hinten an die Queue anhängen
