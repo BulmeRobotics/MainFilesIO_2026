@@ -488,8 +488,6 @@ Instructionset Mapping::GetInstruction() {
 
         targetPosition = findNextTarget();
 
-        std::cout << "currentPos: " << currrentPosition << " Target: "<< targetPosition;
-
         //Pathfinding - A* Algorithm Implementation
         initLists(targetPosition);
 
