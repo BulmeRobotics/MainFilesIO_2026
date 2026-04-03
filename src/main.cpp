@@ -17,8 +17,6 @@
 #define UPPER_LEVEL_HEIGHT 230
 #define LOWER_LEVEL_HEIGHT -100
 
-
-
 #ifdef _MSC_VER
   #pragma endregion Defines
   #pragma region Includes //-----------------------------------------------------------------------

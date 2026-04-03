@@ -29,8 +29,10 @@ private:
     UserInterface* _ui = nullptr;
 
     // --- Interface ---
-    Stream* _ifc = nullptr;
-    bool _connected = false;
+    Stream* _camL = nullptr;
+    Stream* _camR = nullptr;
+    bool _connectedL = false;
+    bool _connectedR = false;
 
     // --- State Fields ---
     bool _LeftEnabled = false, _RightEnabled = false;
@@ -41,14 +43,14 @@ private:
     String _response = "";
 
     // --- helper Methods
-    ErrorCodes Recieve(uint16_t timeout = 200);
+    ErrorCodes Recieve(Stream* ifc, bool connected, uint16_t timeout = 200);
 public:
     /**
      * @brief Constructor for VictimCamera class
      * @param camL ifc for left Cam
      * @param camR ifc for right Cam
      */
-    Vcameras(Stream* ifc = &Serial3) : _ifc(ifc) {}
+    Vcameras(Stream* camL = &Serial3, Stream* camR = &Serial4) : _camL(camL), _camR(camR) {}
 
     /**
      * @brief Initializes Cam class. Tries connecting to cameras

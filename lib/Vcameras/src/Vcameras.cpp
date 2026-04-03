@@ -10,17 +10,25 @@ ErrorCodes Vcameras::Init(Ejector* ejector, Mapping* mapper, Driving* robot, Use
     _mapper = mapper;
     _robot = robot;
     _ui = ui;
-    _connected = false;
 
     pinMode(CAMERAL_PIN_INT, INPUT);
     pinMode(CAMERAR_PIN_INT, INPUT);
 
-    _ifc->print("<I>");
-    if(Recieve() != ErrorCodes::OK || _response.indexOf("OK") == -1){
-        _connected = false;
+    _camL->print("<I>");
+    if(Recieve(_camL, true) != ErrorCodes::OK || _response.indexOf("OK") == -1){
+        _connectedL = false;
         return ErrorCodes::ERROR;
     }
-    _connected = true;
+    _connectedL = true;
+    
+    _camR->print("<I>");
+    if(Recieve(_camR, true) != ErrorCodes::OK || _response.indexOf("OK") == -1){
+        _connectedR = false;
+        return ErrorCodes::ERROR;
+    }
+    _connectedR = true;
+
+
     return ErrorCodes::OK;  
 }
 
@@ -28,15 +36,15 @@ ErrorCodes Vcameras::Init(Ejector* ejector, Mapping* mapper, Driving* robot, Use
 // Recieve UART
 //---------------------------------------------------------------------------------------------------------
 
-ErrorCodes Vcameras::Recieve(uint16_t timeout){
-    if(!_connected) return ErrorCodes::no_connection;
+ErrorCodes Vcameras::Recieve(Stream* ifc, bool connected, uint16_t timeout){
+    if(!connected) return ErrorCodes::no_connection;
     uint32_t start = millis();
     String buffer;
 
     // Read until timeout or until we have at least one complete token <...>
     while (millis() - start <= timeout) {
-        while (_ifc->available()) {
-            int c = _ifc->read();
+        while (ifc->available()) {
+            int c = ifc->read();
             if (c < 0) break;
             buffer += (char)c;
         }
@@ -66,23 +74,22 @@ ErrorCodes Vcameras::Recieve(uint16_t timeout){
 //---------------------------------------------------------------------------------------------------------
 
 ErrorCodes Vcameras::Enable(bool en, ErrorCodes side){
-    if(!_connected) return ErrorCodes::no_connection;
-    char cSide = (side == ErrorCodes::left) ? 'L' : 'R';
+    bool conn = (side == ErrorCodes::left) ? _connectedL : _connectedR;
+    if(conn) return ErrorCodes::no_connection;
+    Stream* ifc = (side == ErrorCodes::left) ? _camL : _camR;
 
     if(en){ //Enable
-        _ifc->print("<E" + cSide + '>');
-        if(Recieve() == ErrorCodes::OK){
+        ifc->print("<E>");
+        if(Recieve(ifc,conn) == ErrorCodes::OK){
             if(_response.indexOf("OK") == -1) return ErrorCodes::ERROR;
-
             if(side == ErrorCodes::left) _LeftEnabled = true;
             else _RightEnabled = true;
             return ErrorCodes::OK;
         }
     } else {    //Disable
-        _ifc->print("<D" + cSide + '>');
-        if(Recieve() == ErrorCodes::OK){
+        ifc->print("<D>");
+        if(Recieve(ifc, conn) == ErrorCodes::OK){
             if(_response.indexOf("OK") == -1) return ErrorCodes::ERROR;
-
             if(side == ErrorCodes::left) _LeftEnabled = false;
             else _RightEnabled = false; 
             return ErrorCodes::OK;
@@ -97,7 +104,7 @@ ErrorCodes Vcameras::Enable(bool en, ErrorCodes side){
 //---------------------------------------------------------------------------------------------------------
 
 ErrorCodes Vcameras::Update(bool onRed){
-    if(!_connected) return ErrorCodes::no_connection;
+    if(!_connectedL || !_connectedR) return ErrorCodes::no_connection;
     if(_oldRed && !onRed) {
         Enable(true, ErrorCodes::left);
         Enable(true, ErrorCodes::right);
