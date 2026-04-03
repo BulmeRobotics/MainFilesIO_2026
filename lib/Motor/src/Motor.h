@@ -107,26 +107,26 @@ class Drivetrain {
     public:
         // Configuration
         #define MOTOR_LB_PWM 13
-        #define MOTOR_LB_CW 36
-        #define MOTOR_LB_CCW 39
+        #define MOTOR_LB_CW 39
+        #define MOTOR_LB_CCW 36
         #define MOTOR_LB_ENCODER 5
         #define MOTOR_LB_DRIVER DRIVER_A
         
         #define MOTOR_LF_PWM 11
-        #define MOTOR_LF_CW 36
-        #define MOTOR_LF_CCW 39
+        #define MOTOR_LF_CW 39
+        #define MOTOR_LF_CCW 36
         #define MOTOR_LF_ENCODER 33  // Not-existent
         #define MOTOR_LF_DRIVER DRIVER_A
 
         #define MOTOR_RF_PWM 10
-        #define MOTOR_RF_CW 37
-        #define MOTOR_RF_CCW 38
+        #define MOTOR_RF_CW 38
+        #define MOTOR_RF_CCW 37
         #define MOTOR_RF_ENCODER 3
         #define MOTOR_RF_DRIVER DRIVER_B
 
         #define MOTOR_RB_PWM 9
-        #define MOTOR_RB_CW 37
-        #define MOTOR_RB_CCW 38
+        #define MOTOR_RB_CW 38
+        #define MOTOR_RB_CCW 37
         #define MOTOR_RB_ENCODER 2  // Not-existent
         #define MOTOR_RB_DRIVER DRIVER_B
 

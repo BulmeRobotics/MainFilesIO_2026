@@ -64,8 +64,8 @@ private:
     const float pid_LeftRightFactor = 0.35;
 
     const uint8_t BUMPER_TRYS = 5;
-    const uint8_t BUMPER_LEFT_PIN = 47;
-    const uint8_t BUMPER_RIGHT_PIN = 45;
+    const uint8_t BUMPER_LEFT_PIN = 45;
+    const uint8_t BUMPER_RIGHT_PIN = 47;
 
 //Obj Pointer -------------------------------------------------------------------------------------------------------------------------
     ColorSensing*  p_colorSensing = nullptr;
