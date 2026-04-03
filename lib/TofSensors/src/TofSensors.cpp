@@ -299,6 +299,78 @@ ErrorCodes TofVL53L4CD::Continue(void) {
     return ErrorCodes::OK;
 }
 
+TofVL53L5CX::TofVL53L5CX(uint8_t i2cAddress , uint8_t xshutPin)
+    : TofParent(i2cAddress, xshutPin) {}
+
+bool TofVL53L5CX::Init(void) {
+	pinMode(xshutPin, INPUT);
+	delay(10);
+	if(sensor.begin()) sensor.begin(i2cAddress);
+	sensor.setResolution(8 * 8);
+	sensor.setAddress(i2cAddress);
+	sensor.setRangingFrequency(15);
+	sensor.startRanging();
+    return true;
+}
+
+bool TofVL53L5CX::IsRamp(void) {
+	// Warte auf neue Daten mit Timeout
+    const unsigned long timeout = 1000; // Timeout in Millisekunden
+    unsigned long startTime = millis();
+
+    while (!sensor.isDataReady()) {
+        if (millis() - startTime > timeout) {
+            #ifdef DEBUG_X64_VIEW
+            Serial.println("Timeout while waiting for new data.");
+            #endif
+            return false; // Keine neuen Daten verfügbar
+        }
+    }
+
+	//Daten sind bereit, lese sie
+	if (sensor.getRangingData(&measurementData)) {
+        #ifdef DEBUG_X64
+		for (int y = 0; y <= imageWidth * (imageWidth - 1); y += imageWidth) {
+			for (int x = imageWidth - 1; x >= 0; x--) {
+				//Serial.print("\tX:");
+				//Serial.print(x);
+				//Serial.print(" Y:");
+			   // Serial.print(y);
+			   // Serial.print(" D:");
+				Serial.print(measurementData.distance_mm[x + y]);
+				Serial.print("\t");
+			}
+			Serial.println();
+		}
+		Serial.println();
+        #endif
+		int Upper = (measurementData.distance_mm[messurePointsUpper[0]] + measurementData.distance_mm[messurePointsUpper[1]]) / 2;
+		int Lower = (measurementData.distance_mm[messurePointsLower[0]] + measurementData.distance_mm[messurePointsLower[1]]) / 2;
+
+		if (Lower <= FRONT_MAX_DETECTION_DISTANCE && Upper <= FRONT_MAX_DETECTION_DISTANCE) {
+			#ifdef DEBUG_X64_VIEW
+			Serial.print("Upper: ");
+			Serial.print(Upper);
+			Serial.print(" \tLower: ");
+			Serial.print(Lower);
+			Serial.print(" \tDiff: ");
+			Serial.print(Upper - Lower);
+			Serial.print("\n");
+			#endif
+	
+			if ((Upper - Lower) >= FRONT_DIFF_DETECTION_VALUE) {
+				#ifdef DEBUG_X64_VIEW
+				Serial.println("Ramp detected!");
+				#endif
+				return true;	//Ramp detected
+			}
+			else return false;	//Ramp not detected
+		}
+		else return false;	//Ramp not detected
+	}
+	else return false;
+}
+
 #ifdef _MSC_VER
     #pragma endregion
     #pragma region TOF Class //--------------------------------------------------------------------------------------------------
@@ -308,10 +380,10 @@ void TofSensors::DisableAll(void) {
     leftFront.Off();
     rightFront.Off();
     rightBack.Off();
-    frontUpper.Off();
-    backUpper.Off();
-    frontLower.Off();
-    backLower.Off();
+    front.Off();
+    back.Off();
+    front_x64.Off();
+    back_x64.Off();
 }
 
 ErrorCodes TofSensors::Init(void) {
@@ -320,8 +392,8 @@ ErrorCodes TofSensors::Init(void) {
     delay(50);
 
     if (leftBack.Init() == true && leftFront.Init() == true && rightFront.Init() == true 
-        && rightBack.Init() == true && backUpper.Init() == true && frontUpper.Init() == true
-        /*&& backLower.Init() == true && frontLower.Init() == true*/)
+        && rightBack.Init() == true && back.Init() == true && front.Init() == true
+        && back_x64.Init() == true && front_x64.Init() == true)
         return ErrorCodes::OK;
     else 
         return ErrorCodes::ERROR;
@@ -334,15 +406,15 @@ ErrorCodes TofSensors::Update(void) {
     ErrorCodes errLF = leftFront.Read();
     ErrorCodes errRF = rightFront.Read();
     ErrorCodes errRB = rightBack.Read();
-    ErrorCodes errBU = backUpper.Read();
-    ErrorCodes errFU = frontUpper.Read();
-    // ErrorCodes errBL = backLower.Read();
-    // ErrorCodes errFL = frontLower.Read();
+    ErrorCodes errBU = back.Read();
+    ErrorCodes errFU = front.Read();
+    ErrorCodes errBL = back_x64.Read();
+    ErrorCodes errFL = front_x64.Read();
 
     if (errLB == ErrorCodes::NEW_DATA || errLF == ErrorCodes::NEW_DATA ||
         errRF == ErrorCodes::NEW_DATA || errRB == ErrorCodes::NEW_DATA ||
-        errBU == ErrorCodes::NEW_DATA || errFU == ErrorCodes::NEW_DATA /*||
-        errBL == ErrorCodes::NEW_DATA || errFL == ErrorCodes::NEW_DATA*/)
+        errBU == ErrorCodes::NEW_DATA || errFU == ErrorCodes::NEW_DATA ||
+        errBL == ErrorCodes::NEW_DATA || errFL == ErrorCodes::NEW_DATA)
     {
         return ErrorCodes::NEW_DATA;
     }
@@ -379,20 +451,20 @@ uint16_t TofSensors::GetRange(TofType sensor) {
         return rightBack.GetRange();
         break;
 
-    case TofType::BACK_UPPER:
-        return backUpper.GetRange();
+    case TofType::BACK:
+        return back.GetRange();
         break;
     
-    case TofType::FRONT_UPPER:
-        return frontUpper.GetRange();
+    case TofType::FRONT:
+        return front.GetRange();
         break;
 
-    case TofType::BACK_LOWER:
-        return backLower.GetRange();
+    case TofType::BACK_X64:
+        return back_x64.GetRange();
         break;
     
-    case TofType::FRONT_LOWER:
-        return frontLower.GetRange();
+    case TofType::FRONT_X64:
+        return front_x64.GetRange();
         break;
     
     default:
@@ -422,20 +494,20 @@ TofStatus TofSensors::GetStatus(TofType sensor) {
         return rightBack.GetStatus();
         break;
 
-    case TofType::BACK_UPPER:
-        return backUpper.GetStatus();
+    case TofType::BACK:
+        return back.GetStatus();
         break;
     
-    case TofType::FRONT_UPPER:
-        return frontUpper.GetStatus();
+    case TofType::FRONT:
+        return front.GetStatus();
         break;
 
-    case TofType::BACK_LOWER:
-        return backLower.GetStatus();
+    case TofType::BACK_X64:
+        return back_x64.GetStatus();
         break;
     
-    case TofType::FRONT_LOWER:
-        return frontLower.GetStatus();
+    case TofType::FRONT_X64:
+        return front_x64.GetStatus();
         break;
     
     default:
@@ -465,20 +537,20 @@ bool TofSensors::IsDataNew(TofType sensor) {
         return rightBack.IsDataNew();
         break;
 
-    case TofType::BACK_UPPER:
-        return backUpper.IsDataNew();
+    case TofType::BACK:
+        return back.IsDataNew();
         break;
     
-    case TofType::FRONT_UPPER:
-        return frontUpper.IsDataNew();
+    case TofType::FRONT:
+        return front.IsDataNew();
         break;
 
-    case TofType::BACK_LOWER:
-        return backLower.IsDataNew();
+    case TofType::BACK_X64:
+        return back_x64.IsDataNew();
         break;
     
-    case TofType::FRONT_LOWER:
-        return frontLower.IsDataNew();
+    case TofType::FRONT_X64:
+        return front_x64.IsDataNew();
         break;
     
     default:
@@ -489,7 +561,7 @@ bool TofSensors::IsDataNew(TofType sensor) {
 
 bool TofSensors::AnyTimeoutOccured(void) {
     if (leftBack.TimeoutOccured() || leftFront.TimeoutOccured() || rightFront.TimeoutOccured() 
-        || rightBack.TimeoutOccured() || frontUpper.TimeoutOccured() || backUpper.TimeoutOccured())
+        || rightBack.TimeoutOccured() || front.TimeoutOccured() || back.TimeoutOccured())
         return true;
     else 
         return false;
@@ -516,8 +588,8 @@ uint8_t TofSensors::GetWalls(bool rampInfront, bool rampBehind) {
 		&& leftFront.GetRange() < 150) wallInfo |= (1<<3);	//Left
 	if (rightBack.GetRange() < 150
 		&& rightFront.GetRange() < 150) wallInfo |= (1<<1);	//Right
-	if (backUpper.GetRange() < 150 && !rampBehind) wallInfo |= (1<<2);	//Back
-	if (frontUpper.GetRange() < 150 && !rampInfront) wallInfo |= (1<<0);	//Front
+	if (back.GetRange() < 150 && !rampBehind) wallInfo |= (1<<2);	//Back
+	if (front.GetRange() < 150 && !rampInfront) wallInfo |= (1<<0);	//Front
 
     #ifdef DEBUG_SCAN
         Serial.print("Wall Info: ");
@@ -531,9 +603,9 @@ uint8_t TofSensors::GetWalls(bool rampInfront, bool rampBehind) {
         Serial.print("\tRB: ");
         Serial.print(rightBack.GetRange());
         Serial.print("\tMF: ");
-        Serial.print(frontUpper.GetRange());
+        Serial.print(front.GetRange());
         Serial.print("\tMB: ");
-        Serial.println(backUpper.GetRange());
+        Serial.println(back.GetRange());
     #endif
 
 	return wallInfo;
