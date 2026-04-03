@@ -17,10 +17,10 @@ class Vcameras
 {
 private:
     // --- Hardware Info ---
-    static constexpr uint8_t CAMERAL_PIN_INT = 40;
-    static constexpr uint8_t CAMERAL_PIN_RST = 42;
-    static constexpr uint8_t CAMERAR_PIN_INT = 41;
-    static constexpr uint8_t CAMERAR_PIN_RST = 43;
+    static constexpr uint8_t CAMERAL_PIN_INT = 31;     // 40;
+    static constexpr uint8_t CAMERAL_PIN_RST = 29;     // 42;
+    static constexpr uint8_t CAMERAR_PIN_INT = 28;     // 41;
+    static constexpr uint8_t CAMERAR_PIN_RST = 27;     // 43;
 
     // --- related Objects ---
     Ejector* _ejector = nullptr;

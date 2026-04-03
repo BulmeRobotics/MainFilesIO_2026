@@ -321,7 +321,7 @@ ErrorCodes TofSensors::Init(void) {
 
     if (leftBack.Init() == true && leftFront.Init() == true && rightFront.Init() == true 
         && rightBack.Init() == true && backUpper.Init() == true && frontUpper.Init() == true
-        /*&& backLower.Init() == true && frontLower.Init() == true*/)
+        && backLower.Init() == true /*&& frontLower.Init() == true*/)
         return ErrorCodes::OK;
     else 
         return ErrorCodes::ERROR;
@@ -336,13 +336,13 @@ ErrorCodes TofSensors::Update(void) {
     ErrorCodes errRB = rightBack.Read();
     ErrorCodes errBU = backUpper.Read();
     ErrorCodes errFU = frontUpper.Read();
-    // ErrorCodes errBL = backLower.Read();
+    ErrorCodes errBL = backLower.Read();
     // ErrorCodes errFL = frontLower.Read();
 
     if (errLB == ErrorCodes::NEW_DATA || errLF == ErrorCodes::NEW_DATA ||
         errRF == ErrorCodes::NEW_DATA || errRB == ErrorCodes::NEW_DATA ||
-        errBU == ErrorCodes::NEW_DATA || errFU == ErrorCodes::NEW_DATA /*||
-        errBL == ErrorCodes::NEW_DATA || errFL == ErrorCodes::NEW_DATA*/)
+        errBU == ErrorCodes::NEW_DATA || errFU == ErrorCodes::NEW_DATA ||
+        errBL == ErrorCodes::NEW_DATA /*|| errFL == ErrorCodes::NEW_DATA*/)
     {
         return ErrorCodes::NEW_DATA;
     }
