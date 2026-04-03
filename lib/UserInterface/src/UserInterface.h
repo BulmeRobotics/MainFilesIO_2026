@@ -244,9 +244,12 @@ public:
 
     /**
      * @brief Set the LED Illumination of the Robot (Light for Camera)
-     * @param color Color of the Illumination (0xRRGGBBWW)
+     * @param red Value of the red RGB part
+     * @param green Value of the green RGB part
+     * @param blue Value of the blue RGB part
+     * @param white Value of the white RGB part
      */
-    void SetIllumination(uint32_t color);
+    void SetIllumination(uint8_t red, uint8_t green, uint8_t blue, uint8_t white);
 
     /**
      * @brief Gets the Battery Charge Level in Percent
