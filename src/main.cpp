@@ -139,7 +139,7 @@ int main(void) {
     UI.AddInfoMsg("Gyro", "ERROR", true);
 
   //Ejector
-  //ejector.Init();
+  ejector.Init();
   UI.AddInfoMsg("Ejectors", "OK", true);
   UI.AddInfoMsg("Drivetrain", "OK", true);
 
