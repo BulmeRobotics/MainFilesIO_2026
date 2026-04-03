@@ -1,7 +1,7 @@
 /**
 * @authors: Vincent Rohkamm, Florian Wiesner
 * @date: 18.11.2025
-* @description: Main Program file for Robot
+* @description: Main Program file for Robot für den Alten Roboter
 */
 
 #ifdef _MSC_VER
