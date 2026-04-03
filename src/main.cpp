@@ -126,20 +126,20 @@ int main(void) {
   else UI.AddInfoMsg("Color Sensor", "OK", true);
   cs.EnableRead(true);
 
-  //ToF
+  // //ToF
   if (tof.Init() == ErrorCodes::OK)
     UI.AddInfoMsg("TOF", "OK", true);
   else
     UI.AddInfoMsg("TOF", "ERROR", true);
 
   //Gyro
-  // if (gyro.Init() == ErrorCodes::OK)
-  //   UI.AddInfoMsg("Gyro", "OK", true);
-  // else
-  //   UI.AddInfoMsg("Gyro", "ERROR", true);
+  if (gyro.Init() == ErrorCodes::OK)
+    UI.AddInfoMsg("Gyro", "OK", true);
+  else
+    UI.AddInfoMsg("Gyro", "ERROR", true);
 
   //Ejector
-  ejector.Init();
+  //ejector.Init();
   UI.AddInfoMsg("Ejectors", "OK", true);
   UI.AddInfoMsg("Drivetrain", "OK", true);
 

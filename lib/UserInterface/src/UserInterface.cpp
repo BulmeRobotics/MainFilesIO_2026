@@ -677,9 +677,9 @@ void UserInterface::Initialize(){
     //Check Battery at Startup
     if(GetCharge() <= 10) {
         AddInfoMsg("Battery", "LOW/ERROR!", false);
-        while(true){
-            BuzzerSignal(200,200,1);
-        }
+        // while(true){
+        //     BuzzerSignal(200,200,1);
+        // }
     } else AddInfoMsg("Battery", "OK", true);
 
     driveMode = ErrorCodes::straight;
