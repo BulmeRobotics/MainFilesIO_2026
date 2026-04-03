@@ -20,10 +20,10 @@ class Vcameras
 {
 private:
     // --- Hardware Info ---
-    static constexpr uint8_t CAMERAL_TX = 01;
-    static constexpr uint8_t CAMERAL_RX = 0;
-    static constexpr uint8_t CAMERAR_TX = 01;
-    static constexpr uint8_t CAMERAR_RX = 0;
+    static constexpr PinName CAMERAL_TX = PI_8;
+    static constexpr PinName CAMERAL_RX = PI_9;
+    static constexpr PinName CAMERAR_TX = PI_9;
+    static constexpr PinName CAMERAR_RX = PI_8;
 
     static constexpr uint8_t CAMERAL_PIN_INT = 40;
     static constexpr uint8_t CAMERAL_PIN_RST = 42;
@@ -32,11 +32,8 @@ private:
     static constexpr uint8_t CAMERAR_PIN_RST = 43;
 
     //Serial
-    mbed::UnbufferedSerial _camL;
-    mbed::UnbufferedSerial _camR;
-
-    //(arduino::digitalPinToPinName(CAMERAL_TX), digitalPinToPinName(CAMERAL_RX));
-    //(digitalPinToPinName(CAMERAR_TX), digitalPinToPinName(CAMERAR_RX));
+    static mbed::UnbufferedSerial _camL;
+    static mbed::UnbufferedSerial _camR;
 
     // --- related Objects ---
     Ejector* _ejector = nullptr;
@@ -45,8 +42,6 @@ private:
     UserInterface* _ui = nullptr;
 
     // --- Interface ---
-    Stream* _camL = nullptr;
-    Stream* _camR = nullptr;
     bool _connectedL = false;
     bool _connectedR = false;
 
@@ -56,17 +51,26 @@ private:
     bool _oldRed = false;
 
     // --- Response ---
-    String _response = "";
+    static char _buffL[7];
+    static char _buffR[7];
+    static uint8_t _idL;
+    static uint8_t _idR;
 
-    // --- helper Methods
-    ErrorCodes Recieve(Stream* ifc, bool connected, uint16_t timeout = 200);
-public:
+    static bool _NEW_DATA_L;
+    static bool _NEW_DATA_R;
+
+    static void on_camL_int();
+    static void on_camR_int();
+
     /**
-     * @brief Constructor for VictimCamera class
-     * @param camL ifc for left Cam
-     * @param camR ifc for right Cam
+     * @brief Recieves Commandos
+     * @param side left / right
+     * @param waittime time to block in ms
+     * @return Commandostring
      */
-    Vcameras(Stream* camL = &Serial3, Stream* camR = &Serial4) : _camL(camL), _camR(camR) {}
+    String Recieve(ErrorCodes side, uint32_t waittime = 0);
+
+public:
 
     /**
      * @brief Initializes Cam class. Tries connecting to cameras
@@ -84,9 +88,12 @@ public:
 
     /**
      * @brief camera handler has to be called periodically
+     * @param onRed is robot on Red Tile?
+     * @param wallL is a wall Left?
+     * @param wallR is a wall Right?
      * @return ErrorCodes for debugging
      */
-    ErrorCodes Update(bool onRed);
+    ErrorCodes Update(bool onRed, bool wallL = true, bool wallR = true);
 
     /**
      * @brief Getter if Cam is enabled
@@ -105,6 +112,4 @@ public:
     bool IsAlert(ErrorCodes cam){
         return (cam == ErrorCodes::left) ? _LeftAlert : _RightAlert;
     }
-
-
 };
