@@ -190,19 +190,19 @@ ErrorCodes Driving::finishRamp(uint8_t distance){
 	startAlign();	//Align robot
 	enableBumpers();	//Disable Bumpers
 
-//!	// //Check for ramps in front and back
-	// if (p_tof->x64.isRamp(&p_tof->x64.front)) {
-	// 	_RAMP_INFRONT = true;
-	// 	_RAMP_BEHIND = false;
-	// }
-	// else if (p_tof->x64.isRamp(&p_tof->x64.back)) {
-	// 	_RAMP_BEHIND = true;
-	// 	_RAMP_INFRONT = false;
-	// }
-	// else {
-	// 	_RAMP_INFRONT = false;
-	// 	_RAMP_BEHIND = false;
-	// }
+	// Check for ramps in front and back
+	if (p_tof->IsRampThere(false)) {
+		_RAMP_INFRONT = true;
+		_RAMP_BEHIND = false;
+	}
+	else if (p_tof->IsRampThere(true)) {
+		_RAMP_BEHIND = true;
+		_RAMP_INFRONT = false;
+	}
+	else {
+		_RAMP_INFRONT = false;
+		_RAMP_BEHIND = false;
+	}
 	return ErrorCodes::OK;
 }
 ErrorCodes Driving::rampHandler(void){
@@ -436,19 +436,19 @@ ErrorCodes Driving::endTurn(){
 	p_mapSys->Turn(p_gyro->GetOrientationFromAngle());
 	_TURNING = false;
 	p_colorSensing->Freeze(false);
-	//Check for ramps in front and back
-//!	// if (p_tof->x64.isRamp(&p_tof->x64.front)) {
-	// 	_RAMP_INFRONT = true;
-	// 	_RAMP_BEHIND = false;
-	// }
-	// else if (p_tof->x64.isRamp(&p_tof->x64.back)) {
-	// 	_RAMP_BEHIND = true;
-	// 	_RAMP_INFRONT = false;
-	// }
-	// else {
-	// 	_RAMP_INFRONT = false;
-	// 	_RAMP_BEHIND = false;
-	// }
+	// Check for ramps in front and back
+    if (p_tof->IsRampThere(false)) {
+		_RAMP_INFRONT = true;
+		_RAMP_BEHIND = false;
+	}
+	else if (p_tof->IsRampThere(true)) {
+		_RAMP_BEHIND = true;
+		_RAMP_INFRONT = false;
+	}
+	else {
+		_RAMP_INFRONT = false;
+		_RAMP_BEHIND = false;
+	}
 	return ErrorCodes::OK;
 }
 ErrorCodes Driving::turn180Degree(void) {

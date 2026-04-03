@@ -271,8 +271,6 @@ class TofSensors {
     #define I2C_ADDRESS_MRB 0x70
     #define I2C_ADDRESS_MFU  0x74
     #define I2C_ADDRESS_MBU  0x78
-    #define I2C_ADDRESS_MFL  0x7C
-    #define I2C_ADDRESS_MBL  0x80
     #define I2C_ADDRESS_Fx64 0x46
     #define I2C_ADDRESS_Bx64 0x47
 
@@ -371,6 +369,13 @@ class TofSensors {
 
     int8_t CalculateLeftRightError(float angleError, uint8_t sideWallThreshold, uint8_t gapRobotWall);
     uint8_t GetWalls(bool rampInfront, bool rampBehind);
+
+    /**
+    * @brief  Method to check if a ramp is infront or behind. 
+    * @param  side specifies the side: false = Front; true = back
+    * @return true if a ramp is there.
+    */
+    bool IsRampThere(bool side);
 };
 #ifdef _MSC_VER
     #pragma endregion

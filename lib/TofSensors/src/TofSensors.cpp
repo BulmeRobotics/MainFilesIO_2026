@@ -299,13 +299,18 @@ ErrorCodes TofVL53L4CD::Continue(void) {
     return ErrorCodes::OK;
 }
 
+#ifdef _MSC_VER
+    #pragma endregion
+    #pragma region VL53L5CX //---------------------------------------------------------------------------------------------------
+#endif
+
 TofVL53L5CX::TofVL53L5CX(uint8_t i2cAddress , uint8_t xshutPin)
     : TofParent(i2cAddress, xshutPin) {}
 
 bool TofVL53L5CX::Init(void) {
-	pinMode(xshutPin, INPUT);
+	On();
 	delay(10);
-	if(sensor.begin()) sensor.begin(i2cAddress);
+	if(!sensor.begin()) sensor.begin(i2cAddress);
 	sensor.setResolution(8 * 8);
 	sensor.setAddress(i2cAddress);
 	sensor.setRangingFrequency(15);
@@ -408,13 +413,13 @@ ErrorCodes TofSensors::Update(void) {
     ErrorCodes errRB = rightBack.Read();
     ErrorCodes errBU = back.Read();
     ErrorCodes errFU = front.Read();
-    ErrorCodes errBL = back_x64.Read();
-    ErrorCodes errFL = front_x64.Read();
+    // ErrorCodes errBL = back_x64.Read();
+    // ErrorCodes errFL = front_x64.Read();
 
     if (errLB == ErrorCodes::NEW_DATA || errLF == ErrorCodes::NEW_DATA ||
         errRF == ErrorCodes::NEW_DATA || errRB == ErrorCodes::NEW_DATA ||
-        errBU == ErrorCodes::NEW_DATA || errFU == ErrorCodes::NEW_DATA ||
-        errBL == ErrorCodes::NEW_DATA || errFL == ErrorCodes::NEW_DATA)
+        errBU == ErrorCodes::NEW_DATA || errFU == ErrorCodes::NEW_DATA /*||
+        errBL == ErrorCodes::NEW_DATA || errFL == ErrorCodes::NEW_DATA*/)
     {
         return ErrorCodes::NEW_DATA;
     }
@@ -609,6 +614,13 @@ uint8_t TofSensors::GetWalls(bool rampInfront, bool rampBehind) {
     #endif
 
 	return wallInfo;
+}
+
+bool TofSensors::IsRampThere(bool side) {
+    if (!side)  
+        return front_x64.IsRamp();
+    else
+        return back_x64.IsRamp();
 }
 
 #ifdef _MSC_VER

@@ -160,6 +160,9 @@ while (true) {
   serialLoop();
   cyclicMainTask();
 
+  // if (tof.IsRampThere(false) || tof.IsRampThere(true))
+  //   Serial.println("RAMP THERE");
+
   if (currentMenuState == RobotState::RUN) {
     if (currentRunState == RunState::INITIAL) { //Initial Run Logic
       mapper.Reset();
