@@ -627,9 +627,9 @@ ErrorCodes Driving::checkDrive(void) {
 		newValue = p_drivetrain->GetEncoderDistance();
 	else
 		if (sensor.type == ReferenceObj::FRONT)
-			newValue = p_tof->GetRange(TofType::FRONT_UPPER);
+			newValue = p_tof->GetRange(TofType::FRONT);
 		else if (sensor.type == ReferenceObj::BACK)
-			newValue = p_tof->GetRange(TofType::BACK_UPPER);
+			newValue = p_tof->GetRange(TofType::BACK);
 
 	if ((newValue >= nextTargetDistance && (sensor.type == ReferenceObj::BACK || sensor.type == ReferenceObj::ENCODER))
 		|| (newValue <= nextTargetDistance && sensor.type == ReferenceObj::FRONT)) {
@@ -665,12 +665,12 @@ ErrorCodes Driving::timeoutDrive(void) {
 ErrorCodes Driving::startAdjustment(void) {
 	//Positon the robot in the middle of the field before turning
 	p_tof->Update();
-	if (p_tof->GetRange(TofType::FRONT_UPPER) > 120)	return ErrorCodes::ERROR;
+	if (p_tof->GetRange(TofType::FRONT) > 120)	return ErrorCodes::ERROR;
 
 	int8_t posError;
 	do {
 		p_tof->Update();
-		posError = p_tof->GetRange(TofType::FRONT_UPPER) - adjust_wallDistance;
+		posError = p_tof->GetRange(TofType::FRONT) - adjust_wallDistance;
 		int8_t adjustSpeed = posError * adjustmentSpeedFactor;	//Calculate the adjustment speed
 
 		p_drivetrain->SetSpeed(adjustSpeed);
@@ -712,8 +712,8 @@ TOF_Optimal_Value Driving::getOptimalSensor(void){
     TOF_Optimal_Value result;
 	lastSensor = sensor;
 
-	result.front = p_tof->GetRange(TofType::FRONT_UPPER);
-	result.back = p_tof->GetRange(TofType::BACK_UPPER);
+	result.front = p_tof->GetRange(TofType::FRONT);
+	result.back = p_tof->GetRange(TofType::BACK);
 
     if (_RAMP_INSTRUCTION) {
 		_RAMP_INSTRUCTION = false;

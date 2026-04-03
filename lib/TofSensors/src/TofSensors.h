@@ -14,6 +14,7 @@
 #include "VL6180X_Custom/VL6180X_Custom.h"
 #include "VL53L4CD_Custom/src/vl53l4cd_class.h"
 #include "VL53L4CD_Custom/src/vl53l4cd_api.h"
+#include <SparkFun_VL53L5CX_Library.h>
 #include "CustomDatatypes.h"
 
 #ifdef _MSC_VER
@@ -218,6 +219,43 @@ class TofVL53L4CD : public TofParent {
     ErrorCodes Continue(void) override;
 };
 
+#ifdef _MSC_VER
+    #pragma endregion
+    #pragma region VL53L5CX //---------------------------------------------------------------------------------------------------
+#endif
+
+class TofVL53L5CX : public TofParent{
+    private:
+		//Object
+        SparkFun_VL53L5CX sensor;
+
+        #define FRONT_MAX_DETECTION_DISTANCE 450
+        #define FRONT_DIFF_DETECTION_VALUE 25
+
+		VL53L5CX_ResultsData measurementData; 
+		uint16_t imageResolution = 64;
+		uint16_t imageWidth = sqrt(imageResolution);
+		uint8_t messurePointsUpper[2] = {35 , 27};
+		uint8_t messurePointsLower[2] = {36 , 28};
+
+	public:	
+        // Constructor
+        TofVL53L5CX(uint8_t i2cAddress , uint8_t xshutPin);
+
+        // Methods
+        /**
+         * @brief  Initializes and configures the specific Time-of-Flight-Sensor.
+         * @return true if the sensors was intitalized succesfully.
+         */
+		bool Init(void) override;
+
+        /**
+         * @brief  Checks if a ramp is infront/behind the robot.
+         * @return true if a ramp was detected.
+         */
+		bool IsRamp(void);
+};
+
 
 #ifdef _MSC_VER
     #pragma endregion
@@ -225,7 +263,6 @@ class TofVL53L4CD : public TofParent {
 #endif
 class TofSensors {
     private:
-    #define OLD_ROBOT    // when the old robot is in use, to disable x64 TOFs
 
     // I2C addresses for the sensors
     #define I2C_ADDRESS_MLF 0x64
@@ -236,6 +273,8 @@ class TofSensors {
     #define I2C_ADDRESS_MBU  0x78
     #define I2C_ADDRESS_MFL  0x7C
     #define I2C_ADDRESS_MBL  0x80
+    #define I2C_ADDRESS_Fx64 0x46
+    #define I2C_ADDRESS_Bx64 0x47
 
     // XSHUT pins for the sensors
     #define XSHUT_PIN_MLF A2
@@ -244,13 +283,8 @@ class TofSensors {
     #define XSHUT_PIN_MRB A4
     #define XSHUT_PIN_MFU  A7
     #define XSHUT_PIN_MBU  A6
-    #define XSHUT_PIN_MFL  32
-    #define XSHUT_PIN_MBL  26
-
-    #ifdef OLD_ROBOT
-        #define XSHUT_PIN_X64_FRONT 32  // only for old robot, to keep them in XSHUT
-        #define XSHUT_PIN_X64_BACK 26   // only for old robot, to keep them in XSHUT
-    #endif
+    #define XSHUT_PIN_Fx64 32
+    #define XSHUT_PIN_Bx64 26
 
     // Ranging budgets for the sensors
     #define RANGING_BUDGET_SHORT 30
@@ -261,10 +295,11 @@ class TofSensors {
     TofVL53L4CD leftFront = TofVL53L4CD(I2C_ADDRESS_MLF, XSHUT_PIN_MLF);
     TofVL53L4CD rightFront = TofVL53L4CD(I2C_ADDRESS_MRF, XSHUT_PIN_MRF);
     TofVL53L4CD rightBack = TofVL53L4CD(I2C_ADDRESS_MRB, XSHUT_PIN_MRB);
-    TofVL53L4CD frontUpper = TofVL53L4CD(I2C_ADDRESS_MFU, XSHUT_PIN_MFU);
-    TofVL53L4CD backUpper = TofVL53L4CD(I2C_ADDRESS_MBU, XSHUT_PIN_MBU);
-    TofVL53L4CD frontLower = TofVL53L4CD(I2C_ADDRESS_MFL, XSHUT_PIN_MFL);
-    TofVL53L4CD backLower = TofVL53L4CD(I2C_ADDRESS_MBL, XSHUT_PIN_MBL);
+    TofVL53L4CD front = TofVL53L4CD(I2C_ADDRESS_MFU, XSHUT_PIN_MFU);
+    TofVL53L4CD back = TofVL53L4CD(I2C_ADDRESS_MBU, XSHUT_PIN_MBU);
+    TofVL53L5CX front_x64 = TofVL53L5CX(I2C_ADDRESS_Fx64, XSHUT_PIN_Fx64);
+    TofVL53L5CX back_x64 = TofVL53L5CX(I2C_ADDRESS_Bx64, XSHUT_PIN_Bx64);
+
 
     // Member
     bool updateEnabled = true;

@@ -642,7 +642,7 @@ void UserInterface::Initialize(){
     pinMode(buzzerPin, OUTPUT);
     pinMode(ledPin, OUTPUT);
 
-    SetIllumination(0xFFFFFFFF); // Turn on Illumination at Startup
+    SetIllumination(0, 0, 0, 255); // Turn on Illumination at Startup
 
     //Initialize Display
     display.begin();
@@ -955,11 +955,11 @@ ErrorCodes UserInterface::CycleDriveMode(){
   #pragma region Signal Unit //-----------------------------------------------------------------------
 #endif
 
-void UserInterface::SetIllumination(uint32_t color){
+void UserInterface::SetIllumination(uint8_t red, uint8_t green, uint8_t blue, uint8_t white){
+    pixels.clear();
     for(uint8_t i = 0; i < pixelNum; i++){
-        pixels.setPixelColor(i, color);
+        pixels.setPixelColor(i, red, green, blue, white);
     }
-    if(color == 0) pixels.clear();
     pixels.show();
 }
 

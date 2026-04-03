@@ -6,6 +6,9 @@
  * @date    01.04.2026
  */
 
+#include <Arduino.h>
+#include <mbed.h>
+
 #include <CustomDatatypes.h>
 #include <Ejector.h>
 #include <Driving.h>
@@ -17,10 +20,23 @@ class Vcameras
 {
 private:
     // --- Hardware Info ---
+    static constexpr uint8_t CAMERAL_TX = 01;
+    static constexpr uint8_t CAMERAL_RX = 0;
+    static constexpr uint8_t CAMERAR_TX = 01;
+    static constexpr uint8_t CAMERAR_RX = 0;
+
     static constexpr uint8_t CAMERAL_PIN_INT = 40;
     static constexpr uint8_t CAMERAL_PIN_RST = 42;
+    
     static constexpr uint8_t CAMERAR_PIN_INT = 41;
     static constexpr uint8_t CAMERAR_PIN_RST = 43;
+
+    //Serial
+    mbed::UnbufferedSerial _camL;
+    mbed::UnbufferedSerial _camR;
+
+    //(arduino::digitalPinToPinName(CAMERAL_TX), digitalPinToPinName(CAMERAL_RX));
+    //(digitalPinToPinName(CAMERAR_TX), digitalPinToPinName(CAMERAR_RX));
 
     // --- related Objects ---
     Ejector* _ejector = nullptr;
