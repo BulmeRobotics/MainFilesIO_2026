@@ -59,14 +59,14 @@ TofSensors tof;
 Mapping mapper;
 Drivetrain drivetrain;
 Driving robot;
-Vcameras cam;
+Vcameras cam(&Serial1);
 
 #ifdef _MSC_VER
 #pragma endregion Objects
 #pragma region Variables //----------------------------------------------------------------------
 #endif
 
-//Variables
+//Variables 
 RobotState currentMenuState;
 RunState currentRunState;
 uint32_t lastButtonPressGray;
@@ -133,10 +133,10 @@ int main(void) {
     UI.AddInfoMsg("TOF", "ERROR", true);
 
   //Gyro
-  if (gyro.Init() == ErrorCodes::OK)
-    UI.AddInfoMsg("Gyro", "OK", true);
-  else
-    UI.AddInfoMsg("Gyro", "ERROR", true);
+  // if (gyro.Init() == ErrorCodes::OK)
+  //   UI.AddInfoMsg("Gyro", "OK", true);
+  // else
+  //   UI.AddInfoMsg("Gyro", "ERROR", true);
 
   //Ejector
   ejector.Init();
