@@ -225,7 +225,7 @@ class TofVL53L4CD : public TofParent {
 #endif
 class TofSensors {
     private:
-    #define OLD_ROBOT    // when the old robot is in use, to disable x64 TOFs
+    // #define OLD_ROBOT    // when the old robot is in use, to disable x64 TOFs
 
     // I2C addresses for the sensors
     #define I2C_ADDRESS_MLF 0x64
@@ -244,8 +244,8 @@ class TofSensors {
     #define XSHUT_PIN_MRB A4
     #define XSHUT_PIN_MFU  A7
     #define XSHUT_PIN_MBU  A6
-    #define XSHUT_PIN_MFL  32
-    #define XSHUT_PIN_MBL  26
+    #define XSHUT_PIN_MFL  32   //A8
+    #define XSHUT_PIN_MBL  50
 
     #ifdef OLD_ROBOT
         #define XSHUT_PIN_X64_FRONT 32  // only for old robot, to keep them in XSHUT
