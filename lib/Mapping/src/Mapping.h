@@ -173,6 +173,11 @@ public:
      */
     ErrorCodes Ramp(ErrorCodes direction, uint8_t length);
 
+    /**
+     * @brief Part of Ramp handling, needed because robot sometimes does 
+     */
+    void RollbackInstructions(uint8_t amount);
+
 #ifdef _MSC_VER
 #pragma region Error Handling
 #endif
