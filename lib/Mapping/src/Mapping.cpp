@@ -301,8 +301,8 @@ ErrorCodes Mapping::Ramp(ErrorCodes direction, uint8_t length) {
             tiles[currrentPosition].type = TileType::visited;
 
             if(currentOrientation == Orientations::North)       {tiles[currrentPosition].north = nextPos; tiles[nextPos].south = currrentPosition;  tiles[nextPos].x = tiles[currrentPosition].x;               tiles[nextPos].y = tiles[currrentPosition].y + length + 1;}
-            else if(currentOrientation == Orientations::South)  {tiles[currrentPosition].east  = nextPos; tiles[nextPos].west  = currrentPosition;  tiles[nextPos].x = tiles[currrentPosition].x + length + 1;  tiles[nextPos].y = tiles[currrentPosition].y;}
-            else if(currentOrientation == Orientations::East)   {tiles[currrentPosition].south = nextPos; tiles[nextPos].north = currrentPosition;  tiles[nextPos].x = tiles[currrentPosition].x;               tiles[nextPos].y = tiles[currrentPosition].y - (length + 1);}
+            else if(currentOrientation == Orientations::East)  {tiles[currrentPosition].east  = nextPos; tiles[nextPos].west  = currrentPosition;   tiles[nextPos].x = tiles[currrentPosition].x + (length + 1);  tiles[nextPos].y = tiles[currrentPosition].y;}
+            else if(currentOrientation == Orientations::South)   {tiles[currrentPosition].south = nextPos; tiles[nextPos].north = currrentPosition; tiles[nextPos].x = tiles[currrentPosition].x;               tiles[nextPos].y = tiles[currrentPosition].y - (length + 1);}
             else if(currentOrientation == Orientations::West)   {tiles[currrentPosition].west  = nextPos; tiles[nextPos].east  = currrentPosition;  tiles[nextPos].x = tiles[currrentPosition].x - (length + 1);  tiles[nextPos].y = tiles[currrentPosition].y;}
             currrentPosition = nextPos;
             return ErrorCodes::OK;
