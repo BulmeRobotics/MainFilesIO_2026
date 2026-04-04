@@ -149,13 +149,13 @@ ErrorCodes Driving::checkRamp(void){
 			_ON_RAMP = true;	//Ramp detected
 			_RAMP_DOWN = true;	//Ramp DOWN detected
 			_RAMP_UP = false;	//Ramp UP not detected
-			if (millis() < lastSetTile + MIN_SETTILE_TIME) {	//Check if settile occured shortly before Ramp detection
-				p_mapSys->Move(true);
-				p_mapSys->RollbackInstructions(1);
-				#ifdef DEBUG_RAMP
-				Serial.println("CORRECTED RAMP DOWN!");
-				#endif // DEBUG_RAMP
-			}
+			// if (millis() < lastSetTile + MIN_SETTILE_TIME) {	//Check if settile occured shortly before Ramp detection
+			// 	p_mapSys->Move(true);
+			// 	p_mapSys->RollbackInstructions(1);
+			// 	#ifdef DEBUG_RAMP
+			// 	Serial.println("CORRECTED RAMP DOWN!");
+			// 	#endif // DEBUG_RAMP
+			// }
 			rampStartTime = 0;	//Reset Ramp Start Time
 			rampEncoderDistance = 0;
 			rampSpeed = rampSpeedDown;
@@ -288,7 +288,6 @@ ErrorCodes Driving::rampHandler(void){
 			_RAMP_UP = false;
 			_RAMP_DOWN = false;
 			_STAIR = false;
-			_ON_RAMP = false;
 			p_colorSensing->Freeze(false);
 			arr_incline_index = 0;	//Reset the incline array index
 

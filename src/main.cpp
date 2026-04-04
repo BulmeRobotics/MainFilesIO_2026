@@ -358,12 +358,13 @@ while (true) {
 				robot._ON_RAMP = false;
 				robot.maxRampIncline = 0;					
 				//pass RampInfos to Mapping
-        if (rampDirection == 1)
-          mapper.Ramp(ErrorCodes::up, rampLenght);
-        else if (rampDirection == -1)
-          mapper.Ramp(ErrorCodes::down, rampLenght);
-        else if (rampDirection == 0)
-          mapper.Ramp(ErrorCodes::same, rampLenght);
+        // if (rampDirection == 1)
+        //   mapper.Ramp(ErrorCodes::up, rampLenght);
+        // else if (rampDirection == -1)
+        //   mapper.Ramp(ErrorCodes::down, rampLenght);
+        // else if (rampDirection == 0)
+        Serial.println("Call Ramp len: " + String(rampLenght));
+        mapper.Ramp(ErrorCodes::same, rampLenght);
 			}
 			currentRunState = RunState::SETTILE;
     }
