@@ -51,6 +51,9 @@ ErrorCodes Vcameras::Init(Ejector* ejector, Mapping* mapper, Driving* robot, Use
     pinMode(CAMERAL_PIN_INT, INPUT);
     pinMode(CAMERAR_PIN_INT, INPUT);
 
+    _camL.baud(115200);
+    _camR.baud(115200);
+
     _camL.attach(&Vcameras::on_camL_int, mbed::SerialBase::RxIrq);
     _camR.attach(&Vcameras::on_camR_int, mbed::SerialBase::RxIrq);
 
