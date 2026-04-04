@@ -168,7 +168,7 @@ while (true) {
 			gyro.ResetAllAngles();	  //Gyro angle zero
 			robot.maxRampIncline = 0;
 			robot.currentRobotHeight = 0;
-      delay(250);
+      delay(250); 
       currentRunState = RunState::SETTILE;
     }
 
