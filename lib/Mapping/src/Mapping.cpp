@@ -696,12 +696,29 @@ Instructionset Mapping::GetInstruction() {
             // Convert path to movement instructions (reverse order)
             pathIndex = 0;
             
+            bool inRamp = false;
             Orientations simOrientation = currentOrientation; 
 
             // IMPORTANT: -2 instead of -: Worst-Case 2 Instructions (Turn + Forward) for each Loop
             for (int16_t i = pathLength - 1; i >= 0 && pathIndex < MAX_INSTRUCTIONS - 2; i--) {
                 uint16_t nextTile = tempPath[i];
                 uint16_t fromTile = (i == pathLength - 1) ? currentPosition : tempPath[i + 1];
+
+                // Überspringt den rein vertikalen Sprung im Graphen. Der nachfolgende 
+                // horizontale Sprung generiert dann genau EINEN D_Forward Befehl.
+                if (tiles[fromTile].up == nextTile || tiles[fromTile].down == nextTile) {
+                    inRamp = true;
+                    // Generiere exakt EINEN Fahrbefehl für die gesamte Rampensequenz
+                    //path[pathIndex++] = Instructionset::D_Forward;
+                    continue; 
+                }
+
+                if(inRamp){
+                    if(tiles[nextTile].weight != COST_RAMP){
+                        inRamp = false;
+                    }
+                    continue;
+                }
 
                 // Determine direction from fromTile to nextTile
                 if (tiles[fromTile].north == nextTile) {
@@ -731,10 +748,6 @@ Instructionset Mapping::GetInstruction() {
                         simOrientation = Orientations::West;
                     }
                     path[pathIndex++] = Instructionset::D_Forward;
-                }
-                else if (tiles[fromTile].up == nextTile || tiles[fromTile].down == nextTile) {
-                    // Ramp transition - maintain current orientation and use ramp instruction
-                    path[pathIndex++] = Instructionset::ramp;
                 }
             }
 
