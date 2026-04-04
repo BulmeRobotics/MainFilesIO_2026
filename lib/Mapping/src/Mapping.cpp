@@ -276,7 +276,6 @@ ErrorCodes Mapping::Ramp(ErrorCodes direction, uint8_t length) {
         return Move(true);
     }
 
-    length = length;
     uint16_t nextPos = findNextEmptyMemory();
 	if (nextPos == UINT16_MAX) return ErrorCodes::Overflow;   //No Memory left for new tile
 
@@ -293,12 +292,14 @@ ErrorCodes Mapping::Ramp(ErrorCodes direction, uint8_t length) {
         default: return ErrorCodes::invalid;
     }
 
-    //Set Coords of next Pos
-    tiles[nextPos].x = tiles[currentPosition].x;
-    tiles[nextPos].y = tiles[currentPosition].y;
+    length--;
 
-    //Length == 0 and dir == same
-    if (direction == ErrorCodes::same && length == 1) {
+    //Set Coords of next Pos
+    tiles[nextPos].x = tiles[currentPosition].x + dx;
+    tiles[nextPos].y = tiles[currentPosition].y + dy;
+
+    //Length = 1 and dir == same
+    if (direction == ErrorCodes::same && length == 0) {
         tiles[nextPos].type = TileType::unexplored;
         tiles[currentPosition].weight = COST_RAMP;
         tiles[currentPosition].up = currentPosition;
@@ -309,11 +310,6 @@ ErrorCodes Mapping::Ramp(ErrorCodes direction, uint8_t length) {
         // Verbindung über Pointer
         tiles[currentPosition].*forwardDir = nextPos;
         tiles[nextPos].*backDir = currentPosition;
-
-        // Koordinaten berechnen (length ist 0, also Verschiebung um 1 Feld)
-        tiles[nextPos].x += dx * 1;
-        tiles[nextPos].y += dy * 1;
-
         currentPosition = nextPos;
         return ErrorCodes::OK;
     }
