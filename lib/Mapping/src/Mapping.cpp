@@ -10,6 +10,8 @@
 #include <cstring>
 #include "Mapping.h"
 
+#include <Arduino.h>
+
 #ifdef _MSC_VER
 #pragma region helpers
 #endif
@@ -341,6 +343,7 @@ ErrorCodes Mapping::Ramp(ErrorCodes direction, uint8_t length) {
 #endif
 
 ErrorCodes Mapping::SetTile(uint8_t walls, TileType floor) {
+    Serial.println("x: " + String(tiles[currrentPosition].x) + " y: " + String(tiles[currrentPosition].y) + " z: " + String(tiles[currrentPosition].z));
 	if (currrentPosition >= MAX_TILES) return ErrorCodes::invalid;
     //check if tile is activated:
     if (tiles[currrentPosition].type == TileType::inactive) return ErrorCodes::invalid;
