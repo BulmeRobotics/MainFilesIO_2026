@@ -199,7 +199,7 @@ uint16_t Mapping::findNextTarget() {
             bufferTargetIndex = 0; // Zurück zum Start (Index 0)
         }
     }
-
+    Serial.println("Target: x:" String(tiles[bufferTargetIndex].x) + " y:" String(tiles[bufferTargetIndex].y) +" z:" String(tiles[bufferTargetIndex].z));
     return bufferTargetIndex;
 }
 
