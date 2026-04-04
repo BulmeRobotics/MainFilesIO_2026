@@ -148,6 +148,7 @@ ErrorCodes Driving::checkRamp(void){
 			Serial.println("RAMP DOWN DETECTED!");
 			#endif
 			_ON_RAMP = true;	//Ramp detected
+			p_mapSys->Move(true);
 			_RAMP_DOWN = true;	//Ramp DOWN detected
 			_RAMP_UP = false;	//Ramp UP not detected
 			if (millis() < lastSetTile + MIN_SETTILE_TIME) {	//Check if settile occured shortly before Ramp detection
