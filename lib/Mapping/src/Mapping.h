@@ -176,10 +176,7 @@ public:
     /**
      * @brief Part of Ramp handling, needed because robot sometimes does 
      */
-    void RollbackInstructions(uint8_t amount){
-        if(pathIndex > amount) pathIndex -= amount;
-        Move(false);
-    }
+    void RollbackOne();
 
 #ifdef _MSC_VER
 #pragma region Error Handling

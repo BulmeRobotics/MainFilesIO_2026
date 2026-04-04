@@ -337,6 +337,28 @@ ErrorCodes Mapping::Ramp(ErrorCodes direction, uint8_t length) {
     return ErrorCodes::OK;
 }
 
+void Mapping::RollbackOne(){
+    if(pathIndex > 1) pathIndex--;
+
+    uint16_t pos = currrentPosition;
+    uint16_t oldPos = 0;
+
+    //get oldPos dep on Orientation
+    if(currentOrientation == Orientations::North)       oldPos = tiles[pos].south;
+    else if(currentOrientation == Orientations::East)   oldPos = tiles[pos].west;
+    else if(currentOrientation == Orientations::South)  oldPos = tiles[pos].north;
+    else oldPos = tiles[pos].east;
+
+    tiles[currrentPosition] = Tile();
+
+    if(currentOrientation == Orientations::North)       tiles[pos].south = oldPos;
+    else if(currentOrientation == Orientations::East)   tiles[pos].west = oldPos;
+    else if(currentOrientation == Orientations::South)  tiles[pos].north = oldPos;
+    else tiles[pos].east = oldPos;
+
+    Move(false);
+}
+
 #ifdef _MSC_VER
 #pragma endregion Movement
 #pragma region Tile
