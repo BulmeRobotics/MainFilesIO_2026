@@ -262,6 +262,7 @@ ErrorCodes Mapping::Move(bool direction) {
     //Check if tile is valid
     if (nextTile == -1) return ErrorCodes::wall;
     currrentPosition = nextTile;
+    Serial.println("x: " + String(tiles[currrentPosition].x) + " y: " + String(tiles[currrentPosition].y) + " z: " + String(tiles[currrentPosition].z));
     return ErrorCodes::OK;
 }
 
@@ -338,10 +339,10 @@ ErrorCodes Mapping::Ramp(ErrorCodes direction, uint8_t length) {
 }
 
 void Mapping::RollbackOne(){
-    if(pathIndex > 1) pathIndex--;
-
     uint16_t pos = currrentPosition;
+    Move(false);
     uint16_t oldPos = 0;
+    if(pathIndex > 1) pathIndex--;
 
     //get oldPos dep on Orientation
     if(currentOrientation == Orientations::North)       oldPos = tiles[pos].south;
@@ -349,14 +350,13 @@ void Mapping::RollbackOne(){
     else if(currentOrientation == Orientations::South)  oldPos = tiles[pos].north;
     else oldPos = tiles[pos].east;
 
-    tiles[currrentPosition] = Tile();
-
+    tiles[pos] = Tile();
+    tiles[pos].type = TileType::unexplored;
+    
     if(currentOrientation == Orientations::North)       tiles[pos].south = oldPos;
     else if(currentOrientation == Orientations::East)   tiles[pos].west = oldPos;
     else if(currentOrientation == Orientations::South)  tiles[pos].north = oldPos;
     else tiles[pos].east = oldPos;
-
-    Move(false);
 }
 
 #ifdef _MSC_VER
@@ -365,7 +365,6 @@ void Mapping::RollbackOne(){
 #endif
 
 ErrorCodes Mapping::SetTile(uint8_t walls, TileType floor) {
-    Serial.println("x: " + String(tiles[currrentPosition].x) + " y: " + String(tiles[currrentPosition].y) + " z: " + String(tiles[currrentPosition].z));
 	if (currrentPosition >= MAX_TILES) return ErrorCodes::invalid;
     //check if tile is activated:
     if (tiles[currrentPosition].type == TileType::inactive) return ErrorCodes::invalid;
