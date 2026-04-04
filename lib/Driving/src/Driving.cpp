@@ -205,6 +205,7 @@ ErrorCodes Driving::finishRamp(uint8_t distance){
 ErrorCodes Driving::rampHandler(void){
     if (!_ON_RAMP) checkRamp();
 	else {
+		p_mapSys->Move(true);
 		p_gyro->GetAngle_advanced(0, GyroAxles::Axis_Z);
 		float incline = -p_gyro->data.angle_car;
 		arr_incline[arr_incline_index] = incline;	//Save the incline value in the array

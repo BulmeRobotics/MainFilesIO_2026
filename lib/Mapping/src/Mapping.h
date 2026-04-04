@@ -178,6 +178,7 @@ public:
      */
     void RollbackInstructions(uint8_t amount){
         if(pathIndex > amount) pathIndex -= amount;
+        Move(false);
     }
 
 #ifdef _MSC_VER

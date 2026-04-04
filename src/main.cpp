@@ -328,7 +328,9 @@ while (true) {
 
     else if (currentRunState == RunState::SCAN) {
 			//Move the robot in the next tile and scan next field
-			mapper.Move(true);	//Move robot forward
+			if (!robot._ON_RAMP)
+        mapper.Move(true);	//Move robot forward
+        
 			//if Ramp detected during DRIVE give 
 			if(robot._ON_RAMP){
 				uint8_t rampLenght = 0;
