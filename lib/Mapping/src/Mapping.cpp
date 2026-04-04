@@ -376,12 +376,10 @@ void Mapping::RollbackOne(){
 
     // remove wrong Tile 
     int16_t frontIdx = tiles[pos].*forwardDir;
-    if (frontIdx != -1 && tiles[frontIdx].type == TileType::unexplored) {
+    if (frontIdx != -1) {
+        Serial.println("Delete Tile");
         tiles[frontIdx] = Tile(); 
     }
-
-    //set old Position
-    uint16_t oldPos = tiles[pos].*backwardDir;
 
     // Reset Tile
     tiles[pos] = Tile();
@@ -391,7 +389,7 @@ void Mapping::RollbackOne(){
     tiles[pos].z = z;
     
     //Set Link to old position 
-    tiles[pos].*backwardDir = oldPos;
+    tiles[pos].*backwardDir = currentPosition;
 }
 
 #ifdef _MSC_VER
