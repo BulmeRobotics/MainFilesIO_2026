@@ -273,7 +273,6 @@ ErrorCodes Mapping::Ramp(ErrorCodes direction, uint8_t length) {
         Move(true);
     }
 
-
     length = length - 1;
 
     uint16_t nextPos = findNextEmptyMemory();
@@ -289,8 +288,28 @@ ErrorCodes Mapping::Ramp(ErrorCodes direction, uint8_t length) {
         tiles[currrentPosition].down = nextPos;
         tiles[nextPos].up = currrentPosition;
         tiles[nextPos].z = tiles[currrentPosition].z - 1;
-    }
-    
+    } else if(direction == ErrorCodes::same){
+        if(length == 0){
+            tiles[nextPos].type = TileType::unexplored;
+            tiles[nextPos].z = tiles[currrentPosition].z;
+            tiles[currrentPosition].weight = COST_RAMP;
+            tiles[currrentPosition].up = currrentPosition;
+            tiles[currrentPosition].down = currrentPosition;
+            tiles[currrentPosition].type = TileType::visited;
+
+            if(currentOrientation == Orientations::North)       {tiles[currrentPosition].north = nextPos; tiles[nextPos].south = currrentPosition;  tiles[nextPos].x = tiles[currrentPosition].x;               tiles[nextPos].y = tiles[currrentPosition].y + length + 1;}
+            else if(currentOrientation == Orientations::South)  {tiles[currrentPosition].east  = nextPos; tiles[nextPos].west  = currrentPosition;  tiles[nextPos].x = tiles[currrentPosition].x + length + 1;  tiles[nextPos].y = tiles[currrentPosition].y;}
+            else if(currentOrientation == Orientations::East)   {tiles[currrentPosition].south = nextPos; tiles[nextPos].north = currrentPosition;  tiles[nextPos].x = tiles[currrentPosition].x;               tiles[nextPos].y = tiles[currrentPosition].y - length + 1;}
+            else if(currentOrientation == Orientations::West)   {tiles[currrentPosition].west  = nextPos; tiles[nextPos].east  = currrentPosition;  tiles[nextPos].x = tiles[currrentPosition].x - length + 1;  tiles[nextPos].y = tiles[currrentPosition].y;}
+            currrentPosition = nextPos;
+            return ErrorCodes::OK;
+        }
+        tiles[currrentPosition].up = nextPos;
+        tiles[nextPos].down = currrentPosition;
+        tiles[nextPos].z = tiles[currrentPosition].z;
+
+    } else return ErrorCodes::invalid;
+
     //Set Tiles as visited
     tiles[currrentPosition].type = TileType::visited;
     tiles[nextPos].type = TileType::visited;
@@ -306,20 +325,14 @@ ErrorCodes Mapping::Ramp(ErrorCodes direction, uint8_t length) {
     tiles[realPos].type = TileType::unexplored;
     tiles[realPos].z = tiles[currrentPosition].z;
 
-        //Set right walls and Position (xy)
+    //Set right walls and Position (xy)
     if(!(wall & (1<<0)))        {tiles[nextPos].north = realPos;    tiles[realPos].south = nextPos; tiles[realPos].x = tiles[nextPos].x;            tiles[realPos].y = tiles[nextPos].y + length;   }
     else if(!(wall & (1<<1)))   {tiles[nextPos].east = realPos;     tiles[realPos].west = nextPos;  tiles[realPos].x = tiles[nextPos].x + length;   tiles[realPos].y = tiles[nextPos].y;            }
     else if(!(wall & (1<<2)))   {tiles[nextPos].south = realPos;    tiles[realPos].north = nextPos; tiles[realPos].x = tiles[nextPos].x;            tiles[realPos].y = tiles[nextPos].y - length;   }
     else if(!(wall & (1<<3)))   {tiles[nextPos].west = realPos;     tiles[realPos].east = nextPos;  tiles[realPos].x = tiles[nextPos].x - length;   tiles[realPos].y = tiles[nextPos].y;            }
 
     currrentPosition = realPos; // Set current position as actual position
-
     return ErrorCodes::OK;
-}
-
-void Mapping::RollbackInstructions(uint8_t amount){
-    if(pathIndex >= amount) pathIndex -= amount;
-    return;
 }
 
 #ifdef _MSC_VER
