@@ -98,7 +98,7 @@ private:
     uint16_t pathIndex;
 
     Orientations currentOrientation;
-    uint16_t currrentPosition, targetPosition;
+    uint16_t currentPosition, targetPosition;
 
     //Checkpoint
     Tile backupTiles[MAX_TILES];
@@ -203,7 +203,7 @@ public:
 #pragma region UI
 #endif
     Tile* GetTiles() { return tiles; }
-    uint16_t GetCurrentPosition() { return currrentPosition; }
+    uint16_t GetCurrentPosition() { return currentPosition; }
     Orientations GetCurrentOrientation() { return currentOrientation; }
 };
 

@@ -72,14 +72,14 @@ uint8_t Mapping::correctWallinfo(uint8_t walls, Orientations orientation) {
 }
 
 ErrorCodes Mapping::compareWalls(uint8_t walls) {
-    if (currrentPosition >= MAX_TILES) return ErrorCodes::invalid;
+    if (currentPosition >= MAX_TILES) return ErrorCodes::invalid;
 
     auto bit = [&](uint8_t b)->bool { return (walls & (1U << b)) != 0U; };
 
-    bool b_north = (tiles[currrentPosition].north == -1);
-    bool b_east = (tiles[currrentPosition].east == -1);
-    bool b_south = (tiles[currrentPosition].south == -1);
-    bool b_west = (tiles[currrentPosition].west == -1);
+    bool b_north = (tiles[currentPosition].north == -1);
+    bool b_east = (tiles[currentPosition].east == -1);
+    bool b_south = (tiles[currentPosition].south == -1);
+    bool b_west = (tiles[currentPosition].west == -1);
 
     if (b_north != bit(0)) return ErrorCodes::invalid;
     if (b_east != bit(1)) return ErrorCodes::invalid;
@@ -90,7 +90,7 @@ ErrorCodes Mapping::compareWalls(uint8_t walls) {
 }
 
 uint16_t Mapping::findNextTarget() {
-    if (currrentPosition >= MAX_TILES) return UINT16_MAX;
+    if (currentPosition >= MAX_TILES) return UINT16_MAX;
 
     uint16_t bufferTargetIndex = UINT16_MAX;
     Orientations bufferPriority = Orientations::North;
@@ -100,10 +100,10 @@ uint16_t Mapping::findNextTarget() {
     else if (pathPriority == ErrorCodes::south) bufferPriority = Orientations::South;
     else if (pathPriority == ErrorCodes::west) bufferPriority = Orientations::West;
 
-	int16_t n = tiles[currrentPosition].north,
-        e = tiles[currrentPosition].east,
-        s = tiles[currrentPosition].south,
-        w = tiles[currrentPosition].west;
+	int16_t n = tiles[currentPosition].north,
+        e = tiles[currentPosition].east,
+        s = tiles[currentPosition].south,
+        w = tiles[currentPosition].west;
     //Buffer for neighboring tile index
 
     switch (bufferPriority)
@@ -146,8 +146,8 @@ uint16_t Mapping::findNextTarget() {
 
 		uint16_t head = 0, tail = 0; // Zeiger für die Queue
 
-		queue[tail++] = currrentPosition; // Startpunkt in die Queue einfügen
-		visited[currrentPosition] = true; // Startpunkt als besucht markieren
+		queue[tail++] = currentPosition; // Startpunkt in die Queue einfügen
+		visited[currentPosition] = true; // Startpunkt als besucht markieren
 
         while (head < tail) {
             uint16_t current = queue[head++];
@@ -168,7 +168,7 @@ uint16_t Mapping::findNextTarget() {
                 tiles[current].type == TileType::blue ||
                 tiles[current].type == TileType::dangerZone ||
                 tiles[current].type == TileType::obstacle ||
-                current == currrentPosition)
+                current == currentPosition)
             {
                 // Alle 6 möglichen Nachbarn (inkl. Rampen) prüfen
                 int16_t neighbors[6] = {
@@ -226,9 +226,9 @@ ErrorCodes Mapping::Turn(Orientations direction) {
 }
 
 ErrorCodes Mapping::Move(bool direction) {
-    if (currrentPosition >= MAX_TILES) return ErrorCodes::invalid;
+    if (currentPosition >= MAX_TILES) return ErrorCodes::invalid;
 
-    int16_t nextTile = currrentPosition;
+    int16_t nextTile = currentPosition;
     Orientations helpOrientation = currentOrientation;
 
     if (!direction) { //transform according to direction (false...backward)
@@ -239,19 +239,19 @@ ErrorCodes Mapping::Move(bool direction) {
 
     switch (helpOrientation) {
     case Orientations::North:
-        nextTile = tiles[currrentPosition].north;
+        nextTile = tiles[currentPosition].north;
         break;
 
     case Orientations::East:
-        nextTile = tiles[currrentPosition].east;
+        nextTile = tiles[currentPosition].east;
         break;
 
     case Orientations::South:
-        nextTile = tiles[currrentPosition].south;
+        nextTile = tiles[currentPosition].south;
         break;
 
     case Orientations::West:
-        nextTile = tiles[currrentPosition].west;
+        nextTile = tiles[currentPosition].west;
         break;
 
     default:
@@ -261,85 +261,107 @@ ErrorCodes Mapping::Move(bool direction) {
 
     //Check if tile is valid
     if (nextTile == -1) return ErrorCodes::wall;
-    currrentPosition = nextTile;
-    Serial.println("x: " + String(tiles[currrentPosition].x) + " y: " + String(tiles[currrentPosition].y) + " z: " + String(tiles[currrentPosition].z));
+    currentPosition = nextTile;
+    Serial.println("x: " + String(tiles[currentPosition].x) + " y: " + String(tiles[currentPosition].y) + " z: " + String(tiles[currentPosition].z));
     return ErrorCodes::OK;
 }
 
 ErrorCodes Mapping::Ramp(ErrorCodes direction, uint8_t length) {
-    //Try using existing ramp:
-    if(tiles[currrentPosition].down != -1){
-        currrentPosition = tiles[currrentPosition].down;
-        Move(true);
-    } else if(tiles[currrentPosition].up != -1){
-        currrentPosition = tiles[currrentPosition].up;
-        Move(true);
+    //Use existing ramps:
+    if(tiles[currentPosition]. down != -1){
+        currentPosition = tiles[currentPosition].down;
+        return Move(true);
+    } else if(tiles[currentPosition].up != -1){
+        currentPosition = tiles[currentPosition].up;
+        return Move(true);
     }
 
     length = length - 1;
-
     uint16_t nextPos = findNextEmptyMemory();
 	if (nextPos == UINT16_MAX) return ErrorCodes::Overflow;   //No Memory left for new tile
 
-    //Set Relation to tile
-    if (direction == ErrorCodes::up) {   //UP
-        tiles[currrentPosition].up = nextPos;
-        tiles[nextPos].down = currrentPosition;
-        tiles[nextPos].z = tiles[currrentPosition].z + 1;
+    // Pointer to Member + dX Setup
+    int16_t Tile::* forwardDir;
+    int16_t Tile::* backDir;
+    int16_t dx = 0, dy = 0;
+
+    switch(currentOrientation){
+        case Orientations::North: forwardDir = &Tile::north; backDir = &Tile::south; dy =  1; break;
+        case Orientations::East:  forwardDir = &Tile::east;  backDir = &Tile::west;  dx =  1; break;
+        case Orientations::South: forwardDir = &Tile::south; backDir = &Tile::north; dy = -1; break;
+        case Orientations::West:  forwardDir = &Tile::west;  backDir = &Tile::east;  dx = -1; break;
+        default: return ErrorCodes::invalid;
     }
-    else if(direction == ErrorCodes::down){    //DOWN
-        tiles[currrentPosition].down = nextPos;
-        tiles[nextPos].up = currrentPosition;
-        tiles[nextPos].z = tiles[currrentPosition].z - 1;
-    } else if(direction == ErrorCodes::same){
-        if(length == 0){
-            tiles[nextPos].type = TileType::unexplored;
-            tiles[nextPos].z = tiles[currrentPosition].z;
-            tiles[currrentPosition].weight = COST_RAMP;
-            tiles[currrentPosition].up = currrentPosition;
-            tiles[currrentPosition].down = currrentPosition;
-            tiles[currrentPosition].type = TileType::visited;
 
-            if(currentOrientation == Orientations::North)      {tiles[currrentPosition].north = nextPos; tiles[nextPos].south = currrentPosition;  tiles[nextPos].x = tiles[currrentPosition].x;               tiles[nextPos].y = tiles[currrentPosition].y + length + 1;}
-            else if(currentOrientation == Orientations::East)  {tiles[currrentPosition].east  = nextPos; tiles[nextPos].west  = currrentPosition;   tiles[nextPos].x = tiles[currrentPosition].x + (length + 1);  tiles[nextPos].y = tiles[currrentPosition].y;}
-            else if(currentOrientation == Orientations::South) {tiles[currrentPosition].south = nextPos; tiles[nextPos].north = currrentPosition; tiles[nextPos].x = tiles[currrentPosition].x;               tiles[nextPos].y = tiles[currrentPosition].y - (length + 1);}
-            else if(currentOrientation == Orientations::West)  {tiles[currrentPosition].west  = nextPos; tiles[nextPos].east  = currrentPosition;  tiles[nextPos].x = tiles[currrentPosition].x - (length + 1);  tiles[nextPos].y = tiles[currrentPosition].y;}
-            currrentPosition = nextPos;
-            return ErrorCodes::OK;
-        }
-        tiles[currrentPosition].up = nextPos;
-        tiles[nextPos].down = currrentPosition;
-        tiles[nextPos].z = tiles[currrentPosition].z;
+    //Set Coords of next Pos
+    tiles[nextPos].x = tiles[currentPosition].x;
+    tiles[nextPos].y = tiles[currentPosition].y;
 
-    } else return ErrorCodes::invalid;
+    //Length == 0 and dir == same
+    if (direction == ErrorCodes::same && length == 0) {
+        tiles[nextPos].type = TileType::unexplored;
+        tiles[currentPosition].weight = COST_RAMP;
+        tiles[currentPosition].up = currentPosition;
+        tiles[currentPosition].down = currentPosition;
+        tiles[currentPosition].type = TileType::visited;
+        tiles[nextPos].z = tiles[currentPosition].z;
 
-    //Set Tiles as visited
-    tiles[currrentPosition].type = TileType::visited;
+        // Verbindung über Pointer
+        tiles[currentPosition].*forwardDir = nextPos;
+        tiles[nextPos].*backDir = currentPosition;
+
+        // Koordinaten berechnen (length ist 0, also Verschiebung um 1 Feld)
+        tiles[nextPos].x += dx * 1;
+        tiles[nextPos].y += dy * 1;
+
+        currentPosition = nextPos;
+        return ErrorCodes::OK;
+    }
+
+    //Change Z level
+    if (direction == ErrorCodes::up) {
+        tiles[currentPosition].up = nextPos;
+        tiles[nextPos].down = currentPosition;
+        tiles[nextPos].z = tiles[currentPosition].z + 1;
+    } else if(direction == ErrorCodes::down) {
+        tiles[currentPosition].down = nextPos;
+        tiles[nextPos].up = currentPosition;
+        tiles[nextPos].z = tiles[currentPosition].z - 1;
+    } else if(direction == ErrorCodes::same) {
+        tiles[currentPosition].up = nextPos;
+        tiles[nextPos].down = currentPosition;
+        tiles[nextPos].z = tiles[currentPosition].z;
+    } else {
+        return ErrorCodes::invalid;
+    }
+
+    //Regular Ramp:
+    tiles[currentPosition].type = TileType::visited;
     tiles[nextPos].type = TileType::visited;
-
-    //Set weight
-    tiles[currrentPosition].weight = COST_RAMP;
+    tiles[currentPosition].weight = COST_RAMP;
     tiles[nextPos].weight = COST_RAMP;
 
     uint16_t realPos = findNextEmptyMemory();
+    if (realPos == UINT16_MAX) return ErrorCodes::Overflow; // Check if overflow
 
-    //Set real Pos
     tiles[realPos].type = TileType::unexplored;
-    tiles[realPos].z = tiles[currrentPosition].z;
+    tiles[realPos].z = tiles[currentPosition].z;
 
-    //Set right walls and Position (xy)
-    if(currentOrientation == Orientations::North)     {tiles[nextPos].north = realPos; tiles[realPos].south = nextPos; tiles[realPos].x = tiles[nextPos].x;          tiles[realPos].y = tiles[nextPos].y + length;}
-    else if(currentOrientation == Orientations::East) {tiles[nextPos].east = realPos;  tiles[realPos].west = nextPos;  tiles[realPos].x = tiles[nextPos].x + length; tiles[realPos].y = tiles[nextPos].y;         }
-    else if(currentOrientation == Orientations::South){tiles[nextPos].south = realPos; tiles[realPos].north = nextPos; tiles[realPos].x = tiles[nextPos].x;          tiles[realPos].y = tiles[nextPos].y - length;}
-    else if(currentOrientation == Orientations::West) {tiles[nextPos].west = realPos;  tiles[realPos].east = nextPos;  tiles[realPos].x = tiles[nextPos].x - length; tiles[realPos].y = tiles[nextPos].y;         }
+    // Verbindung über Pointer herstellen
+    tiles[nextPos].*forwardDir = realPos;
+    tiles[realPos].*backDir = nextPos;
 
-    currrentPosition = realPos; // Set current position as actual position
+    // Koordinaten über Deltas berechnen
+    tiles[realPos].x = tiles[nextPos].x + (dx * length);
+    tiles[realPos].y = tiles[nextPos].y + (dy * length);
+
+    currentPosition = realPos;
     return ErrorCodes::OK;
 }
 
 void Mapping::RollbackOne(){
     if(pathIndex > 1) pathIndex--;
-    uint16_t pos = currrentPosition;
+    uint16_t pos = currentPosition;
     Move(false);
 
     //Get Coordinates
@@ -384,9 +406,9 @@ void Mapping::RollbackOne(){
 #endif
 
 ErrorCodes Mapping::SetTile(uint8_t walls, TileType floor) {
-	if (currrentPosition >= MAX_TILES) return ErrorCodes::invalid;
+	if (currentPosition >= MAX_TILES) return ErrorCodes::invalid;
     //check if tile is activated:
-    if (tiles[currrentPosition].type == TileType::inactive) return ErrorCodes::invalid;
+    if (tiles[currentPosition].type == TileType::inactive) return ErrorCodes::invalid;
 
     uint8_t absWalls = correctWallinfo(walls, currentOrientation);
     if (absWalls & 1 << 6) return ErrorCodes::invalid; //Check for error in correctWallInfo
@@ -396,18 +418,18 @@ ErrorCodes Mapping::SetTile(uint8_t walls, TileType floor) {
 
     //check checkpoint
     if (floor == TileType::checkpoint) {
-        if (resetCounter > 0 || currrentPosition != lastCheckpointPosition) {
-            lastCheckpointPosition = currrentPosition;
+        if (resetCounter > 0 || currentPosition != lastCheckpointPosition) {
+            lastCheckpointPosition = currentPosition;
 			memcpy(backupTiles, tiles, sizeof(tiles));
         }
 
     }
 
     //Check if tile was already visited:
-    if (tiles[currrentPosition].type != TileType::unexplored) {   //already visited
+    if (tiles[currentPosition].type != TileType::unexplored) {   //already visited
         if(floor == TileType::blue){
-            tiles[currrentPosition].type = TileType::blue;
-            tiles[currrentPosition].weight = COST_BLUE;
+            tiles[currentPosition].type = TileType::blue;
+            tiles[currentPosition].weight = COST_BLUE;
         }
         return compareWalls(absWalls);
     }
@@ -415,113 +437,113 @@ ErrorCodes Mapping::SetTile(uint8_t walls, TileType floor) {
     //if not already visited: -------------------------------------------------
 
     //Floor + Cost according to floor
-    tiles[currrentPosition].type = floor;
+    tiles[currentPosition].type = floor;
     if (floor == TileType::black) {
-        tiles[currrentPosition].weight = 255;
+        tiles[currentPosition].weight = 255;
     }
     else if (floor == TileType::blue) {
-        tiles[currrentPosition].weight = COST_BLUE;
+        tiles[currentPosition].weight = COST_BLUE;
     }
     else if (floor == TileType::dangerZone) {
-        tiles[currrentPosition].weight = COST_DANGER_ZONE;
+        tiles[currentPosition].weight = COST_DANGER_ZONE;
     }
     else if (floor == TileType::obstacle) {
-        tiles[currrentPosition].weight = COST_OBSTACLE;
+        tiles[currentPosition].weight = COST_OBSTACLE;
     }
-    else tiles[currrentPosition].weight = COST_REGULAR;
+    else tiles[currentPosition].weight = COST_REGULAR;
 
     uint16_t bufferIndex = 0;
     //check Walls -> activate neighboring tiles depending on walls and exploration status
     //start with Northern Tile:
-    if ((absWalls & (1 << 0)) == 0 && tiles[currrentPosition].north == -1) {
-        uint16_t nx = tiles[currrentPosition].x,
-			ny = tiles[currrentPosition].y + 1,
-			nz = tiles[currrentPosition].z;
+    if ((absWalls & (1 << 0)) == 0 && tiles[currentPosition].north == -1) {
+        uint16_t nx = tiles[currentPosition].x,
+			ny = tiles[currentPosition].y + 1,
+			nz = tiles[currentPosition].z;
 		uint16_t existingNode = findTileByCoordinate(nx, ny, nz);
 
         if (existingNode != UINT16_MAX) {   //Tile exists, set Relation
-            tiles[currrentPosition].north = existingNode;
-            tiles[existingNode].south = currrentPosition;
+            tiles[currentPosition].north = existingNode;
+            tiles[existingNode].south = currentPosition;
         }
         else {
             bufferIndex = findNextEmptyMemory();
 
-            tiles[currrentPosition].north = bufferIndex;
-            tiles[bufferIndex].south = currrentPosition;
+            tiles[currentPosition].north = bufferIndex;
+            tiles[bufferIndex].south = currentPosition;
             tiles[bufferIndex].type = TileType::unexplored;
 
-            tiles[bufferIndex].z = tiles[currrentPosition].z;
-            tiles[bufferIndex].x = tiles[currrentPosition].x;
-            tiles[bufferIndex].y = tiles[currrentPosition].y + 1;
+            tiles[bufferIndex].z = tiles[currentPosition].z;
+            tiles[bufferIndex].x = tiles[currentPosition].x;
+            tiles[bufferIndex].y = tiles[currentPosition].y + 1;
         }
     }
     //South
-    if ((absWalls & (1 << 2)) == 0 && tiles[currrentPosition].south == -1) {
-        uint16_t nx = tiles[currrentPosition].x,
-            ny = tiles[currrentPosition].y - 1,
-            nz = tiles[currrentPosition].z;
+    if ((absWalls & (1 << 2)) == 0 && tiles[currentPosition].south == -1) {
+        uint16_t nx = tiles[currentPosition].x,
+            ny = tiles[currentPosition].y - 1,
+            nz = tiles[currentPosition].z;
         uint16_t existingNode = findTileByCoordinate(nx, ny, nz);
 
         if(existingNode != UINT16_MAX) {   //Tile exists, set Relation
-            tiles[currrentPosition].south = existingNode;
-            tiles[existingNode].north = currrentPosition;
+            tiles[currentPosition].south = existingNode;
+            tiles[existingNode].north = currentPosition;
         }
         else {
             bufferIndex = findNextEmptyMemory();
 
-            tiles[currrentPosition].south = bufferIndex;
-            tiles[bufferIndex].north = currrentPosition;
+            tiles[currentPosition].south = bufferIndex;
+            tiles[bufferIndex].north = currentPosition;
             tiles[bufferIndex].type = TileType::unexplored;
 
-            tiles[bufferIndex].z = tiles[currrentPosition].z;
-            tiles[bufferIndex].x = tiles[currrentPosition].x;
-            tiles[bufferIndex].y = tiles[currrentPosition].y - 1;
+            tiles[bufferIndex].z = tiles[currentPosition].z;
+            tiles[bufferIndex].x = tiles[currentPosition].x;
+            tiles[bufferIndex].y = tiles[currentPosition].y - 1;
         }
     }
     //East
-    if ((absWalls & (1 << 1)) == 0 && tiles[currrentPosition].east == -1) {
-        uint16_t nx = tiles[currrentPosition].x + 1,
-            ny = tiles[currrentPosition].y,
-            nz = tiles[currrentPosition].z;
+    if ((absWalls & (1 << 1)) == 0 && tiles[currentPosition].east == -1) {
+        uint16_t nx = tiles[currentPosition].x + 1,
+            ny = tiles[currentPosition].y,
+            nz = tiles[currentPosition].z;
         uint16_t existingNode = findTileByCoordinate(nx, ny, nz);
 
         if (existingNode != UINT16_MAX) {   //Tile exists, set Relation
-            tiles[currrentPosition].east = existingNode;
-            tiles[existingNode].west = currrentPosition;
+            tiles[currentPosition].east = existingNode;
+            tiles[existingNode].west = currentPosition;
         }
         else {
             bufferIndex = findNextEmptyMemory();
 
-            tiles[currrentPosition].east = bufferIndex;
-            tiles[bufferIndex].west = currrentPosition;
+            tiles[currentPosition].east = bufferIndex;
+            tiles[bufferIndex].west = currentPosition;
             tiles[bufferIndex].type = TileType::unexplored;
 
-            tiles[bufferIndex].z = tiles[currrentPosition].z;
-            tiles[bufferIndex].x = tiles[currrentPosition].x + 1;
-            tiles[bufferIndex].y = tiles[currrentPosition].y;
+            tiles[bufferIndex].z = tiles[currentPosition].z;
+            tiles[bufferIndex].x = tiles[currentPosition].x + 1;
+            tiles[bufferIndex].y = tiles[currentPosition].y;
         }
     }
     //West
-    if ((absWalls & (1 << 3)) == 0 && tiles[currrentPosition].west == -1) {
-        uint16_t nx = tiles[currrentPosition].x - 1,
-            ny = tiles[currrentPosition].y,
-            nz = tiles[currrentPosition].z;
+    if ((absWalls & (1 << 3)) == 0 && tiles[currentPosition].west == -1) {
+        uint16_t nx = tiles[currentPosition].x - 1,
+            ny = tiles[currentPosition].y,
+            nz = tiles[currentPosition].z;
         uint16_t existingNode = findTileByCoordinate(nx, ny, nz);
 
         if (existingNode != UINT16_MAX) {   //Tile exists, set Relation
-            tiles[currrentPosition].west = existingNode;
-            tiles[existingNode].east = currrentPosition;
+            tiles[currentPosition].west = existingNode;
+            tiles[existingNode].east = currentPosition;
         }
         else {
             bufferIndex = findNextEmptyMemory();
 
-            tiles[currrentPosition].west = bufferIndex;
-            tiles[bufferIndex].east = currrentPosition;
+            tiles[currentPosition].west = bufferIndex;
+            tiles[bufferIndex].east = currentPosition;
             tiles[bufferIndex].type = TileType::unexplored;
 
-            tiles[bufferIndex].z = tiles[currrentPosition].z;
-            tiles[bufferIndex].x = tiles[currrentPosition].x - 1;
-            tiles[bufferIndex].y = tiles[currrentPosition].y;
+            tiles[bufferIndex].z = tiles[currentPosition].z;
+            tiles[bufferIndex].x = tiles[currentPosition].x - 1;
+            tiles[bufferIndex].y = tiles[currentPosition].y;
         }
     }
 
@@ -543,22 +565,22 @@ ErrorCodes Mapping::SetPriority(ErrorCodes priority) {
 
 Instructionset Mapping::GetInstruction() {
     if (path[pathIndex] == Instructionset::FinishedInstructions) {
-        if (_RETURN_HOME && currrentPosition == 0) {
+        if (_RETURN_HOME && currentPosition == 0) {
             return Instructionset::MazeFinished;
         }
 
         targetPosition = findNextTarget();
 
-        std::cout << "currentPos: " << currrentPosition << " Target: "<< targetPosition;
+        std::cout << "currentPos: " << currentPosition << " Target: "<< targetPosition;
 
         //Pathfinding - A* Algorithm Implementation
         initLists(targetPosition);
 
         // Initialize start node
         uint16_t openCount = 1;
-        open[0].nodeIndex = currrentPosition;
+        open[0].nodeIndex = currentPosition;
         open[0].g = 0;
-        open[0].f = heuristic3D(tiles[currrentPosition], tiles[targetPosition]);
+        open[0].f = heuristic3D(tiles[currentPosition], tiles[targetPosition]);
 
         // Parent tracking for path reconstruction (stores index of parent tile)
         int16_t parent[MAX_TILES];
@@ -666,7 +688,7 @@ Instructionset Mapping::GetInstruction() {
             int16_t current = targetPosition;
 
             // Build path backwards from target to start
-            while (current != -1 && current != currrentPosition && pathLength < MAX_INSTRUCTIONS) {
+            while (current != -1 && current != currentPosition && pathLength < MAX_INSTRUCTIONS) {
                 tempPath[pathLength++] = current;
                 current = parent[current];
             }
@@ -679,7 +701,7 @@ Instructionset Mapping::GetInstruction() {
             // IMPORTANT: -2 instead of -: Worst-Case 2 Instructions (Turn + Forward) for each Loop
             for (int16_t i = pathLength - 1; i >= 0 && pathIndex < MAX_INSTRUCTIONS - 2; i--) {
                 uint16_t nextTile = tempPath[i];
-                uint16_t fromTile = (i == pathLength - 1) ? currrentPosition : tempPath[i + 1];
+                uint16_t fromTile = (i == pathLength - 1) ? currentPosition : tempPath[i + 1];
 
                 // Determine direction from fromTile to nextTile
                 if (tiles[fromTile].north == nextTile) {
@@ -746,10 +768,10 @@ void Mapping::Reset(void) {
 
     //set first tile as start
     tiles[0].type = TileType::unexplored;
-    currrentPosition = 0;
+    currentPosition = 0;
 
     resetCounter = 0;
-    lastCheckpointPosition = currrentPosition;
+    lastCheckpointPosition = currentPosition;
     memcpy(backupTiles, tiles, sizeof(tiles));
 }
 
@@ -776,7 +798,7 @@ void Mapping::Reset(void) {
 //             for (uint16_t i = 0; i < MAX_TILES; i++) {
 //                 if (tiles[i].type != TileType::inactive && tiles[i].x == x && tiles[i].y == y) {
 //                     found = true;
-//                     if (i == currrentPosition) {
+//                     if (i == currentPosition) {
 //                         std::cout << "R "; // Aktuelle Roboterposition
 //                     }
 //                     else if (tiles[i].type == TileType::unexplored) {
@@ -810,30 +832,30 @@ void Mapping::Reset(void) {
 // }
 
 ErrorCodes Mapping::Bumper(void) {
-    if (currrentPosition >= MAX_TILES) return ErrorCodes::invalid;
+    if (currentPosition >= MAX_TILES) return ErrorCodes::invalid;
 
     int16_t neighborIndex = -1;
 
     // Finde heraus, in welche Richtung wir gerade schauen und kappe die Verbindung
     switch (currentOrientation) {
     case Orientations::North:
-        neighborIndex = tiles[currrentPosition].north;
-        tiles[currrentPosition].north = -1; // Wand setzen
+        neighborIndex = tiles[currentPosition].north;
+        tiles[currentPosition].north = -1; // Wand setzen
         if (neighborIndex != -1) tiles[neighborIndex].south = -1; // Gegenverbindung kappen
         break;
     case Orientations::East:
-        neighborIndex = tiles[currrentPosition].east;
-        tiles[currrentPosition].east = -1;
+        neighborIndex = tiles[currentPosition].east;
+        tiles[currentPosition].east = -1;
         if (neighborIndex != -1) tiles[neighborIndex].west = -1;
         break;
     case Orientations::South:
-        neighborIndex = tiles[currrentPosition].south;
-        tiles[currrentPosition].south = -1;
+        neighborIndex = tiles[currentPosition].south;
+        tiles[currentPosition].south = -1;
         if (neighborIndex != -1) tiles[neighborIndex].north = -1;
         break;
     case Orientations::West:
-        neighborIndex = tiles[currrentPosition].west;
-        tiles[currrentPosition].west = -1;
+        neighborIndex = tiles[currentPosition].west;
+        tiles[currentPosition].west = -1;
         if (neighborIndex != -1) tiles[neighborIndex].east = -1;
         break;
     }
@@ -854,7 +876,7 @@ ErrorCodes Mapping::Bumper(void) {
 ErrorCodes Mapping::RestartCheckpoint() {
     // 1. Saubere Karte und Position aus dem Backup wiederherstellen
     memcpy(tiles, backupTiles, sizeof(tiles));
-    currrentPosition = lastCheckpointPosition;
+    currentPosition = lastCheckpointPosition;
 
     // 2. Ausrichtung überschreiben (da der Schiedsrichter den Roboter neu hinstellt)
     currentOrientation = Orientations::North;
@@ -873,10 +895,10 @@ ErrorCodes Mapping::RestartCheckpoint() {
 
 ErrorCodes Mapping::SetVictim(){
     //Check if even valid tile Type
-    if(!(tiles[currrentPosition].type == TileType::visited || tiles[currrentPosition].type == TileType::unexplored)) return ErrorCodes::invalid;
+    if(!(tiles[currentPosition].type == TileType::visited || tiles[currentPosition].type == TileType::unexplored)) return ErrorCodes::invalid;
 
     //Check if already found
-    if (tiles[currrentPosition].victim) return ErrorCodes::already_found;
-    tiles[currrentPosition].victim = true;
+    if (tiles[currentPosition].victim) return ErrorCodes::already_found;
+    tiles[currentPosition].victim = true;
     return ErrorCodes::OK;
 }
