@@ -292,27 +292,25 @@ ErrorCodes Mapping::Ramp(ErrorCodes direction, uint8_t length) {
         default: return ErrorCodes::invalid;
     }
 
-    length--;
-
     //Set Coords of next Pos
-    tiles[nextPos].x = tiles[currentPosition].x + dx;
-    tiles[nextPos].y = tiles[currentPosition].y + dy;
+    tiles[nextPos].x = tiles[currentPosition].x;
+    tiles[nextPos].y = tiles[currentPosition].y;
 
     //Length = 1 and dir == same
-    if (direction == ErrorCodes::same && length == 0) {
-        tiles[nextPos].type = TileType::unexplored;
-        tiles[currentPosition].weight = COST_RAMP;
-        tiles[currentPosition].up = currentPosition;
-        tiles[currentPosition].down = currentPosition;
-        tiles[currentPosition].type = TileType::visited;
-        tiles[nextPos].z = tiles[currentPosition].z;
+    // if (direction == ErrorCodes::same && length == 0) {
+    //     tiles[nextPos].type = TileType::unexplored;
+    //     tiles[currentPosition].weight = COST_RAMP;
+    //     tiles[currentPosition].up = currentPosition;
+    //     tiles[currentPosition].down = currentPosition;
+    //     tiles[currentPosition].type = TileType::visited;
+    //     tiles[nextPos].z = tiles[currentPosition].z;
 
-        // Verbindung über Pointer
-        tiles[currentPosition].*forwardDir = nextPos;
-        tiles[nextPos].*backDir = currentPosition;
-        currentPosition = nextPos;
-        return ErrorCodes::OK;
-    }
+    //     // Verbindung über Pointer
+    //     tiles[currentPosition].*forwardDir = nextPos;
+    //     tiles[nextPos].*backDir = currentPosition;
+    //     currentPosition = nextPos;
+    //     return ErrorCodes::OK;
+    // }
 
     //Change Z level
     if (direction == ErrorCodes::up) {
