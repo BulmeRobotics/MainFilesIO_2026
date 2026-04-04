@@ -20,10 +20,10 @@ class Vcameras
 {
 private:
     // --- Hardware Info ---
-    static constexpr PinName CAMERAL_TX = PI_8;
-    static constexpr PinName CAMERAL_RX = PI_9;
-    static constexpr PinName CAMERAR_TX = PI_9;
-    static constexpr PinName CAMERAR_RX = PI_8;
+    static constexpr PinName CAMERAL_TX = PD_5;     // D18  TX1 PD_5
+    static constexpr PinName CAMERAL_RX = PD_6;     // D19  RX1 PD_6
+    static constexpr PinName CAMERAR_TX = PH_13;    // D16  TX2 PH_13
+    static constexpr PinName CAMERAR_RX = PI_9;     // D17  RX2 PI_9
 
     static constexpr uint8_t CAMERAL_PIN_INT = 40;
     static constexpr uint8_t CAMERAL_PIN_RST = 42;
