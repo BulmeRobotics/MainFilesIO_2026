@@ -330,7 +330,7 @@ while (true) {
 			//Move the robot in the next tile and scan next field
 			if (!robot._ON_RAMP)
         mapper.Move(true);	//Move robot forward
-        
+
 			//if Ramp detected during DRIVE give 
 			if(robot._ON_RAMP){
 				uint8_t rampLenght = 0;
@@ -406,12 +406,11 @@ return 0;
 
 void cyclicMainTask() {
   //Main cyclic tasks
+  tof.Update();
   UI.Update();
   cs.Update();
 }
 void cyclicRunTask() {
-  tof.Update();
-
   cam.Update((cs.GetFloor() == TileType::dangerZone));
 
   //Black Tile Handling
