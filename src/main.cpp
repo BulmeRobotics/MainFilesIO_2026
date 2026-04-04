@@ -330,36 +330,41 @@ while (true) {
 			//Move the robot in the next tile and scan next field
 			mapper.Move(true);	//Move robot forward
 			//if Ramp detected during DRIVE give 
-			// if(robot._ON_RAMP){
-			// 	uint8_t rampLenght = 0;
-			// 	int8_t rampDirection = 0;
-				
-			// 	//Calculate RAMP INFOS
-			// 	rampLenght = (robot.RAMP_LENGTH / 300);	//Calculate num of Tiles
-			// 	//Determine RAMP Direction
-			// 	if(robot.currentRobotHeight < robot.currentRobotHeight + robot.RAMP_HEIGHT){
-			// 		if(robot.currentRobotHeight <= LOWER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT >= UPPER_LEVEL_HEIGHT
-			// 			) rampDirection = 2;
-			// 		else if(robot.currentRobotHeight <= LOWER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT > LOWER_LEVEL_HEIGHT
-			// 			) rampDirection = 1;
-			// 		else if(robot.currentRobotHeight < UPPER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT >= UPPER_LEVEL_HEIGHT
-			// 			) rampDirection = 1;						 
-			// 	}
-			// 	else if(robot.currentRobotHeight > robot.currentRobotHeight + robot.RAMP_HEIGHT){
-			// 		if(robot.currentRobotHeight >= UPPER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT <= LOWER_LEVEL_HEIGHT
-			// 			) rampDirection = -2;
-			// 		else if(robot.currentRobotHeight >= UPPER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT < UPPER_LEVEL_HEIGHT
-			// 			) rampDirection = -1;
-			// 		else if(robot.currentRobotHeight < UPPER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT <= LOWER_LEVEL_HEIGHT
-			// 			) rampDirection = -1;
-			// 	}
-			// 	robot.currentRobotHeight += robot.RAMP_HEIGHT;
-			// 	if(robot.currentRobotHeight <= RESET_HEIGHT_SPAN && robot.currentRobotHeight >= -RESET_HEIGHT_SPAN) robot.currentRobotHeight = 0;
-			// 	robot._ON_RAMP = false;
-			// 	robot.maxRampIncline = 0;					
-			// 	//pass RampInfos to Mapping
-      //   mapper.Ramp(rampDirection, rampLenght);
-			// }
+			if(robot._ON_RAMP){
+				uint8_t rampLenght = 0;
+				int8_t rampDirection = 0;
+			
+				//Calculate RAMP INFOS
+				rampLenght = (robot.RAMP_LENGTH / 300);	//Calculate num of Tiles
+				//Determine RAMP Direction
+				if(robot.currentRobotHeight < robot.currentRobotHeight + robot.RAMP_HEIGHT){
+					// if(robot.currentRobotHeight <= LOWER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT >= UPPER_LEVEL_HEIGHT
+					// 	) rampDirection = 2;
+					if(robot.currentRobotHeight <= LOWER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT > LOWER_LEVEL_HEIGHT
+						) rampDirection = 1;
+					else if(robot.currentRobotHeight < UPPER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT >= UPPER_LEVEL_HEIGHT
+						) rampDirection = 1;						 
+				}
+				else if(robot.currentRobotHeight > robot.currentRobotHeight + robot.RAMP_HEIGHT){
+					// if(robot.currentRobotHeight >= UPPER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT <= LOWER_LEVEL_HEIGHT
+					// 	) rampDirection = -2;
+					if(robot.currentRobotHeight >= UPPER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT < UPPER_LEVEL_HEIGHT
+						) rampDirection = -1;
+					else if(robot.currentRobotHeight < UPPER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT <= LOWER_LEVEL_HEIGHT
+						) rampDirection = -1;
+				}
+				robot.currentRobotHeight += robot.RAMP_HEIGHT;
+				if(robot.currentRobotHeight <= RESET_HEIGHT_SPAN && robot.currentRobotHeight >= -RESET_HEIGHT_SPAN) robot.currentRobotHeight = 0;
+				robot._ON_RAMP = false;
+				robot.maxRampIncline = 0;					
+				//pass RampInfos to Mapping
+        if (rampDirection == 1)
+          mapper.Ramp(ErrorCodes::up, rampLenght);
+        else if (rampDirection == -1)
+          mapper.Ramp(ErrorCodes::down, rampLenght);
+        else if (rampDirection == 0)
+          mapper.Ramp(ErrorCodes::same, rampLenght);
+			}
 			currentRunState = RunState::SETTILE;
     }
 

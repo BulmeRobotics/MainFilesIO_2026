@@ -151,9 +151,7 @@ ErrorCodes Driving::checkRamp(void){
 			_RAMP_UP = false;	//Ramp UP not detected
 			if (millis() < lastSetTile + MIN_SETTILE_TIME) {	//Check if settile occured shortly before Ramp detection
 				p_mapSys->Move(true);
-//!				if(p_mapSys->rollBackPath(1) != ErrorCodes::OK){
-//!					// Serial.println("no Rollback!");	//Roll back the path
-//!				}
+				p_mapSys->RollbackInstructions(1);
 				#ifdef DEBUG_RAMP
 				Serial.println("CORRECTED RAMP DOWN!");
 				#endif // DEBUG_RAMP
