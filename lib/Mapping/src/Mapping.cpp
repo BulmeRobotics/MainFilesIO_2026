@@ -339,24 +339,44 @@ ErrorCodes Mapping::Ramp(ErrorCodes direction, uint8_t length) {
 }
 
 void Mapping::RollbackOne(){
+    if(pathIndex > 1) pathIndex--;
     uint16_t pos = currrentPosition;
     Move(false);
-    uint16_t oldPos = 0;
-    if(pathIndex > 1) pathIndex--;
 
-    //get oldPos dep on Orientation
-    if(currentOrientation == Orientations::North)       oldPos = tiles[pos].south;
-    else if(currentOrientation == Orientations::East)   oldPos = tiles[pos].west;
-    else if(currentOrientation == Orientations::South)  oldPos = tiles[pos].north;
-    else oldPos = tiles[pos].east;
+    //Get Coordinates
+    int16_t x = tiles[pos].x, y = tiles[pos].y, z = tiles[pos].z;
 
+    // Pointer to back and front Tiles
+    int16_t Tile::* forwardDir = 0;
+    int16_t Tile::* backwardDir = 0;
+
+    //get Position depending on Orientation
+    switch (currentOrientation){
+        case Orientations::North: forwardDir = &Tile::north; backwardDir = &Tile::south; break;
+        case Orientations::East:  forwardDir = &Tile::east;  backwardDir = &Tile::west;  break;
+        case Orientations::South: forwardDir = &Tile::south; backwardDir = &Tile::north; break;
+        case Orientations::West:  forwardDir = &Tile::west;  backwardDir = &Tile::east;  break;
+        default: return; // return for safety
+    }
+
+    // remove wrong Tile 
+    int16_t frontIdx = tiles[pos].*forwardDir;
+    if (frontIdx != -1 && tiles[frontIdx].type == TileType::unexplored) {
+        tiles[frontIdx] = Tile(); 
+    }
+
+    //set old Position
+    uint16_t oldPos = tiles[pos].*backwardDir;
+
+    // Reset Tile
     tiles[pos] = Tile();
     tiles[pos].type = TileType::unexplored;
+    tiles[pos].x = x;
+    tiles[pos].y = y;
+    tiles[pos].z = z;
     
-    if(currentOrientation == Orientations::North)       tiles[pos].south = oldPos;
-    else if(currentOrientation == Orientations::East)   tiles[pos].west = oldPos;
-    else if(currentOrientation == Orientations::South)  tiles[pos].north = oldPos;
-    else tiles[pos].east = oldPos;
+    //Set Link to old position 
+    tiles[pos].*backwardDir = oldPos;
 }
 
 #ifdef _MSC_VER
