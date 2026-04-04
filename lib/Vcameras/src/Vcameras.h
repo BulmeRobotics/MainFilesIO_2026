@@ -6,6 +6,9 @@
  * @date    01.04.2026
  */
 
+#include <Arduino.h>
+#include <mbed.h>
+
 #include <CustomDatatypes.h>
 #include <Ejector.h>
 #include <Driving.h>
@@ -17,10 +20,20 @@ class Vcameras
 {
 private:
     // --- Hardware Info ---
+    static constexpr PinName CAMERAL_TX = PD_5;     // D18  TX1 PD_5
+    static constexpr PinName CAMERAL_RX = PD_6;     // D19  RX1 PD_6
+    static constexpr PinName CAMERAR_TX = PH_13;    // D16  TX2 PH_13
+    static constexpr PinName CAMERAR_RX = PI_9;     // D17  RX2 PI_9
+
     static constexpr uint8_t CAMERAL_PIN_INT = 40;
     static constexpr uint8_t CAMERAL_PIN_RST = 42;
+    
     static constexpr uint8_t CAMERAR_PIN_INT = 41;
     static constexpr uint8_t CAMERAR_PIN_RST = 43;
+
+    //Serial
+    static mbed::UnbufferedSerial _camL;
+    static mbed::UnbufferedSerial _camR;
 
     // --- related Objects ---
     Ejector* _ejector = nullptr;
@@ -29,8 +42,8 @@ private:
     UserInterface* _ui = nullptr;
 
     // --- Interface ---
-    Stream* _ifc = nullptr;
-    bool _connected = false;
+    bool _connectedL = false;
+    bool _connectedR = false;
 
     // --- State Fields ---
     bool _LeftEnabled = false, _RightEnabled = false;
@@ -38,17 +51,26 @@ private:
     bool _oldRed = false;
 
     // --- Response ---
-    String _response = "";
+    static char _buffL[7];
+    static char _buffR[7];
+    static uint8_t _idL;
+    static uint8_t _idR;
 
-    // --- helper Methods
-    ErrorCodes Recieve(uint16_t timeout = 200);
-public:
+    static bool _NEW_DATA_L;
+    static bool _NEW_DATA_R;
+
+    static void on_camL_int();
+    static void on_camR_int();
+
     /**
-     * @brief Constructor for VictimCamera class
-     * @param camL ifc for left Cam
-     * @param camR ifc for right Cam
+     * @brief Recieves Commandos
+     * @param side left / right
+     * @param waittime time to block in ms
+     * @return Commandostring
      */
-    Vcameras(Stream* ifc = &Serial3) : _ifc(ifc) {}
+    String Recieve(ErrorCodes side, uint32_t waittime = 0);
+
+public:
 
     /**
      * @brief Initializes Cam class. Tries connecting to cameras
@@ -66,9 +88,12 @@ public:
 
     /**
      * @brief camera handler has to be called periodically
+     * @param onRed is robot on Red Tile?
+     * @param wallL is a wall Left?
+     * @param wallR is a wall Right?
      * @return ErrorCodes for debugging
      */
-    ErrorCodes Update(bool onRed);
+    ErrorCodes Update(bool onRed, bool wallL = true, bool wallR = true);
 
     /**
      * @brief Getter if Cam is enabled
@@ -87,6 +112,4 @@ public:
     bool IsAlert(ErrorCodes cam){
         return (cam == ErrorCodes::left) ? _LeftAlert : _RightAlert;
     }
-
-
 };

@@ -317,6 +317,11 @@ ErrorCodes Mapping::Ramp(ErrorCodes direction, uint8_t length) {
     return ErrorCodes::OK;
 }
 
+void Mapping::RollbackInstructions(uint8_t amount){
+    if(pathIndex >= amount) pathIndex -= amount;
+    return;
+}
+
 #ifdef _MSC_VER
 #pragma endregion Movement
 #pragma region Tile

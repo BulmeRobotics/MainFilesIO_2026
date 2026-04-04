@@ -1,6 +1,37 @@
 #include "Vcameras.h"
 #include <UserInterface.h>
 
+// --- Definition der statischen Member-Variablen ---
+mbed::UnbufferedSerial Vcameras::_camL(Vcameras::CAMERAL_TX, Vcameras::CAMERAL_RX);
+mbed::UnbufferedSerial Vcameras::_camR(Vcameras::CAMERAR_TX, Vcameras::CAMERAR_RX);
+
+
+char Vcameras::_buffL[7];
+char Vcameras::_buffR[7];
+uint8_t Vcameras::_idL = 0;
+uint8_t Vcameras::_idR = 0;
+bool Vcameras::_NEW_DATA_L = false;
+bool Vcameras::_NEW_DATA_R = false;
+
+//---------------------------------------------------------------------------------------------------------
+// ISR
+//---------------------------------------------------------------------------------------------------------
+
+void Vcameras::on_camL_int(){
+    char c;
+    if(_camL.read(&c,1)){
+        _buffL[_idL++] = c;
+        if(c == '>') _NEW_DATA_L = true;
+    }
+}
+void Vcameras::on_camR_int(){
+    char c;
+    if(_camR.read(&c,1)){
+        _buffR[_idR++] = c;
+        if(c == '>') _NEW_DATA_R = true;
+    }
+}
+
 //---------------------------------------------------------------------------------------------------------
 // Initialization
 //---------------------------------------------------------------------------------------------------------
@@ -10,17 +41,30 @@ ErrorCodes Vcameras::Init(Ejector* ejector, Mapping* mapper, Driving* robot, Use
     _mapper = mapper;
     _robot = robot;
     _ui = ui;
-    _connected = false;
+
+    //Reset incoming:
+    _NEW_DATA_L = false;
+    _NEW_DATA_R = false;
+    _idL = 0;
+    _idR = 0;
 
     pinMode(CAMERAL_PIN_INT, INPUT);
     pinMode(CAMERAR_PIN_INT, INPUT);
 
-    _ifc->print("<I>");
-    if(Recieve() != ErrorCodes::OK || _response.indexOf("OK") == -1){
-        _connected = false;
-        return ErrorCodes::ERROR;
-    }
-    _connected = true;
+    _camL.attach(&Vcameras::on_camL_int, mbed::SerialBase::RxIrq);
+    _camR.attach(&Vcameras::on_camR_int, mbed::SerialBase::RxIrq);
+
+    const char msg[] = "<I>";
+    String str;
+
+    _camL.write(msg, sizeof(msg) - 1);
+    str = Recieve(ErrorCodes::left, 200);
+    _connectedL = (str.indexOf("OK") != -1) ? true : false;
+    
+    _camL.write(msg, sizeof(msg) - 1);
+    str = Recieve(ErrorCodes::right, 200);
+    _connectedR = (str.indexOf("OK") != -1) ? true : false;
+
     return ErrorCodes::OK;  
 }
 
@@ -28,37 +72,30 @@ ErrorCodes Vcameras::Init(Ejector* ejector, Mapping* mapper, Driving* robot, Use
 // Recieve UART
 //---------------------------------------------------------------------------------------------------------
 
-ErrorCodes Vcameras::Recieve(uint16_t timeout){
-    if(!_connected) return ErrorCodes::no_connection;
-    uint32_t start = millis();
-    String buffer;
+String Vcameras::Recieve(ErrorCodes side, uint32_t waittime){
+    bool* newData = (side == ErrorCodes::left) ? &_NEW_DATA_L : &_NEW_DATA_R;
+    //Wait if wanted
+    if(waittime > 0){
+        uint32_t time = millis();
+        while((time + waittime > millis()) && !(*newData)) delay(5);
+    }
 
-    // Read until timeout or until we have at least one complete token <...>
-    while (millis() - start <= timeout) {
-        while (_ifc->available()) {
-            int c = _ifc->read();
-            if (c < 0) break;
-            buffer += (char)c;
+    if(*newData){
+        *newData = false;
+        char* buff = (side == ErrorCodes::left) ? _buffL : _buffR;
+        uint8_t* len = (side == ErrorCodes::left) ? &_idL : &_idR;
+
+        String str = "";
+        for(uint8_t i = 0; i < *len; i++){
+            str += buff[i];
+            buff[i] = 0;
         }
+        *len = 0;
 
-        int s = buffer.indexOf('<');
-        int e = (s >= 0) ? buffer.indexOf('>', s) : -1;
-        if (s >= 0 && e > s) break; // have a complete token
+        int idx = str.indexOf('>',1);
+        if(idx > 1) return str.substring(1, idx);
     }
-
-    if (buffer.isEmpty()) {
-        _ui->ShowPopup("Camera timeout!", ErrorCodes::ERROR);
-        return ErrorCodes::TIMEOUT;
-    }
-
-    int s = buffer.indexOf('<');
-    int e = (s >= 0) ? buffer.indexOf('>', s) : -1;
-    if (s >= 0 && e > s) {
-        _response = buffer.substring(s + 1, e);
-        return ErrorCodes::OK;
-    }
-    _ui->ShowPopup("response invalid!", ErrorCodes::warning);
-    return ErrorCodes::invalid;
+    return " ";
 }
 
 //---------------------------------------------------------------------------------------------------------
@@ -66,28 +103,24 @@ ErrorCodes Vcameras::Recieve(uint16_t timeout){
 //---------------------------------------------------------------------------------------------------------
 
 ErrorCodes Vcameras::Enable(bool en, ErrorCodes side){
-    if(!_connected) return ErrorCodes::no_connection;
-    char cSide = (side == ErrorCodes::left) ? 'L' : 'R';
+    bool conn = (side == ErrorCodes::left) ? _connectedL : _connectedR;
+    if(!conn) return ErrorCodes::no_connection; //Return if no connection
 
-    if(en){ //Enable
-        _ifc->print("<E" + cSide + '>');
-        if(Recieve() == ErrorCodes::OK){
-            if(_response.indexOf("OK") == -1) return ErrorCodes::ERROR;
+    //Create buffers
+    bool& enState =  (side == ErrorCodes::left) ? _LeftEnabled : _RightEnabled;
+    mbed::UnbufferedSerial* ifc = (side == ErrorCodes::left) ? &_camL : &_camR;
+    String str;
 
-            if(side == ErrorCodes::left) _LeftEnabled = true;
-            else _RightEnabled = true;
-            return ErrorCodes::OK;
-        }
-    } else {    //Disable
-        _ifc->print("<D" + cSide + '>');
-        if(Recieve() == ErrorCodes::OK){
-            if(_response.indexOf("OK") == -1) return ErrorCodes::ERROR;
+    //Send command
+    const char* cmd = en ? "<E>" : "<D>";
+    ifc->write(cmd, 3);
 
-            if(side == ErrorCodes::left) _LeftEnabled = false;
-            else _RightEnabled = false; 
-            return ErrorCodes::OK;
-        }
-    }
+    //Recieve Command
+    str = Recieve(side, 100);
+    if(str.indexOf("OK") != -1) {
+        enState = en;
+        return ErrorCodes::OK;
+    }        
     _ui->ShowPopup("cams enable error", ErrorCodes::ERROR);
     return ErrorCodes::invalid;
 }
@@ -96,8 +129,8 @@ ErrorCodes Vcameras::Enable(bool en, ErrorCodes side){
 // Update
 //---------------------------------------------------------------------------------------------------------
 
-ErrorCodes Vcameras::Update(bool onRed){
-    if(!_connected) return ErrorCodes::no_connection;
+ErrorCodes Vcameras::Update(bool onRed, bool wallL, bool wallR){
+    if(!_connectedL || !_connectedR) return ErrorCodes::no_connection;
     if(_oldRed && !onRed) {
         Enable(true, ErrorCodes::left);
         Enable(true, ErrorCodes::right);
@@ -105,6 +138,15 @@ ErrorCodes Vcameras::Update(bool onRed){
         Enable(false, ErrorCodes::left);
         Enable(false, ErrorCodes::right);
     }
+    _oldRed = onRed;
+    if(onRed) return ErrorCodes::OK;
+
+    //Wände überprüfen
+    if(wallL && !_LeftEnabled)      Enable(true,  ErrorCodes::left);
+    else if(!wallL && _LeftEnabled) Enable(false, ErrorCodes::left);
+
+    if(wallR && !_RightEnabled)      Enable(true,  ErrorCodes::right);
+    else if(!wallR && _RightEnabled) Enable(false, ErrorCodes::right);
 
     //Abfrage auf alert
     if(_LeftEnabled) _LeftAlert = digitalRead(CAMERAL_PIN_INT);
@@ -113,19 +155,22 @@ ErrorCodes Vcameras::Update(bool onRed){
     //Continue when no camera is reporting
     if(!_LeftAlert && !_RightAlert) return ErrorCodes::OK;
 
-    //Check for new Data
-    ErrorCodes err = Recieve();
-    if(err != ErrorCodes::OK){
-        _ui->ShowPopup("Victim:" + (err == ErrorCodes::invalid) ? "invalid" : "Already Found", (err == ErrorCodes::invalid) ? ErrorCodes::ERROR : ErrorCodes::info);
-        return err;
-    }
+    String str = "";
+    ErrorCodes side;
+    //Wait for new Data
+    if(_NEW_DATA_L){
+        str = Recieve(ErrorCodes::left);
+        side = ErrorCodes::left;
+    } else if (_NEW_DATA_R){
+        str = Recieve(ErrorCodes::right);
+        side = ErrorCodes::right;
+    } else return ErrorCodes::OK;
 
     //Dissect to side, and Victim Type
-    char victim = _response[0];
-    ErrorCodes side = (_response[1] == 'L') ? ErrorCodes::left : ErrorCodes::right;
+    char victim = str[0];
 
     //Mapping call
-    err = _mapper->SetVictim();
+    ErrorCodes err = _mapper->SetVictim();
     if(err != ErrorCodes::OK) return err;
 
     _robot->endDrive(); //Stops robot
@@ -143,8 +188,9 @@ ErrorCodes Vcameras::Update(bool onRed){
         amount = 0;
         break;
     }
-
-    _ui->ShowPopup("VICTIM Detected:" + victim, ErrorCodes::info);
+    char buffer[20];
+    sprintf(buffer,"VICTIM Detected: %c", victim);
+    _ui->ShowPopup(buffer, ErrorCodes::info);
     _ui->Update();
     _ejector->Eject(side, amount, _robot);
     _ui->LED_BUZZER_Signal(500,500,5);
