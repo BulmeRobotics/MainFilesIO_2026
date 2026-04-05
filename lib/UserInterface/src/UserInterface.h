@@ -12,7 +12,7 @@
 #include <Arduino_GigaDisplay.h>
 #include <Arduino_GigaDisplay_GFX.h>
 #include <Arduino_GigaDisplayTouch.h>
-#include <Adafruit_NeoPixel.h>
+#include "Adafruit_NeoPixel.h"
 
 #include <CustomDatatypes.h>
 #include <Mapping.h>
