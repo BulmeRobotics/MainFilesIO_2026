@@ -645,8 +645,6 @@ void UserInterface::Initialize(){
     pinMode(buzzerPin, OUTPUT);
     pinMode(ledPin, OUTPUT);
 
-    SetIllumination(0, 0, 0, 255); // Turn on Illumination at Startup
-
     //Initialize Display
     display.begin();
     display.setRotation(1);
@@ -684,7 +682,7 @@ void UserInterface::Initialize(){
             BuzzerSignal(200,200,1);
         }
     } else AddInfoMsg("Battery", "OK", true);
-
+    SetIllumination(0, 0, 0, 255); // Turn on Illumination at Startup
     driveMode = ErrorCodes::straight;
 }
 
@@ -971,8 +969,9 @@ void UserInterface::SetIllumination(uint8_t red, uint8_t green, uint8_t blue, ui
     pixels.clear();
     for(uint8_t i = 0; i < pixelNum; i++){
         pixels.setPixelColor(i, red, green, blue, white);
+        pixels.show();
     }
-    pixels.show();
+
 }
 
 void UserInterface::BuzzerSignal(uint16_t time_ms, uint16_t pause_ms, uint8_t repetitions){
