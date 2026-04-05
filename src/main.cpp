@@ -68,11 +68,13 @@ Vcameras cam(&Serial);
 RobotState currentMenuState;
 RunState currentRunState;
 uint32_t lastButtonPressGray;
+uint32_t ts_lastSetTile;
 
 //Flags
 bool _ROBOT_TURNING = false;
 bool _RAMP_INFRONT = false;
 bool _RAMP_BEHIND = false;
+Instructionset saveInstruction;
 ErrorCodes _CHECKPOINT = ErrorCodes::OK;
 
 #ifdef _MSC_VER
@@ -181,15 +183,24 @@ while (true) {
       //Checkpoint handling
       if(cs.GetFloor() == TileType::checkpoint) UI.ShowPopup("CHECKPOINT",ErrorCodes::info, 2);
       cs.resetCheckpoint();
+      
+      bool _INSTR_DRIVE = (saveInstruction == Instructionset::D_Forward);
+      if (_INSTR_DRIVE && millis() < ts_lastSetTile + MIN_SETTILE_TIME) {	//Check if settile occured shortly before Ramp detection
+				mapper.RollbackOne();
+				#ifdef DEBUG_RAMP
+				Serial.println("CORRECTED RAMP DOWN!");
+				#endif // DEBUG_RAMP
+			}
 
 			currentRunState = RunState::GET_INSTRUCTIONS;
-			robot.lastSetTile = millis();
+			ts_lastSetTile = millis();
     } 
 
     else if (currentRunState == RunState::GET_INSTRUCTIONS) {
       UI.UpdateMap();
       //Get Instructions Logic
-      switch (mapper.GetInstruction()) 
+      saveInstruction = mapper.GetInstruction();
+      switch (saveInstruction) 
       {
       case Instructionset::T_North:
       //Turn North Logic

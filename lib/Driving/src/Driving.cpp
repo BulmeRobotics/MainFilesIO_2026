@@ -153,12 +153,6 @@ ErrorCodes Driving::checkRamp(void){
 			
 			_RAMP_DOWN = true;	//Ramp DOWN detected
 			_RAMP_UP = false;	//Ramp UP not detected
-			if (millis() < lastSetTile + MIN_SETTILE_TIME) {	//Check if settile occured shortly before Ramp detection
-				p_mapSys->RollbackOne();
-				#ifdef DEBUG_RAMP
-				Serial.println("CORRECTED RAMP DOWN!");
-				#endif // DEBUG_RAMP
-			}
 
 			p_mapSys->Move(true);
 			
