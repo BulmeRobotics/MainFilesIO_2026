@@ -352,7 +352,7 @@ while (true) {
 					// 	) rampDirection = -2;
 					if(robot.currentRobotHeight >= UPPER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT < UPPER_LEVEL_HEIGHT
 						) rampDirection = -1;
-            
+
 					else if(robot.currentRobotHeight < UPPER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT <= LOWER_LEVEL_HEIGHT
 						) rampDirection = -1;
 				}

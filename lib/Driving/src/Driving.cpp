@@ -85,7 +85,6 @@ ErrorCodes Driving::bumperHandler(void){
 ErrorCodes Driving::checkRamp(void){
     p_gyro->GetAngle_advanced(0, GyroAxles::Axis_Z);
     float incline = -p_gyro->data.angle_car;
-
 	Serial.println(incline);
 
     p_gyro->GetAngle_advanced(0, GyroAxles::Axis_Y);
@@ -180,6 +179,7 @@ ErrorCodes Driving::checkRamp(void){
     		rampCheckDuration = 1000;   // optional Default
     		#ifdef DEBUG_RAMP
     		Serial.println("NO RAMP!");
+			Serial.println("inc: " + String(inclineCycleCounter) + " non: " + String(nonInclineCycleCounter));
     		#endif
 		}
 	}
@@ -219,6 +219,7 @@ ErrorCodes Driving::rampHandler(void){
 	else {
 		p_gyro->GetAngle_advanced(0, GyroAxles::Axis_Z);
 		float incline = -p_gyro->data.angle_car;
+		Serial.println(incline);
 		arr_incline[arr_incline_index] = incline;	//Save the incline value in the array
 		arr_incline_index++;
 
