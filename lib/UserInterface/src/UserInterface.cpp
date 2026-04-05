@@ -894,6 +894,7 @@ void UserInterface::Update(){
                 ErrorCodes newLayer = ErrorCodes::single;
                 if(p_mapping->GetLayerSetting() == ErrorCodes::single) newLayer = ErrorCodes::multi;
                 p_mapping->SetLayerSetting(newLayer);
+                btnLayerSetting.Draw(display,(p_mapping->GetLayerSetting() == ErrorCodes::single) ? "single" : "multi");
             }
 
             //Speed
