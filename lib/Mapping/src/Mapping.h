@@ -108,7 +108,7 @@ private:
     //Config:
     ErrorCodes pathPriority = ErrorCodes::straight;
     bool _RETURN_HOME = false;
-    ErrorCodes _layerSetting = ErrorCodes::same;
+    ErrorCodes _layerSetting = ErrorCodes::single;
 
 public:
 
