@@ -97,7 +97,9 @@ String Vcameras::Recieve(ErrorCodes side, uint32_t waittime){
         *len = 0;
 
         int idx = str.indexOf('>',1);
-        if(idx > 1) return str.substring(1, idx);
+        String s = (idx > 1) ? str.substring(1, idx) : " ";
+        if(_debug_ifc != nullptr) _debug_ifc->println("Rec: " + s);
+        return s;
     }
     return " ";
 }

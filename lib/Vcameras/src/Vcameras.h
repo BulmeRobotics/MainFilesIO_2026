@@ -43,6 +43,8 @@ private:
     Mapping* _mapper = nullptr;
     UserInterface* _ui = nullptr;
 
+    Stream* _debug_ifc = nullptr;
+
     // --- Interface ---
     bool _connectedL = false;
     bool _connectedR = false;
@@ -73,6 +75,8 @@ private:
     String Recieve(ErrorCodes side, uint32_t waittime = 0);
 
 public:
+
+    Vcameras(Stream* debugPort = nullptr) : _debug_ifc(debugPort) {}
 
     /**
      * @brief Initializes Cam class. Tries connecting to cameras
