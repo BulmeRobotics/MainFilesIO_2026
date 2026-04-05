@@ -61,13 +61,14 @@ ErrorCodes Vcameras::Init(Ejector* ejector, Mapping* mapper, Driving* robot, Use
     String str;
 
     _camL.write(msg, sizeof(msg) - 1);
-    str = Recieve(ErrorCodes::left, 200);
+    str = Recieve(ErrorCodes::left, CAM_TIMEOUT);
     _connectedL = (str.indexOf("OK") != -1) ? true : false;
     
-    _camL.write(msg, sizeof(msg) - 1);
-    str = Recieve(ErrorCodes::right, 200);
+    _camR.write(msg, sizeof(msg) - 1);
+    str = Recieve(ErrorCodes::right, CAM_TIMEOUT);
     _connectedR = (str.indexOf("OK") != -1) ? true : false;
 
+    if(!_connectedL || !_connectedR) return ErrorCodes::no_connection;
     return ErrorCodes::OK;  
 }
 
@@ -119,7 +120,7 @@ ErrorCodes Vcameras::Enable(bool en, ErrorCodes side){
     ifc->write(cmd, 3);
 
     //Recieve Command
-    str = Recieve(side, 100);
+    str = Recieve(side, CAM_TIMEOUT);
     if(str.indexOf("OK") != -1) {
         enState = en;
         return ErrorCodes::OK;
@@ -171,6 +172,12 @@ ErrorCodes Vcameras::Update(bool onRed, bool wallL, bool wallR){
 
     //Dissect to side, and Victim Type
     char victim = str[0];
+
+    //Check if Victim is allowed:
+    if(!(victim == 'H' || victim == 'S' || victim == 'U')){
+        _ui->ShowPopup("Invalid victim!", ErrorCodes::warning, 2);
+        return ErrorCodes::ERROR;
+    }
 
     //Mapping call
     ErrorCodes err = _mapper->SetVictim();

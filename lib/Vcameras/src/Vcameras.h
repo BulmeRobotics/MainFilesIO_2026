@@ -31,6 +31,8 @@ private:
     static constexpr uint8_t CAMERAR_PIN_INT = 41;
     static constexpr uint8_t CAMERAR_PIN_RST = 43;
 
+    static constexpr uint32_t CAM_TIMEOUT = 200;
+
     //Serial
     static mbed::UnbufferedSerial _camL;
     static mbed::UnbufferedSerial _camR;
