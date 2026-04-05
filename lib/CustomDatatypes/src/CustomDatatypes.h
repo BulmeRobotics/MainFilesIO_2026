@@ -27,7 +27,7 @@ enum class ErrorCodes : uint8_t {
     CHECK_DRIVE,
     SCAN_DRIVE,
     CHECK_RAMP,
-    invalid, wall, straight, north, east, south, west, Overflow, up, down, same, //Mapping specific
+    invalid, wall, straight, north, east, south, west, Overflow, up, down, same, single, multi, //Mapping specific
     disabled, left, right,
     info,warning,    //Popup System
     empty,               //ejector

@@ -108,6 +108,7 @@ private:
     //Config:
     ErrorCodes pathPriority = ErrorCodes::straight;
     bool _RETURN_HOME = false;
+    ErrorCodes _layerSetting = ErrorCodes::single;
 
 public:
 
@@ -142,6 +143,23 @@ public:
      * @return already_found / OK / ERROR
      */
     ErrorCodes SetVictim();
+
+    /**
+     * @brief set ramp handling
+     * @param set single / multi 
+     * @return current setting
+     */
+    ErrorCodes SetLayerSetting(ErrorCodes set){
+        if(set == ErrorCodes::single || set == ErrorCodes::multi)
+            _layerSetting = set;
+        return _layerSetting;
+    }
+
+    /**
+     * @brief gets current ramp handling
+     * @return current layer setting -> single / multi
+     */
+    ErrorCodes GetLayerSetting() { return _layerSetting; };
 
     // /**
     //  * @brief Druckt die intern gespeicherte Karte des Roboters in die Konsole
