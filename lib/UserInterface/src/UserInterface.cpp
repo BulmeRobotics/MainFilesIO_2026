@@ -390,8 +390,10 @@ void UserInterface::ConstructSettingsMenu() {
     DrawMainMenuStatic();         // Linke Navigation malen
 
     // Label-Boxen (Statischer Text)
-    display.fillRoundRect(140, 10, 362, 44, 5, HL_COLOR);
-    display.fillRoundRect(140, 158, 640, 122, 5, HL_COLOR);
+    display.fillRoundRect(140, 10, 362, 44, 10, HL_COLOR);
+
+    //Color Sensors
+    display.fillRoundRect(140, 158, 640, 152, 10, HL_COLOR);
     
     display.setTextSize(3);
     display.setTextColor(TEXT_COLOR, HL_COLOR);
@@ -406,13 +408,14 @@ void UserInterface::ConstructSettingsMenu() {
     // Alle Buttons malen (Der Text wird durch die Klasse automatisch zentriert!)
     btnSpeedMinus.Draw(display, "-");
     btnSpeedPlus.Draw(display, "+");
-    btnCalibWhite.Draw(display, "WHITE");
+    btnCalibWhite.Draw(display, "WHI");
     btnBleConnect.Draw(display, "BLE");
     
-    btnCalibBlack.Draw(display, "Black");
-    btnCalibBlue.Draw(display, "Blue");
-    btnCalibDZone.Draw(display, "D-Zone");
-    btnCalibCheckP.Draw(display, "CheckP");
+    btnCalibBlack.Draw(display, "Bla");
+    btnCalibBlue.Draw(display, "Blu");
+    btnCalibDZone.Draw(display, "Red");
+    btnCalibCheckP.Draw(display, "Sil");
+    btnLayerSetting.Draw(display,(p_mapping->GetLayerSetting() == ErrorCodes::single) ? "single" : "multi");
 }
 
 #ifdef _MSC_VER
@@ -885,6 +888,14 @@ void UserInterface::Update(){
 
         // Update Buttons
         if(touched){
+            //Layer Settings
+            if(btnLayerSetting.IsPressed(tx,ty)){
+                BuzzerSignal(5,0,1);
+                ErrorCodes newLayer = ErrorCodes::single;
+                if(p_mapping->GetLayerSetting() == ErrorCodes::single) newLayer = ErrorCodes::multi;
+                p_mapping->SetLayerSetting(newLayer);
+            }
+
             //Speed
             if(btnSpeedMinus.IsPressed(tx,ty) && driveSpeed > 10){
                 driveSpeed -= 10;

@@ -145,12 +145,15 @@ private:
     // -- Settings --
     Button btnSpeedMinus  = Button(140, 64, 160, 84, HL_COLOR, TEXT_COLOR, 4, nullptr);
     Button btnSpeedPlus   = Button(320, 64, 160, 84, HL_COLOR, TEXT_COLOR, 4, nullptr);
-    Button btnCalibWhite  = Button(500, 71, 135, 70, BTN_COLOR, TEXT_COLOR, 3, nullptr);
     Button btnBleConnect  = Button(665, 71, 105, 70, BTN_COLOR, TEXT_COLOR, 3, nullptr);
-    Button btnCalibBlack  = Button(160, 200, 135, 70, BTN_COLOR, 0x0000, 3, nullptr); // Schwarz
-    Button btnCalibBlue   = Button(315, 200, 135, 70, BTN_COLOR, 0x001f, 3, nullptr); // Blau
-    Button btnCalibDZone  = Button(470, 200, 135, 70, BTN_COLOR, 0xf800, 3, nullptr); // Rot
-    Button btnCalibCheckP = Button(625, 200, 135, 70, BTN_COLOR, TEXT_COLOR, 3, nullptr); // Gelb/Text
+
+    Button btnCalibWhite  = Button(160, 200, 104, 100, BTN_COLOR, TEXT_COLOR, 3, nullptr);
+    Button btnCalibBlack  = Button(284, 200, 104, 100, BTN_COLOR, 0x0000, 3, nullptr); // Schwarz
+    Button btnCalibBlue   = Button(408, 200, 104, 100, BTN_COLOR, 0x001f, 3, nullptr); // Blau
+    Button btnCalibDZone  = Button(532, 200, 104, 100, BTN_COLOR, 0xf800, 3, nullptr); // Rot
+    Button btnCalibCheckP = Button(656, 200, 104, 100, BTN_COLOR, TEXT_COLOR, 3, nullptr); // Gelb/Text
+
+    Button btnLayerSetting = Button(500, 71, 145, 70, BTN_COLOR, TEXT_COLOR, 3, nullptr);
 
 // --- Functions ---
     // -- Main Menu --

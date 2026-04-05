@@ -269,6 +269,8 @@ ErrorCodes Mapping::Move(bool direction) {
 }
 
 ErrorCodes Mapping::Ramp(ErrorCodes direction, uint8_t length) {
+    if(_layerSetting == ErrorCodes::single) direction = ErrorCodes::same;
+    
     //Use existing ramps:
     if(tiles[currentPosition]. down != -1){
         currentPosition = tiles[currentPosition].down;
