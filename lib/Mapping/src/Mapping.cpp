@@ -199,7 +199,7 @@ uint16_t Mapping::findNextTarget() {
             bufferTargetIndex = 0; // Zurück zum Start (Index 0)
         }
     }
-    Serial.println("Target: x:" + String(tiles[bufferTargetIndex].x) + " y:" + String(tiles[bufferTargetIndex].y) +" z:" + String(tiles[bufferTargetIndex].z));
+    //Serial.println("Target: x:" + String(tiles[bufferTargetIndex].x) + " y:" + String(tiles[bufferTargetIndex].y) +" z:" + String(tiles[bufferTargetIndex].z));
     return bufferTargetIndex;
 }
 
@@ -262,7 +262,9 @@ ErrorCodes Mapping::Move(bool direction) {
     //Check if tile is valid
     if (nextTile == -1) return ErrorCodes::wall;
     currentPosition = nextTile;
+    
     Serial.println("x: " + String(tiles[currentPosition].x) + " y: " + String(tiles[currentPosition].y) + " z: " + String(tiles[currentPosition].z));
+    
     return ErrorCodes::OK;
 }
 
@@ -339,7 +341,7 @@ ErrorCodes Mapping::Ramp(ErrorCodes direction, uint8_t length) {
     if (realPos == UINT16_MAX) return ErrorCodes::Overflow; // Check if overflow
 
     tiles[realPos].type = TileType::unexplored;
-    tiles[realPos].z = tiles[currentPosition].z;
+    tiles[realPos].z = tiles[nextPos].z;
 
     // Verbindung über Pointer herstellen
     tiles[nextPos].*forwardDir = realPos;
@@ -377,7 +379,7 @@ void Mapping::RollbackOne(){
     // remove wrong Tile 
     int16_t frontIdx = tiles[pos].*forwardDir;
     if (frontIdx != -1) {
-        Serial.println("Delete Tile");
+        //Serial.println("Delete Tile");
         tiles[frontIdx] = Tile(); 
     }
 
