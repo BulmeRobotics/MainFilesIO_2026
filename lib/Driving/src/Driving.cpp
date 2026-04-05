@@ -85,7 +85,6 @@ ErrorCodes Driving::bumperHandler(void){
 ErrorCodes Driving::checkRamp(void){
     p_gyro->GetAngle_advanced(0, GyroAxles::Axis_Z);
     float incline = -p_gyro->data.angle_car;
-	Serial.println(incline);
 
     p_gyro->GetAngle_advanced(0, GyroAxles::Axis_Y);
     float sideTilt = p_gyro->data.angle_car;
@@ -239,6 +238,10 @@ ErrorCodes Driving::rampHandler(void){
             if (nonInclineCycleCounter >= 5 && p_drivetrain->GetEncoderDistance() > 50) {
                 rampEncoderDistance = p_drivetrain->GetEncoderDistance();
 
+				#ifdef DEBUG_RAMP
+				Serial.println("RAMP END @" + String(incline));
+				#endif
+
                 endDrive();
 
                 #ifdef DEBUG_RAMP_ARRAY
@@ -249,7 +252,7 @@ ErrorCodes Driving::rampHandler(void){
                 #endif
 
                 if(checkStairRamp()) {
-                    finishRamp(100);
+                    finishRamp(95);
                     _STAIR = true;
                 }
                 else finishRamp(95);

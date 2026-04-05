@@ -358,7 +358,7 @@ ErrorCodes Mapping::Ramp(ErrorCodes direction, uint8_t length) {
 }
 
 void Mapping::RollbackOne(){
-    if(pathIndex > 1) pathIndex--;
+    if(pathIndex > 1) pathIndex-= 2;
     uint16_t pos = currentPosition;
     Move(false);
 
@@ -370,7 +370,7 @@ void Mapping::RollbackOne(){
     int16_t Tile::* backwardDir = 0;
 
     //get Position depending on Orientation
-    switch (currentOrientation){
+    switch (currentOrientation) {
         case Orientations::North: forwardDir = &Tile::north; backwardDir = &Tile::south; break;
         case Orientations::East:  forwardDir = &Tile::east;  backwardDir = &Tile::west;  break;
         case Orientations::South: forwardDir = &Tile::south; backwardDir = &Tile::north; break;
