@@ -352,6 +352,7 @@ while (true) {
 					// 	) rampDirection = -2;
 					if(robot.currentRobotHeight >= UPPER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT < UPPER_LEVEL_HEIGHT
 						) rampDirection = -1;
+            
 					else if(robot.currentRobotHeight < UPPER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT <= LOWER_LEVEL_HEIGHT
 						) rampDirection = -1;
 				}
@@ -411,7 +412,8 @@ void cyclicMainTask() {
   cs.Update();
 }
 void cyclicRunTask() {
-  cam.Update((cs.GetFloor() == TileType::dangerZone));
+  uint8_t buffer = tof.GetWalls(_RAMP_INFRONT, _RAMP_BEHIND);
+  cam.Update((cs.GetFloor() == TileType::dangerZone), (buffer & (1<<3)) != 0, (buffer & (1<<1)) != 0);
 
   //Black Tile Handling
 	if(cs.GetFloor() == TileType::black) {

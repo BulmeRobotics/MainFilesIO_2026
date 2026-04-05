@@ -86,6 +86,8 @@ ErrorCodes Driving::checkRamp(void){
     p_gyro->GetAngle_advanced(0, GyroAxles::Axis_Z);
     float incline = -p_gyro->data.angle_car;
 
+	Serial.println(incline);
+
     p_gyro->GetAngle_advanced(0, GyroAxles::Axis_Y);
     float sideTilt = p_gyro->data.angle_car;
 
@@ -113,14 +115,16 @@ ErrorCodes Driving::checkRamp(void){
 		inclineCycleCounter--;
 		nonInclineCycleCounter = 0;
 	}
-	else if (!_ON_RAMP && ((incline > rampThresholdAngle) || (incline < -rampThresholdAngle)))	{
+	else if (!_ON_RAMP && ((incline >= rampThresholdAngle) || (incline <= -rampThresholdAngle)))	{
 		if (incline > 0) inclineCycleCounter++;
 		else inclineCycleCounter--;
 		if ((incline < 15) && (incline > -15)) rampCheckDuration = 1000;
 		else if (((incline >= 15) && (incline < 20)) || ((incline <= -15) && (incline > -20)))	rampCheckDuration = 500;
 		else if ((incline >= 20) || (incline <= -20))	rampCheckDuration = 200;
 	}
-	nonInclineCycleCounter++;
+
+	else if (!_ON_RAMP && ((incline < rampThresholdAngle) && (incline > -rampThresholdAngle)))
+		nonInclineCycleCounter++;
 
 	if ( !_ON_RAMP && millis() > (rampStartTime + rampCheckDuration) && rampStartTime != 0) {
 		if (inclineCycleCounter >= nonInclineCycleCounter * rampConfidence) {
@@ -170,10 +174,13 @@ ErrorCodes Driving::checkRamp(void){
 			return ErrorCodes::OK;
 		}
 		else {
-			inclineCycleCounter = 0;
-			#ifdef DEBUG_RAMP
-			Serial.print("NO RAMP!");
-			#endif
+    		inclineCycleCounter = 0;
+    		nonInclineCycleCounter = 0;
+    		rampStartTime = 0;
+    		rampCheckDuration = 1000;   // optional Default
+    		#ifdef DEBUG_RAMP
+    		Serial.println("NO RAMP!");
+    		#endif
 		}
 	}
 	return ErrorCodes::OK;

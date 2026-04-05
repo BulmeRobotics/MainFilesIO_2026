@@ -40,7 +40,7 @@ private:
 
     //Ramp settings
     const float rampThresholdAngle = 10;	//Angle threshold for the ramp
-    const float rampConfidence = 0.9;    //Confidence for the ramp detection
+    const float rampConfidence = 0.5;    //Confidence for the ramp detection
     const uint8_t rampSpeedUp = 75;
     const uint8_t rampSpeedDown = 25;
     const uint8_t rampSubDistance = 30;
