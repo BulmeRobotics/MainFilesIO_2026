@@ -252,10 +252,10 @@ ErrorCodes Driving::rampHandler(void){
                 #endif
 
                 if(checkStairRamp()) {
-                    finishRamp(95);
+                    finishRamp(70);
                     _STAIR = true;
                 }
-                else finishRamp(95);
+                else finishRamp(70);
                 
                 for (uint16_t i = 0; i < INCLINE_ARRAY_SIZE; i++) {
                     arr_incline[i] = 0.0;	//Reset the incline array

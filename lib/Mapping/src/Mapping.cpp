@@ -358,9 +358,14 @@ ErrorCodes Mapping::Ramp(ErrorCodes direction, uint8_t length) {
 }
 
 void Mapping::RollbackOne(){
-    if(pathIndex > 1) pathIndex-= 2;
+    Serial.println("Rollback: p: " + String(pathIndex));
+    Serial.println("Instruction: " + String((uint8_t)path[pathIndex]));
+    if(pathIndex >= 1) pathIndex-= 1;
+    Serial.println("Instruction: " + String((uint8_t)path[pathIndex]));
     uint16_t pos = currentPosition;
     Move(false);
+
+    if(tiles[pos].weight == COST_RAMP) return;
 
     //Get Coordinates
     int16_t x = tiles[pos].x, y = tiles[pos].y, z = tiles[pos].z;
@@ -750,6 +755,12 @@ Instructionset Mapping::GetInstruction() {
             // Mark end of instructions
             path[pathIndex] = Instructionset::FinishedInstructions;
             pathIndex = 1;  // Reset to start of path
+
+            for (int i = 0; path[i] != Instructionset::FinishedInstructions; i++)
+            {
+                Serial.println("A: " + String((uint8_t)path[i]));
+            }
+            
             return path[0];
         }
         else {
