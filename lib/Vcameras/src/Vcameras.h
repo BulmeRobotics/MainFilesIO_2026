@@ -30,7 +30,7 @@ private:
     static constexpr uint8_t CAMERAR_PIN_INT = 41;
     static constexpr uint8_t CAMERAR_PIN_RST = 43;
 
-    static constexpr uint32_t CAM_TIMEOUT = 5000;
+    static constexpr uint32_t CAM_TIMEOUT = 300;
 
     //Serial
     UART* _camL = CAMERA_L;
@@ -60,6 +60,19 @@ private:
     bool _LeftAlert = false, _RightAlert = false;
     bool _oldRed = false;
 
+    // Enable command state per camera (allows concurrent non-blocking left/right updates)
+    bool _enPendingL = false;
+    bool _enPendingR = false;
+    bool _enTargetL = false;
+    bool _enTargetR = false;
+    uint32_t _enStartL = 0;
+    uint32_t _enStartR = 0;
+    String _rxEnableL = "";
+    String _rxEnableR = "";
+
+    ErrorCodes EnableNonBlockingStep(ErrorCodes side);
+    bool TryReceivePacketNonBlocking(ErrorCodes side, String& packet);
+
     // --- Response ---
     static volatile char _buffL[10];
     static volatile char _buffR[10];
@@ -88,7 +101,7 @@ public:
      * @param side left / right
      * @return OK / Error
      */
-    ErrorCodes Enable(bool en, ErrorCodes side);
+    ErrorCodes Enable(bool en, ErrorCodes side, bool blocking = true);
 
     /**
      * @brief camera handler has to be called periodically
