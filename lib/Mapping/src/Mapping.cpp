@@ -263,7 +263,7 @@ ErrorCodes Mapping::Move(bool direction) {
     if (nextTile == -1) return ErrorCodes::wall;
     currentPosition = nextTile;
     
-    Serial.println("x: " + String(tiles[currentPosition].x) + " y: " + String(tiles[currentPosition].y) + " z: " + String(tiles[currentPosition].z));
+    //Serial.println("x: " + String(tiles[currentPosition].x) + " y: " + String(tiles[currentPosition].y) + " z: " + String(tiles[currentPosition].z));
     
     return ErrorCodes::OK;
 }
@@ -358,10 +358,7 @@ ErrorCodes Mapping::Ramp(ErrorCodes direction, uint8_t length) {
 }
 
 void Mapping::RollbackOne(){
-    Serial.println("Rollback: p: " + String(pathIndex));
-    Serial.println("Instruction: " + String((uint8_t)path[pathIndex]));
     if(pathIndex >= 1) pathIndex-= 1;
-    Serial.println("Instruction: " + String((uint8_t)path[pathIndex]));
     uint16_t pos = currentPosition;
     Move(false);
 
@@ -759,10 +756,10 @@ Instructionset Mapping::GetInstruction() {
             path[pathIndex] = Instructionset::FinishedInstructions;
             pathIndex = 1;  // Reset to start of path
 
-            for (int i = 0; path[i] != Instructionset::FinishedInstructions; i++)
-            {
-                Serial.println("A: " + String((uint8_t)path[i]));
-            }
+            //for (int i = 0; path[i] != Instructionset::FinishedInstructions; i++)
+            //{
+            //    Serial.println("A: " + String((uint8_t)path[i]));
+            //}
             
             return path[0];
         }
