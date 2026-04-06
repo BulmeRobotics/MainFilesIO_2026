@@ -552,14 +552,14 @@ ErrorCodes Driving::startAlign(void) {
 #pragma endregion TURN
 #pragma region DRIVE
 #endif
-ErrorCodes Driving::startDrive(void) {
+ErrorCodes Driving::startDrive(bool rampDown) {
 	_registeredBumps = 0;	//add 1 to bump registered
 	_DRIVE_TIMEOUT = false;
 	_CAM_VICTIM = false;
 	maxDriveTime = 5000;
 	driveStartTime = millis();
 
-	sensor = getOptimalSensor();
+	sensor = getOptimalSensor(rampDown);
 	lastTargetDistance = nextTargetDistance;
 
 	if (sensor.type == ReferenceObj::BACK)
@@ -591,9 +591,9 @@ ErrorCodes Driving::controlDrive(int8_t driveSpeed, float angle) {
 	int8_t leftRightError = p_tof->CalculateLeftRightError(p_gyro->data.angle_error, tof_sideWallThreshold, gap_robot_wall);
 	float error = -p_gyro->data.angle_error + (leftRightError * pid_LeftRightFactor);
 
-	if (error != 0)	integralError += error;	//Summenfehler berechnen
+	if (error != 0) integralError += error;	//Summenfehler berechnen
 	else integralError = 0;	//Summe zurücksetzen bei Sollwert
-	derivativeError = error - pid_lastError;	//�nderung des Winkels berechnen
+	derivativeError = error - pid_lastError;	//Änderung des Winkels berechnen
 	pid_lastError = error;
 
 	PID_Coefficients coeff;
@@ -720,7 +720,7 @@ PID_Coefficients  Driving::calculatePIDCoefficients(float loopDuration){
     #endif
 	return pid;
 }
-TOF_Optimal_Value Driving::getOptimalSensor(void){
+TOF_Optimal_Value Driving::getOptimalSensor(bool rampDown){
     TOF_Optimal_Value result;
 	lastSensor = sensor;
 
@@ -754,10 +754,10 @@ TOF_Optimal_Value Driving::getOptimalSensor(void){
 	#endif
 
 	if (result.front <= 850 && result.back > 550)	result.type = ReferenceObj::FRONT;
-	else if (result.front >= 850 && result.back <= 550)	result.type = ReferenceObj::BACK;
+	else if (result.front >= 850 && result.back <= 550 && !rampDown)	result.type = ReferenceObj::BACK;
 	else if (result.front >= 850 && result.back >= 550)	result.type = ReferenceObj::ENCODER;
 	else if (result.front < result.back)	result.type = ReferenceObj::FRONT;
-	else if (result.front > result.back)	result.type = ReferenceObj::BACK;
+	else if (result.front > result.back && !rampDown)	result.type = ReferenceObj::BACK;
 
     #ifdef DEBUG_DRIVING
 	Serial.print("OPTIMAL");

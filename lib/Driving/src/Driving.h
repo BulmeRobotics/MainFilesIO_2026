@@ -19,7 +19,7 @@ class Cameras; // Forward declaration of the Cameras class
 class Driving {
 protected:
 
-    #define DEBUG_RAMP
+    //#define DEBUG_RAMP
     //#define DEBUG_RAMP_ARRAY
     //#define DEBUG_X64
     //#define DEBUG_DRIVING
@@ -137,7 +137,7 @@ private:
 
     //General
     PID_Coefficients calculatePIDCoefficients(float);
-    TOF_Optimal_Value getOptimalSensor(void);
+    TOF_Optimal_Value getOptimalSensor(bool);
 
 public:
     //PUBLIC FLAGS
@@ -261,7 +261,7 @@ public:
      * @brief  Initializes a forward driving sequence.
      * @return OK always.
      */    
-    ErrorCodes startDrive(void);
+    ErrorCodes startDrive(bool rampDown);
 
     /**
      * @brief  Controls forward movement using PID and sensor fusion.

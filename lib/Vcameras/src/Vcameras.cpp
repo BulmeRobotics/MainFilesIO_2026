@@ -197,6 +197,8 @@ ErrorCodes Vcameras::Update(bool onRed, bool wallL, bool wallR){
     _ejector->Eject(side, amount, _robot);
     _ui->LED_BUZZER_Signal(500,500,5);
     _ui->Update();
+    _robot->integralError = 0;
+    _robot->derivativeError = 0;
 
     if(_robot->_TURNING)
         _robot->_CAM_ALERT_TURN = true;

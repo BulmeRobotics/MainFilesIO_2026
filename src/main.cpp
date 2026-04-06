@@ -48,7 +48,7 @@
 #endif
 
 //Objects
-UserInterface UI(250); // Update Interval: 50ms
+UserInterface UI(100); // Update Interval: 50ms
 EEPROM eeprom;
 ColorSensing cs/*(&Serial)*/;
 Gyro gyro;
@@ -246,7 +246,12 @@ while (true) {
           //Weiterfahren
         }
         currentRunState = RunState::CHECK_DRIVE;	//Start Drive
-        robot.startDrive();
+        robot.startDrive(false);
+        break;
+      
+      case Instructionset::ramp:
+        currentRunState = RunState::CHECK_DRIVE;
+        robot.startDrive(true);
         break;
 
       case Instructionset::MazeFinished:
