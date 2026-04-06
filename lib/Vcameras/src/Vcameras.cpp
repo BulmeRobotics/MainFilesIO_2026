@@ -62,33 +62,103 @@ String Vcameras::Recieve(ErrorCodes side, uint32_t waittime){
     return " "; // Timeout
 }
 
+bool Vcameras::TryReceivePacketNonBlocking(ErrorCodes side, String& packet){
+    UART* ifc = (side == ErrorCodes::left) ? _camL : _camR;
+    String& rx = (side == ErrorCodes::left) ? _rxEnableL : _rxEnableR;
+
+    while (ifc->available()) {
+        char c = ifc->read();
+        if (c == '<') {
+            rx = "";
+        } else if (c == '>') {
+            packet = rx;
+            rx = "";
+            if(_debug_ifc != nullptr) _debug_ifc->println("Rec(NB): " + packet);
+            return true;
+        } else {
+            rx += c;
+        }
+    }
+    return false;
+}
+
+ErrorCodes Vcameras::EnableNonBlockingStep(ErrorCodes side){
+    bool& pending = (side == ErrorCodes::left) ? _enPendingL : _enPendingR;
+    bool& target = (side == ErrorCodes::left) ? _enTargetL : _enTargetR;
+    bool& enState = (side == ErrorCodes::left) ? _LeftEnabled : _RightEnabled;
+    uint32_t& startTs = (side == ErrorCodes::left) ? _enStartL : _enStartR;
+    UART* ifc = (side == ErrorCodes::left) ? _camL : _camR;
+
+    if (!pending) return ErrorCodes::OK;
+
+    String packet;
+    if (TryReceivePacketNonBlocking(side, packet)) {
+        pending = false;
+        if (packet.indexOf("OK") != -1) {
+            enState = target;
+            return ErrorCodes::OK;
+        }
+        _ui->ShowPopup("cams enable error", ErrorCodes::ERROR);
+        return ErrorCodes::invalid;
+    }
+
+    if ((millis() - startTs) > CAM_TIMEOUT) {
+        pending = false;
+        _ui->ShowPopup("cams enable timeout", ErrorCodes::warning, 2);
+        return ErrorCodes::TIMEOUT;
+    }
+
+    return ErrorCodes::NO_NEW_DATA;
+}
+
 //---------------------------------------------------------------------------------------------------------
 // Enable
 //---------------------------------------------------------------------------------------------------------
 
-ErrorCodes Vcameras::Enable(bool en, ErrorCodes side){
+ErrorCodes Vcameras::Enable(bool en, ErrorCodes side, bool blocking){
     if(en && _victimFound) return ErrorCodes::OK;
     bool conn = (side == ErrorCodes::left) ? _connectedL : _connectedR;
     if(!conn) return ErrorCodes::no_connection; //Return if no connection
 
     //Create buffers
     bool& enState =  (side == ErrorCodes::left) ? _LeftEnabled : _RightEnabled;
-    if(enState == en) return::ErrorCodes::OK;
+    bool& pending = (side == ErrorCodes::left) ? _enPendingL : _enPendingR;
+    bool& target = (side == ErrorCodes::left) ? _enTargetL : _enTargetR;
+    uint32_t& startTs = (side == ErrorCodes::left) ? _enStartL : _enStartR;
     UART* ifc = (side == ErrorCodes::left) ? _camL : _camR;
-    String str;
+
+    if (pending) {
+        if (target != en) {
+            // Command changed while waiting -> restart request with latest target.
+            pending = false;
+        } else {
+            ErrorCodes step = EnableNonBlockingStep(side);
+            if (!blocking || step != ErrorCodes::NO_NEW_DATA) return step;
+        }
+    }
+
+    if(enState == en) return ErrorCodes::OK;
 
     //Send command
     const char* cmd = en ? "<E>" : "<D>";
     ifc->print(cmd);
 
-    //Recieve Command
-    str = Recieve(side, CAM_TIMEOUT);
-    if(str.indexOf("OK") != -1) {
-        enState = en;
-        return ErrorCodes::OK;
-    }        
-    _ui->ShowPopup("cams enable error", ErrorCodes::ERROR);
-    return ErrorCodes::invalid;
+    // Prepare async wait state
+    pending = true;
+    target = en;
+    startTs = millis();
+
+    if(!blocking) return ErrorCodes::NO_NEW_DATA;
+
+    // Blocking mode: keep stepping until done or timeout
+    while (true) {
+        ErrorCodes step = EnableNonBlockingStep(side);
+        if (step == ErrorCodes::NO_NEW_DATA) {
+            delay(1);
+            continue;
+        }
+        return step;
+    }
 }
 
 //---------------------------------------------------------------------------------------------------------
@@ -100,8 +170,8 @@ ErrorCodes Vcameras::HandleReset(){
     if(_timeFound + DEACT_TIME_VICTIM < millis()){
         _victimFound = false;
         //Enable cams
-        Enable(true,ErrorCodes::left);
-        Enable(true,ErrorCodes::right);
+        Enable(true,ErrorCodes::left, false);
+        Enable(true,ErrorCodes::right, false);
         return ErrorCodes::OK;
     }
     return ErrorCodes::disabled;
@@ -113,24 +183,29 @@ ErrorCodes Vcameras::HandleReset(){
 
 ErrorCodes Vcameras::Update(bool onRed, bool wallL, bool wallR){
     if(!_connectedL || !_connectedR) return ErrorCodes::no_connection;
+
+    // Progress pending async enable commands for both cameras each cycle.
+    EnableNonBlockingStep(ErrorCodes::left);
+    EnableNonBlockingStep(ErrorCodes::right);
+
     if(HandleReset() == ErrorCodes::disabled) return ErrorCodes::disabled;
 
     if(_oldRed && !onRed) {
-        Enable(true, ErrorCodes::left);
-        Enable(true, ErrorCodes::right);
+        Enable(true, ErrorCodes::left, false);
+        Enable(true, ErrorCodes::right, false);
     } else if (!_oldRed && onRed){
-        Enable(false, ErrorCodes::left);
-        Enable(false, ErrorCodes::right);
+        Enable(false, ErrorCodes::left, false);
+        Enable(false, ErrorCodes::right, false);
     }
     _oldRed = onRed;
     if(onRed) return ErrorCodes::OK;
 
     //Wände überprüfen
-    if(wallL && !_LeftEnabled)      Enable(true,  ErrorCodes::left);
-    else if(!wallL && _LeftEnabled) Enable(false, ErrorCodes::left);
+    if(wallL && !_LeftEnabled)      Enable(true,  ErrorCodes::left, false);
+    else if(!wallL && _LeftEnabled) Enable(false, ErrorCodes::left, false);
 
-    if(wallR && !_RightEnabled)      Enable(true,  ErrorCodes::right);
-    else if(!wallR && _RightEnabled) Enable(false, ErrorCodes::right);
+    if(wallR && !_RightEnabled)      Enable(true,  ErrorCodes::right, false);
+    else if(!wallR && _RightEnabled) Enable(false, ErrorCodes::right, false);
 
     //Abfrage auf alert
     if(_LeftEnabled) _LeftAlert = digitalRead(CAMERAL_PIN_INT);
@@ -172,8 +247,9 @@ ErrorCodes Vcameras::Update(bool onRed, bool wallL, bool wallR){
 
     //Reset cams
     _victimFound = true;
-    Enable(false, ErrorCodes::left);
-    Enable(false, ErrorCodes::right);
+    _timeFound = millis();
+    Enable(false, ErrorCodes::left, false);
+    Enable(false, ErrorCodes::right, false);
 
     //Get Amount of dropped Rescue Packs
     uint8_t amount;
