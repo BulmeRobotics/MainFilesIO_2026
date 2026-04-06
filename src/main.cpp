@@ -143,8 +143,8 @@ int main(void) {
   UI.AddInfoMsg("Drivetrain", "OK", true);
 
   //Camera
-  // if(cam.Init(&ejector, &mapper, &robot, &UI, &drivetrain) != ErrorCodes::OK) UI.AddInfoMsg("Cameras", "CONN ERROR", false);
-  // else {UI.AddInfoMsg("Cameras", "OK", true);}
+  if(cam.Init(&ejector, &mapper, &robot, &UI, &drivetrain) != ErrorCodes::OK) UI.AddInfoMsg("Cameras", "CONN ERROR", false);
+  else {UI.AddInfoMsg("Cameras", "OK", true);}
 
   //Robot
   robot.init(&cs, &tof, &gyro, &mapper, &drivetrain);
@@ -348,16 +348,12 @@ while (true) {
           rampLenght = 1;
 				//Determine RAMP Direction
 				if(robot.currentRobotHeight < robot.currentRobotHeight + robot.RAMP_HEIGHT){
-					// if(robot.currentRobotHeight <= LOWER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT >= UPPER_LEVEL_HEIGHT
-					// 	) rampDirection = 2;
 					if(robot.currentRobotHeight <= LOWER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT > LOWER_LEVEL_HEIGHT
 						) rampDirection = 1;
 					else if(robot.currentRobotHeight < UPPER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT >= UPPER_LEVEL_HEIGHT
 						) rampDirection = 1;						 
 				}
 				else if(robot.currentRobotHeight > robot.currentRobotHeight + robot.RAMP_HEIGHT){
-					// if(robot.currentRobotHeight >= UPPER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT <= LOWER_LEVEL_HEIGHT
-					// 	) rampDirection = -2;
 					if(robot.currentRobotHeight >= UPPER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT < UPPER_LEVEL_HEIGHT
 						) rampDirection = -1;
 
@@ -369,13 +365,13 @@ while (true) {
 				robot._ON_RAMP = false;
 				robot.maxRampIncline = 0;					
 				//pass RampInfos to Mapping
-        // if (rampDirection == 1)
-        //   mapper.Ramp(ErrorCodes::up, rampLenght);
-        // else if (rampDirection == -1)
-        //   mapper.Ramp(ErrorCodes::down, rampLenght);
-        // else if (rampDirection == 0)
-        Serial.println("Call Ramp len: " + String(rampLenght));
-        mapper.Ramp(ErrorCodes::same, rampLenght);
+        Serial.println("Ramp D: " + String(rampDirection));
+        if (rampDirection == 1)
+          mapper.Ramp(ErrorCodes::up, rampLenght);
+        else if (rampDirection == -1)
+          mapper.Ramp(ErrorCodes::down, rampLenght);
+        else if (rampDirection == 0)
+          mapper.Ramp(ErrorCodes::same, rampLenght);
 			}
 			currentRunState = RunState::SETTILE;
     }
@@ -418,9 +414,6 @@ void cyclicMainTask() {
   tof.Update();
   UI.Update();
   cs.Update();
-
-  Serial.println(millis() - ts_lastCycle);
-  ts_lastCycle = millis();
 }
 void cyclicRunTask() {
   uint8_t buffer = tof.GetWalls(_RAMP_INFRONT, _RAMP_BEHIND);

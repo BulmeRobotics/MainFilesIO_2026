@@ -265,7 +265,7 @@ ErrorCodes Driving::rampHandler(void){
 			}
 			else if (_RAMP_DOWN && !_STAIR) {
 				rampEncoderDistance = rampEncoderDistance * rampDown_K + rampDown_d;
-				RAMP_ANGLE = maxRampIncline;
+				RAMP_ANGLE = maxRampIncline + 2;
 				#ifdef DEBUG_RAMP
 				Serial.print("\tRAMP DOWN");
 				#endif

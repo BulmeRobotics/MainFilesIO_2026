@@ -19,7 +19,7 @@ class Cameras; // Forward declaration of the Cameras class
 class Driving {
 protected:
 
-    //#define DEBUG_RAMP
+    #define DEBUG_RAMP
     //#define DEBUG_RAMP_ARRAY
     //#define DEBUG_X64
     //#define DEBUG_DRIVING
@@ -47,8 +47,8 @@ private:
     const float rampStairsThreshold = 60;
     const float rampUp_K = 0.95;
     const float rampUp_d = 30; 
-    const float rampDown_K = 1.7;
-    const float rampDown_d = 25;
+    const float rampDown_K = 1.4;
+    const float rampDown_d = 20;
     const float stairUp_K = 0.7;
     const float stairUp_d = 0;
     const float stairDown_K = 1.15;
