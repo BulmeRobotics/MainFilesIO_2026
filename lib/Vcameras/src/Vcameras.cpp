@@ -12,10 +12,6 @@ ErrorCodes Vcameras::Init(Ejector* ejector, Mapping* mapper, Driving* robot, Use
     _ui = ui;
     _drivetrain = drivetrain;
 
-
-    //Reset incoming:
-    
-
     pinMode(CAMERAL_PIN_INT, INPUT);
     pinMode(CAMERAR_PIN_INT, INPUT);
 
@@ -71,11 +67,13 @@ String Vcameras::Recieve(ErrorCodes side, uint32_t waittime){
 //---------------------------------------------------------------------------------------------------------
 
 ErrorCodes Vcameras::Enable(bool en, ErrorCodes side){
+    if(en && _victimFound) return ErrorCodes::OK;
     bool conn = (side == ErrorCodes::left) ? _connectedL : _connectedR;
     if(!conn) return ErrorCodes::no_connection; //Return if no connection
 
     //Create buffers
     bool& enState =  (side == ErrorCodes::left) ? _LeftEnabled : _RightEnabled;
+    if(enState == en) return::ErrorCodes::OK;
     UART* ifc = (side == ErrorCodes::left) ? _camL : _camR;
     String str;
 
@@ -99,7 +97,6 @@ ErrorCodes Vcameras::Enable(bool en, ErrorCodes side){
 
 ErrorCodes Vcameras::HandleReset(){
     if(!_victimFound) return ErrorCodes::OK;
-
     if(_timeFound + DEACT_TIME_VICTIM < millis()){
         _victimFound = false;
         //Enable cams
@@ -117,6 +114,7 @@ ErrorCodes Vcameras::HandleReset(){
 ErrorCodes Vcameras::Update(bool onRed, bool wallL, bool wallR){
     if(!_connectedL || !_connectedR) return ErrorCodes::no_connection;
     if(HandleReset() == ErrorCodes::disabled) return ErrorCodes::disabled;
+
     if(_oldRed && !onRed) {
         Enable(true, ErrorCodes::left);
         Enable(true, ErrorCodes::right);
