@@ -155,9 +155,7 @@ ErrorCodes Driving::checkRamp(void){
 			_RAMP_UP = false;	//Ramp UP not detected
 			if (millis() < lastSetTile + MIN_SETTILE_TIME) {	//Check if settile occured shortly before Ramp detection
 				p_mapSys->RollbackOne();
-				#ifdef DEBUG_RAMP
 				Serial.println("CORRECTED RAMP DOWN!");
-				#endif // DEBUG_RAMP
 			}
 
 			p_mapSys->Move(true);
@@ -240,10 +238,10 @@ ErrorCodes Driving::rampHandler(void){
 			#endif
 
 			if(checkStairRamp()) {
-				finishRamp(80);
+				finishRamp(75);
 				_STAIR = true;
 			}
-			else finishRamp(75);
+			else finishRamp(70);
 			
 			
 			for (uint16_t i = 0; i < INCLINE_ARRAY_SIZE; i++) {
@@ -754,10 +752,12 @@ TOF_Optimal_Value Driving::getOptimalSensor(bool rampDown){
 	#endif
 
 	if (result.front <= 850 && result.back > 550)	result.type = ReferenceObj::FRONT;
-	else if (result.front >= 850 && result.back <= 550 && !rampDown)	result.type = ReferenceObj::BACK;
+	else if (result.front >= 850 && result.back <= 550)	result.type = ReferenceObj::BACK;
 	else if (result.front >= 850 && result.back >= 550)	result.type = ReferenceObj::ENCODER;
 	else if (result.front < result.back)	result.type = ReferenceObj::FRONT;
-	else if (result.front > result.back && !rampDown)	result.type = ReferenceObj::BACK;
+	else if (result.front > result.back)	result.type = ReferenceObj::BACK;
+
+	if (rampDown) result.type = ReferenceObj::ENCODER;
 
     #ifdef DEBUG_DRIVING
 	Serial.print("OPTIMAL");
