@@ -198,6 +198,11 @@ ErrorCodes Vcameras::Update(bool onRed, bool wallL, bool wallR){
     _ui->LED_BUZZER_Signal(500,500,5);
     _ui->Update();
 
+    if(_robot->_TURNING)
+        _robot->_CAM_ALERT_TURN = true;
+    else
+        _robot->_CAM_VICTIM = true;
+
     //2RC - Harmed
     //1RC - Stable
     //0RC - Unharmed

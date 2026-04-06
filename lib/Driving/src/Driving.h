@@ -129,7 +129,6 @@ private:
     bool                _STAIR = false;
     bool 				_TURN_180_DEGREE = false;
     bool                _DRIVE_TIMEOUT = false;
-    bool 	            _CAM_ALERT_TURN = false;
     
     //speedMOD
     const uint8_t stdSPEED_MOD = 2;
@@ -148,6 +147,8 @@ public:
     bool 	_RAMP_INSTRUCTION = false;
     bool    _TURNING = true;
     bool    _SLOW_SPEED = false;
+    bool 	_CAM_ALERT_TURN = false;
+    bool    _CAM_VICTIM = false;
 
     //Public Variables
     TOF_Optimal_Value 	sensor;

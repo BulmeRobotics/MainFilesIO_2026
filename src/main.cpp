@@ -48,7 +48,7 @@
 #endif
 
 //Objects
-UserInterface UI(100); // Update Interval: 50ms
+UserInterface UI(250); // Update Interval: 50ms
 EEPROM eeprom;
 ColorSensing cs/*(&Serial)*/;
 Gyro gyro;
@@ -57,7 +57,7 @@ TofSensors tof;
 Mapping mapper;
 Drivetrain drivetrain;
 Driving robot;
-Vcameras cam(&Serial);
+Vcameras cam;
 
 #ifdef _MSC_VER
 #pragma endregion Objects
@@ -68,13 +68,12 @@ Vcameras cam(&Serial);
 RobotState currentMenuState;
 RunState currentRunState;
 uint32_t lastButtonPressGray;
-uint32_t ts_lastSetTile;
+uint32_t ts_lastCycle;
 
 //Flags
 bool _ROBOT_TURNING = false;
 bool _RAMP_INFRONT = false;
 bool _RAMP_BEHIND = false;
-Instructionset saveInstruction;
 ErrorCodes _CHECKPOINT = ErrorCodes::OK;
 
 #ifdef _MSC_VER
@@ -183,24 +182,14 @@ while (true) {
       //Checkpoint handling
       if(cs.GetFloor() == TileType::checkpoint) UI.ShowPopup("CHECKPOINT",ErrorCodes::info, 2);
       cs.resetCheckpoint();
-      
-      bool _INSTR_DRIVE = (saveInstruction == Instructionset::D_Forward);
-      if (_INSTR_DRIVE && millis() < ts_lastSetTile + MIN_SETTILE_TIME) {	//Check if settile occured shortly before Ramp detection
-				mapper.RollbackOne();
-				#ifdef DEBUG_RAMP
-				Serial.println("CORRECTED RAMP DOWN!");
-				#endif // DEBUG_RAMP
-			}
 
 			currentRunState = RunState::GET_INSTRUCTIONS;
-			ts_lastSetTile = millis();
     } 
 
     else if (currentRunState == RunState::GET_INSTRUCTIONS) {
       UI.UpdateMap();
       //Get Instructions Logic
-      saveInstruction = mapper.GetInstruction();
-      switch (saveInstruction) 
+      switch (mapper.GetInstruction()) 
       {
       case Instructionset::T_North:
       //Turn North Logic

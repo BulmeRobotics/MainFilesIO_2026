@@ -153,6 +153,12 @@ ErrorCodes Driving::checkRamp(void){
 			
 			_RAMP_DOWN = true;	//Ramp DOWN detected
 			_RAMP_UP = false;	//Ramp UP not detected
+			if (millis() < lastSetTile + MIN_SETTILE_TIME) {	//Check if settile occured shortly before Ramp detection
+				p_mapSys->RollbackOne();
+				#ifdef DEBUG_RAMP
+				Serial.println("CORRECTED RAMP DOWN!");
+				#endif // DEBUG_RAMP
+			}
 
 			p_mapSys->Move(true);
 			
@@ -212,121 +218,105 @@ ErrorCodes Driving::rampHandler(void){
 	else {
 		p_gyro->GetAngle_advanced(0, GyroAxles::Axis_Z);
 		float incline = -p_gyro->data.angle_car;
-		
-        // FIX 1: Array Bounds Check - Verhindert Buffer-Overflow, falls die Rampe sehr lang dauert
-        if (arr_incline_index < INCLINE_ARRAY_SIZE) {
-            arr_incline[arr_incline_index] = incline;	
-		    arr_incline_index++;
-        }
+		arr_incline[arr_incline_index] = incline;	//Save the incline value in the array
+		arr_incline_index++;
+
 
 		p_gyro->GetAngle_advanced(0, GyroAxles::Axis_Y);		
 
 		if  (_RAMP_UP && incline > maxRampIncline)	maxRampIncline = incline;	//Ramp up
 		else if (_RAMP_DOWN && incline < maxRampIncline) maxRampIncline = incline;	//Ramp down
 
-        // FIX 2: Debounce & Mindestdistanz für das Ende der Rampe
 		if (incline <= 4 && incline >= -4) {
-            nonInclineCycleCounter++; // Zähler hochzählen (Variable ist bereits im Header verfügbar)
+			rampEncoderDistance = p_drivetrain->GetEncoderDistance();
+
+			endDrive();
+
+			#ifdef DEBUG_RAMP_ARRAY
+			Serial.println("ARRAY");
+			for (uint8_t i = 0; i < arr_incline_index; i++) {
+				Serial.println(arr_incline[i]);
+			}
+			#endif
+
+			if(checkStairRamp()) {
+				finishRamp(80);
+				_STAIR = true;
+			}
+			else finishRamp(75);
 			
-            // Abbruch erst, wenn der Roboter für 5 Zyklen flach steht UND mindestens 50 Ticks gefahren ist
-            if (nonInclineCycleCounter >= 5 && p_drivetrain->GetEncoderDistance() > 50) {
-                rampEncoderDistance = p_drivetrain->GetEncoderDistance();
+			
+			for (uint16_t i = 0; i < INCLINE_ARRAY_SIZE; i++) {
+				arr_incline[i] = 0.0;	//Reset the incline array
+			}
 
+			#ifdef DEBUG_RAMP
+			Serial.print("Raw: ");
+			Serial.print(rampEncoderDistance);
+
+			Serial.print("\tStair: ");
+			Serial.print(_STAIR);
+			#endif // DEBUG_RAMP	
+			
+			if (_RAMP_UP && !_STAIR) {
+				rampEncoderDistance = rampEncoderDistance * rampUp_K + rampUp_d;
+				RAMP_ANGLE = maxRampIncline;
 				#ifdef DEBUG_RAMP
-				Serial.println("RAMP END @" + String(incline));
+				Serial.print("\tRAMP UP");
 				#endif
+			}
+			else if (_RAMP_DOWN && !_STAIR) {
+				rampEncoderDistance = rampEncoderDistance * rampDown_K + rampDown_d;
+				RAMP_ANGLE = maxRampIncline;
+				#ifdef DEBUG_RAMP
+				Serial.print("\tRAMP DOWN");
+				#endif
+			}
+			else if (_RAMP_UP && _STAIR) {
+				rampEncoderDistance = rampEncoderDistance * stairUp_K + stairUp_d;
+				RAMP_ANGLE = avgIncline + stairUp_angle_offset;
+				#ifdef DEBUG_RAMP
+				Serial.print("\tSTAIR UP");
+				#endif
+			}
+			else if (_RAMP_DOWN && _STAIR) {
+				rampEncoderDistance = rampEncoderDistance * stairDown_K + stairDown_d;
+				RAMP_ANGLE = avgIncline + stairDown_angle_offset;
+				#ifdef DEBUG_RAMP
+				Serial.print("\tSTAIR DOWN");
+				#endif
+			}
+			else rampEncoderDistance = 0;	//No Ramp detected
 
-                endDrive();
+			if (!_STAIR) rampEncoderDistance *= 0.95;
 
-                #ifdef DEBUG_RAMP_ARRAY
-                Serial.println("ARRAY");
-                for (uint8_t i = 0; i < arr_incline_index; i++) {
-                    Serial.println(arr_incline[i]);
-                }
-                #endif
+			RAMP_HYPOTENUSE = rampEncoderDistance;
+			RAMP_HEIGHT = rampEncoderDistance * sinf(RAMP_ANGLE * PI / 180.0);
+			RAMP_LENGTH = rampEncoderDistance * cosf(RAMP_ANGLE * PI / 180.0);
+			
+			
+			_RAMP_UP = false;
+			_RAMP_DOWN = false;
+			_STAIR = false;
+			p_colorSensing->Freeze(false);
+			arr_incline_index = 0;	//Reset the incline array index
 
-                if(checkStairRamp()) {
-                    finishRamp(70);
-                    _STAIR = true;
-                }
-                else finishRamp(70);
-                
-                for (uint16_t i = 0; i < INCLINE_ARRAY_SIZE; i++) {
-                    arr_incline[i] = 0.0;	//Reset the incline array
-                }
-
-                #ifdef DEBUG_RAMP
-                Serial.print("Raw: ");
-                Serial.print(rampEncoderDistance);
-
-                Serial.print("\tStair: ");
-                Serial.print(_STAIR);
-                #endif // DEBUG_RAMP	
-                
-                if (_RAMP_UP && !_STAIR) {
-                    rampEncoderDistance = rampEncoderDistance * rampUp_K + rampUp_d;
-                    RAMP_ANGLE = maxRampIncline;
-                    #ifdef DEBUG_RAMP
-                    Serial.print("\tRAMP UP");
-                    #endif
-                }
-                else if (_RAMP_DOWN && !_STAIR) {
-                    rampEncoderDistance = rampEncoderDistance * rampDown_K + rampDown_d;
-                    RAMP_ANGLE = maxRampIncline;
-                    #ifdef DEBUG_RAMP
-                    Serial.print("\tRAMP DOWN");
-                    #endif
-                }
-                else if (_RAMP_UP && _STAIR) {
-                    rampEncoderDistance = rampEncoderDistance * stairUp_K + stairUp_d;
-                    RAMP_ANGLE = avgIncline + stairUp_angle_offset;
-                    #ifdef DEBUG_RAMP
-                    Serial.print("\tSTAIR UP");
-                    #endif
-                }
-                else if (_RAMP_DOWN && _STAIR) {
-                    rampEncoderDistance = rampEncoderDistance * stairDown_K + stairDown_d;
-                    RAMP_ANGLE = avgIncline + stairDown_angle_offset;
-                    #ifdef DEBUG_RAMP
-                    Serial.print("\tSTAIR DOWN");
-                    #endif
-                }
-                else rampEncoderDistance = 0;	//No Ramp detected
-
-                if (!_STAIR) rampEncoderDistance *= 0.95;
-
-                RAMP_HYPOTENUSE = rampEncoderDistance;
-                RAMP_HEIGHT = rampEncoderDistance * sinf(RAMP_ANGLE * PI / 180.0);
-                RAMP_LENGTH = rampEncoderDistance * cosf(RAMP_ANGLE * PI / 180.0);
-                
-                _RAMP_UP = false;
-                _RAMP_DOWN = false;
-                _STAIR = false;
-                p_colorSensing->Freeze(false);
-                arr_incline_index = 0;	//Reset the incline array index
-                nonInclineCycleCounter = 0; // WICHTIG: Zähler für die nächste Rampe zurücksetzen
-
-                #ifdef DEBUG_RAMP
-                Serial.print("\tDistance: ");
-                Serial.print(RAMP_HYPOTENUSE);
-                Serial.print("\tRamp angle: ");
-                Serial.print(RAMP_ANGLE);
-                Serial.print("\tHeight: ");
-                Serial.print(RAMP_HEIGHT);
-                Serial.print("\tLength: ");
-                Serial.println(RAMP_LENGTH);
-                #endif // DEBUG_RAMP
-                
-                return ErrorCodes::RAMP_END;
-            }
-		} else {
-            // Setzt den Zähler wieder zurück, falls der Winkel wieder steil wird (z.B. nach einem Bouncer)
-            nonInclineCycleCounter = 0; 
-        }
+			#ifdef DEBUG_RAMP
+			Serial.print("\tDistance: ");
+			Serial.print(RAMP_HYPOTENUSE);
+			Serial.print("\tRamp angle: ");
+			Serial.print(RAMP_ANGLE);
+			Serial.print("\tHeight: ");
+			Serial.print(RAMP_HEIGHT);
+			Serial.print("\tLength: ");
+			Serial.println(RAMP_LENGTH);
+			#endif // DEBUG_RAMP
+			
+			return ErrorCodes::RAMP_END;
+		}
 	}
 	return ErrorCodes::OK;
 }
-
 bool Driving::checkStairRamp(void) {
 	float aggregatedIncline = 0.0;
 	float sumIncline = 0.0;
@@ -445,6 +435,7 @@ ErrorCodes Driving::controlTurn(float angle) {
 ErrorCodes Driving::endTurn(){
 	enableBumpers();	//Enable Bumpers
 	_CAM_ALERT_TURN = false;
+	maxTurnTime = 3000;
 	startAlign();
 	// p_gyro->ResetAngle(GyroAxles::Axis_Y);
 	// p_gyro->ResetAngle(GyroAxles::Axis_Z);
@@ -564,6 +555,8 @@ ErrorCodes Driving::startAlign(void) {
 ErrorCodes Driving::startDrive(void) {
 	_registeredBumps = 0;	//add 1 to bump registered
 	_DRIVE_TIMEOUT = false;
+	_CAM_VICTIM = false;
+	maxDriveTime = 5000;
 	driveStartTime = millis();
 
 	sensor = getOptimalSensor();
@@ -635,6 +628,7 @@ ErrorCodes Driving::controlDrive(int8_t driveSpeed, float angle) {
 	Serial.println(millis());
 	#endif
 
+	if (_CAM_VICTIM) maxDriveTime = 12000;
 	if ((!_ON_RAMP) && (millis() - driveStartTime > maxDriveTime)) return ErrorCodes::TIMEOUT;
 	else if (!_ON_RAMP) return ErrorCodes::CHECK_DRIVE;
 	else return ErrorCodes::OK;
@@ -668,6 +662,7 @@ ErrorCodes Driving::checkDrive(void) {
 ErrorCodes Driving::endDrive(void) {
 	lastPID_timestamp = 0;
 	p_drivetrain->Stop();
+
 
 	return ErrorCodes::OK;
 }

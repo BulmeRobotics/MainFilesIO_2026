@@ -13,6 +13,7 @@
     #pragma region Init //-------------------------------------------------------------------------------------------------------
 #endif
 void Ejector::Init(void) {
+	return;;
 	pinMode(PIN_SERVO_LEFT, OUTPUT);
 	pinMode(PIN_SERVO_RIGHT, OUTPUT);
 	
@@ -27,6 +28,7 @@ void Ejector::Init(void) {
     #pragma region Eject //------------------------------------------------------------------------------------------------------
 #endif
 ErrorCodes Ejector::Eject(ErrorCodes side, uint8_t amount, Driving* robot) {
+	return ErrorCodes::OK;
 	if(amount == 0) return ErrorCodes::OK;
 	amount = constrain(amount, 1, 5);
 
