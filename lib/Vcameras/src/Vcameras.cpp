@@ -36,11 +36,13 @@ void Vcameras::on_camR_int(){
 // Initialization
 //---------------------------------------------------------------------------------------------------------
 
-ErrorCodes Vcameras::Init(Ejector* ejector, Mapping* mapper, Driving* robot, UserInterface* ui){
+ErrorCodes Vcameras::Init(Ejector* ejector, Mapping* mapper, Driving* robot, UserInterface* ui, Drivetrain* drivetrain){
     _ejector = ejector;
     _mapper = mapper;
     _robot = robot;
     _ui = ui;
+    _drivetrain = drivetrain;
+
 
     //Reset incoming:
     _NEW_DATA_L = false;
@@ -186,7 +188,8 @@ ErrorCodes Vcameras::Update(bool onRed, bool wallL, bool wallR){
     ErrorCodes err = _mapper->SetVictim();
     if(err != ErrorCodes::OK) return err;
 
-    _robot->endDrive(); //Stops robot
+    //_robot->endDrive(); //Stops robot
+    _drivetrain->Stop();
 
     //Get Amount of dropped Rescue Packs
     uint8_t amount;
