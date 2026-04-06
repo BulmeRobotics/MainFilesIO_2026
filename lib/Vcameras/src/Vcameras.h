@@ -13,6 +13,7 @@
 #include <Ejector.h>
 #include <Driving.h>
 #include <Mapping.h>
+#include <Motor.h>
 
 class UserInterface;
 
@@ -40,6 +41,7 @@ private:
     Driving* _robot = nullptr;
     Mapping* _mapper = nullptr;
     UserInterface* _ui = nullptr;
+    Drivetrain* _drivetrain = nullptr;
 
     Stream* _debug_ifc = nullptr;
 
@@ -78,7 +80,7 @@ public:
      * @brief Initializes Cam class. Tries connecting to cameras
      * @return OK - success, else ErrorCodes
      */
-    ErrorCodes Init(Ejector* ejector, Mapping* mapper, Driving* robot, UserInterface* ui);
+    ErrorCodes Init(Ejector* ejector, Mapping* mapper, Driving* robot, UserInterface* ui, Drivetrain* drivetrain);
 
     /**
      * @brief enables or disables Camera

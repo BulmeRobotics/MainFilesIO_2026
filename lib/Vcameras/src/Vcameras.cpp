@@ -5,11 +5,13 @@
 // Initialization
 //---------------------------------------------------------------------------------------------------------
 
-ErrorCodes Vcameras::Init(Ejector* ejector, Mapping* mapper, Driving* robot, UserInterface* ui){
+ErrorCodes Vcameras::Init(Ejector* ejector, Mapping* mapper, Driving* robot, UserInterface* ui, Drivetrain* drivetrain){
     _ejector = ejector;
     _mapper = mapper;
     _robot = robot;
     _ui = ui;
+    _drivetrain = drivetrain;
+
 
     //Reset incoming:
     
@@ -167,7 +169,8 @@ ErrorCodes Vcameras::Update(bool onRed, bool wallL, bool wallR){
     ErrorCodes err = _mapper->SetVictim();
     if(err != ErrorCodes::OK) return err;
 
-    _robot->endDrive(); //Stops robot
+    //_robot->endDrive(); //Stops robot
+    _drivetrain->Stop();
 
     //Reset cams
     _victimFound = true;

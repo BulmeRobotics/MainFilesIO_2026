@@ -144,7 +144,7 @@ int main(void) {
   UI.AddInfoMsg("Drivetrain", "OK", true);
 
   //Camera
-  if(cam.Init(&ejector, &mapper, &robot, &UI) != ErrorCodes::OK) UI.AddInfoMsg("Cameras", "CONN ERROR", false);
+  if(cam.Init(&ejector, &mapper, &robot, &UI, &drivetrain) != ErrorCodes::OK) UI.AddInfoMsg("Cameras", "CONN ERROR", false);
   else {UI.AddInfoMsg("Cameras", "OK", true);}
 
   //Robot
