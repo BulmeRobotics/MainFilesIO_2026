@@ -143,8 +143,8 @@ int main(void) {
   UI.AddInfoMsg("Drivetrain", "OK", true);
 
   //Camera
-  if(cam.Init(&ejector, &mapper, &robot, &UI, &drivetrain) != ErrorCodes::OK) UI.AddInfoMsg("Cameras", "CONN ERROR", false);
-  else {UI.AddInfoMsg("Cameras", "OK", true);}
+  // if(cam.Init(&ejector, &mapper, &robot, &UI, &drivetrain) != ErrorCodes::OK) UI.AddInfoMsg("Cameras", "CONN ERROR", false);
+  // else {UI.AddInfoMsg("Cameras", "OK", true);}
 
   //Robot
   robot.init(&cs, &tof, &gyro, &mapper, &drivetrain);
@@ -184,6 +184,7 @@ while (true) {
       cs.resetCheckpoint();
 
 			currentRunState = RunState::GET_INSTRUCTIONS;
+      robot.lastSetTile = millis();
     } 
 
     else if (currentRunState == RunState::GET_INSTRUCTIONS) {
@@ -343,6 +344,8 @@ while (true) {
 			
 				//Calculate RAMP INFOS
 				rampLenght = (robot.RAMP_LENGTH / 300);	//Calculate num of Tiles
+        if (rampLenght == 0 && robot.RAMP_LENGTH >= 100)
+          rampLenght = 1;
 				//Determine RAMP Direction
 				if(robot.currentRobotHeight < robot.currentRobotHeight + robot.RAMP_HEIGHT){
 					// if(robot.currentRobotHeight <= LOWER_LEVEL_HEIGHT && robot.currentRobotHeight + robot.RAMP_HEIGHT >= UPPER_LEVEL_HEIGHT
