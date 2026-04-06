@@ -709,6 +709,9 @@ Instructionset Mapping::GetInstruction() {
                 // horizontale Sprung generiert dann genau EINEN D_Forward Befehl.
                 if (tiles[fromTile].up == nextTile || tiles[fromTile].down == nextTile) {
                     inRamp = true;
+                    pathIndex--;
+                    path[pathIndex++] = Instructionset::ramp;
+
                     // Generiere exakt EINEN Fahrbefehl für die gesamte Rampensequenz
                     //path[pathIndex++] = Instructionset::D_Forward;
                     continue; 
