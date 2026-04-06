@@ -418,6 +418,9 @@ void cyclicMainTask() {
   tof.Update();
   UI.Update();
   cs.Update();
+
+  Serial.println(millis() - ts_lastCycle);
+  ts_lastCycle = millis();
 }
 void cyclicRunTask() {
   uint8_t buffer = tof.GetWalls(_RAMP_INFRONT, _RAMP_BEHIND);
