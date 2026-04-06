@@ -20,10 +20,8 @@ class Vcameras
 {
 private:
     // --- Hardware Info ---
-    static constexpr PinName CAMERAL_TX = PD_5;     // D18  TX1 PD_5
-    static constexpr PinName CAMERAL_RX = PD_6;     // D19  RX1 PD_6
-    static constexpr PinName CAMERAR_TX = PH_13;    // D16  TX2 PH_13
-    static constexpr PinName CAMERAR_RX = PI_9;     // D17  RX2 PI_9
+    static constexpr UART* CAMERA_L = &Serial2;     // D18  TX1 PD_5
+    static constexpr UART* CAMERA_R = &Serial3;  // D19  RX1 PD_6
 
     static constexpr uint8_t CAMERAL_PIN_INT = 40;
     static constexpr uint8_t CAMERAL_PIN_RST = 42;
@@ -31,11 +29,11 @@ private:
     static constexpr uint8_t CAMERAR_PIN_INT = 41;
     static constexpr uint8_t CAMERAR_PIN_RST = 43;
 
-    static constexpr uint32_t CAM_TIMEOUT = 200;
+    static constexpr uint32_t CAM_TIMEOUT = 5000;
 
     //Serial
-    static mbed::UnbufferedSerial _camL;
-    static mbed::UnbufferedSerial _camR;
+    UART* _camL = CAMERA_L;
+    UART* _camR = CAMERA_R;
 
     // --- related Objects ---
     Ejector* _ejector = nullptr;
@@ -44,6 +42,12 @@ private:
     UserInterface* _ui = nullptr;
 
     Stream* _debug_ifc = nullptr;
+
+    //Reset after detection
+    bool _victimFound = false;
+    uint32_t _timeFound;
+    static constexpr uint32_t DEACT_TIME_VICTIM = 2000;
+    ErrorCodes HandleReset();
 
     // --- Interface ---
     bool _connectedL = false;
@@ -55,16 +59,8 @@ private:
     bool _oldRed = false;
 
     // --- Response ---
-    static char _buffL[7];
-    static char _buffR[7];
-    static uint8_t _idL;
-    static uint8_t _idR;
-
-    static bool _NEW_DATA_L;
-    static bool _NEW_DATA_R;
-
-    static void on_camL_int();
-    static void on_camR_int();
+    static volatile char _buffL[10];
+    static volatile char _buffR[10];
 
     /**
      * @brief Recieves Commandos
