@@ -177,7 +177,6 @@ while (true) {
 
     if (currentRunState == RunState::SETTILE) {
       UI.BuzzerSignal(5, 0, 1);
-      cs.resetCheckpoint();
 			mapper.SetTile(tof.GetWalls(_RAMP_INFRONT, _RAMP_BEHIND), cs.GetFloor());
 
       //Checkpoint handling

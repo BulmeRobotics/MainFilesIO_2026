@@ -226,6 +226,7 @@ PoI_Type ColorSensing::checkFront(){
     // Not white
     if( colorRaw[8] <= 13000){
         _ALERT = true;
+        _checkpoint = false;
         
         //Check Black
         if(colorRaw[8] <= 2500 && colorRaw[1] <= 1000)
@@ -240,7 +241,7 @@ PoI_Type ColorSensing::checkFront(){
         return PoI_Type::checkpoint;
     }
 
-
+    _checkpoint = false;
     _ALERT = false;
     return PoI_Type::white; //TODO: Implement actual color checking
 }
