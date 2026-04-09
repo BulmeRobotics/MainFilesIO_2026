@@ -240,7 +240,10 @@ ErrorCodes Vcameras::Update(bool onRed, bool wallL, bool wallR){
 
     //Mapping call
     ErrorCodes err = _mapper->SetVictim();
-    if(err != ErrorCodes::OK) return err;
+    if(err != ErrorCodes::OK) {
+        if(err == ErrorCodes::already_found) _ui->ShowPopup("Victim alr found",ErrorCodes::warning);
+        return err;
+    }
 
     //_robot->endDrive(); //Stops robot
     _drivetrain->Stop();
@@ -266,9 +269,10 @@ ErrorCodes Vcameras::Update(bool onRed, bool wallL, bool wallR){
     }
     char buffer[20];
     sprintf(buffer,"VICTIM Detected: %c", victim);
-    _ui->ShowPopup(buffer, ErrorCodes::info);
+    _ui->ShowPopup(buffer, ErrorCodes::info, 7);
     _ui->Update();
     _ejector->Eject(side, amount, _robot);
+    _ui->Update();
     _ui->LED_BUZZER_Signal(500,500,5);
     _ui->Update();
     _robot->integralError = 0;
