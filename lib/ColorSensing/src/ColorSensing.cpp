@@ -179,7 +179,9 @@ ErrorCodes ColorSensing::Update(){
 TileType ColorSensing::GetFloor(){
     if(_FREEZE_SENSOR) return TileType::obstacle;
     else if(colorFront == PoI_Type::black) return TileType::black;
-    else return colorMiddle;
+    TileType floor = colorMiddle;
+    if (floor == TileType::checkpoint && !_checkpoint) return TileType::visited;
+    else return floor;
 }
 
 bool ColorSensing::GetAlert(){
