@@ -909,7 +909,7 @@ ErrorCodes Mapping::RestartCheckpoint() {
     if (resetCounter >= OPTION_MAX_RESETS) {
         _RETURN_HOME = true; // Zwingt den A*, den Weg zum Feld 0 zu suchen
     }
-
+    resetCounter++;
     return ErrorCodes::OK;
 }
 
