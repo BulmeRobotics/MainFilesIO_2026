@@ -177,12 +177,11 @@ while (true) {
 
     if (currentRunState == RunState::SETTILE) {
       UI.BuzzerSignal(5, 0, 1);
+      cs.resetCheckpoint();
 			mapper.SetTile(tof.GetWalls(_RAMP_INFRONT, _RAMP_BEHIND), cs.GetFloor());
 
       //Checkpoint handling
       if(cs.GetFloor() == TileType::checkpoint) UI.ShowPopup("CHECKPOINT",ErrorCodes::info, 4);
-      cs.resetCheckpoint();
-
 			currentRunState = RunState::GET_INSTRUCTIONS;
       robot.lastSetTile = millis();
     } 
