@@ -13,6 +13,7 @@
 #include <Gyro.h>
 #include <ColorSensing.h>
 #include <Mapping.h>
+#include <Vcameras.h>
 
 class Cameras; // Forward declaration of the Cameras class
 
@@ -73,7 +74,7 @@ private:
     Gyro*          p_gyro = nullptr;
     Drivetrain*    p_drivetrain = nullptr;
     Mapping*       p_mapSys = nullptr;
-    // Cameras*       p_cams = nullptr;
+    Vcameras*      p_cams = nullptr;
 
 //Objects -------------------------------------------------------------------------------------------------------------------------
     
@@ -171,7 +172,7 @@ public:
      * @brief  Initializes the Driving module and links all required subsystems.
      * @param  Pointers to all required modules (sensors, mapping, drivetrain).
      */
-    void init(ColorSensing* p_colorSensing, TofSensors* p_tof, Gyro* p_gyro, Mapping* mapSys_pointer, /*Cameras* cam_pointer, */ Drivetrain* p_drivetrain);
+    void init(ColorSensing* p_colorSensing, TofSensors* p_tof, Gyro* p_gyro, Mapping* mapSys_pointer, Vcameras* cam_pointer, Drivetrain* p_drivetrain);
 
     //Bumpers:  
     /**

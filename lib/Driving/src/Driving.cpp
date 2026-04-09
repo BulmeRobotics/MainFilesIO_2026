@@ -383,7 +383,7 @@ ErrorCodes Driving::controlTurn(float angle) {
 	if (((millis() - startTime) >= maxTurnTime))	turnTimeout = true;
 	else turnTimeout = false;
 
-	if ((p_gyro->data.angle_abs >= (angle + 0.15) || (p_gyro->data.angle_abs <= (angle - 0.15))) && !turnTimeout) {
+	if ((p_gyro->data.angle_abs >= (angle + 0.5) || (p_gyro->data.angle_abs <= (angle - 0.5))) && !turnTimeout) {
 		//Get the gyro readings and calculate the control data
 		p_gyro->GetAngle_advanced(angle, GyroAxles::Axis_X);
 		#ifdef DEBUG_TURN
@@ -393,11 +393,11 @@ ErrorCodes Driving::controlTurn(float angle) {
 
 		//Calculate the turn speed with an exponential function
 		int16_t turnSpeed = 0;
-		float baseSpeed = 80.0;
-//!		// if (p_cams->_ALERT_STATE) {
-		// 	baseSpeed = 30.0;	//Reduce speed if CS is on ALERT
-		// 	_CAM_ALERT_TURN = true;
-		// }
+		float baseSpeed = 70.0;
+		if (p_cams->IsAlert(ErrorCodes::left) || p_cams->IsAlert(ErrorCodes::right)) {
+			baseSpeed = 30.0;	//Reduce speed if CS is on ALERT
+			_CAM_ALERT_TURN = true;
+		}
 
 		if (p_gyro->data.direction_right)	turnSpeed = -(baseSpeed * 	(1 - pow(EULER, p_gyro->data.angle_error / 25.0)) + 20.0);
 		else if (p_gyro->data.direction_left) turnSpeed = (baseSpeed * 	(1 - pow(EULER, -p_gyro->data.angle_error / 25.0)) + 20.0);
@@ -770,12 +770,12 @@ TOF_Optimal_Value Driving::getOptimalSensor(bool rampDown){
     #endif // DEBUG
 	return result;
 }
-void Driving::init(ColorSensing* p_colorSensing, TofSensors* p_tof, Gyro* p_gyro, Mapping* mapSys_pointer, /*Cameras* cam_pointer, */ Drivetrain* p_drivetrain) {
+void Driving::init(ColorSensing* p_colorSensing, TofSensors* p_tof, Gyro* p_gyro, Mapping* mapSys_pointer, Vcameras* cam_pointer, Drivetrain* p_drivetrain) {
     this->p_colorSensing = p_colorSensing;
     this->p_tof = p_tof;
     this->p_gyro = p_gyro;
 	this->p_mapSys = mapSys_pointer;
-//!    this->p_cams = cam_pointer;
+	this->p_cams = cam_pointer;
     this->p_drivetrain = p_drivetrain;	//Pointer to Motor 
 
     //ENABLE Bumper pins
