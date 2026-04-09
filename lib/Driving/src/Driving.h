@@ -13,9 +13,9 @@
 #include <Gyro.h>
 #include <ColorSensing.h>
 #include <Mapping.h>
-#include <Vcameras.h>
 
-class Cameras; // Forward declaration of the Cameras class
+class Vcameras;
+
 
 class Driving {
 protected:
