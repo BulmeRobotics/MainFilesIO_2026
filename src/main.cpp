@@ -382,7 +382,7 @@ while (true) {
       robot.disableBumpers();
       cam.Enable(false, ErrorCodes::left);
       cam.Enable(false, ErrorCodes::right);
-      UI.LED_BUZZER_Signal(100,500,3);
+      UI.LED_BUZZER_Signal(1000,1000,5);
       currentMenuState = RobotState::ABOUT;
     }
   } 
