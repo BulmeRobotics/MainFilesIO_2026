@@ -50,7 +50,7 @@
 //Objects
 UserInterface UI(100); // Update Interval: 50ms
 EEPROM eeprom;
-ColorSensing cs/*(&Serial)*/;
+ColorSensing cs(&Serial);
 Gyro gyro;
 Ejector ejector;
 TofSensors tof;
