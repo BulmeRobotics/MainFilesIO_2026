@@ -219,7 +219,8 @@ PoI_Type ColorSensing::checkFront(){
     printDebugData(colorRaw, 'F');
 
     // Silver Tile
-    UpdateHistory(colorRaw[4], colorRaw[5], colorRaw[6]);
+    //UpdateHistory(colorRaw[4], colorRaw[5], colorRaw[6]);
+
 
     // Not white
     if( colorRaw[8] <= 13000){
@@ -231,6 +232,15 @@ PoI_Type ColorSensing::checkFront(){
         else return PoI_Type::undef;
         
     }
+
+    //Silver - checkpoint
+    if(colorRaw[4] < 7000 && colorRaw[5] < 7000){
+        _checkpoint = true;
+        _ALERT = true;
+        return PoI_Type::checkpoint;
+    }
+
+
     _ALERT = false;
     return PoI_Type::white; //TODO: Implement actual color checking
 }
