@@ -28,7 +28,7 @@ void Ejector::Init(void) {
 #endif
 ErrorCodes Ejector::Eject(ErrorCodes side, uint8_t amount, Driving* robot) {
 	if(amount == 0) return ErrorCodes::OK;
-	amount = constrain(amount, 1, 5);
+	amount = constrain(amount, 1, 6);
 
 	if(remainingPacks <= 0) return ErrorCodes::empty;
 

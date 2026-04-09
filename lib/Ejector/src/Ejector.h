@@ -51,8 +51,8 @@ class Ejector {
         // Positions
         static constexpr int POS_CLOSED_LEFT    = 80;
         static constexpr int POS_OPEN_LEFT      = 0;
-        static constexpr int POS_CLOSED_RIGHT   = 100;
-        static constexpr int POS_OPEN_RIGHT     = 180;
+        static constexpr int POS_CLOSED_RIGHT   = 85;
+        static constexpr int POS_OPEN_RIGHT     = 170;
 
         // Timing
         static constexpr uint16_t DELAY_OPEN    = 500;
