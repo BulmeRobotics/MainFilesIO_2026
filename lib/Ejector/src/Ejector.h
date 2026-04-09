@@ -49,8 +49,8 @@ class Ejector {
         static constexpr uint8_t PIN_SERVO_RIGHT= 7;
 
         // Positions
-        static constexpr int POS_CLOSED_LEFT    = 80;
-        static constexpr int POS_OPEN_LEFT      = 0;
+        static constexpr int POS_CLOSED_LEFT    = 100;
+        static constexpr int POS_OPEN_LEFT      = 18;
         static constexpr int POS_CLOSED_RIGHT   = 85;
         static constexpr int POS_OPEN_RIGHT     = 170;
 

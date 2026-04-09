@@ -52,7 +52,7 @@ UserInterface UI(100); // Update Interval: 50ms
 EEPROM eeprom;
 ColorSensing cs/*(&Serial)*/;
 Gyro gyro;
-Ejector ejector(4);
+Ejector ejector;
 TofSensors tof;
 Mapping mapper;
 Drivetrain drivetrain;
