@@ -180,7 +180,7 @@ while (true) {
 			mapper.SetTile(tof.GetWalls(_RAMP_INFRONT, _RAMP_BEHIND), cs.GetFloor());
 
       //Checkpoint handling
-      if(cs.GetFloor() == TileType::checkpoint) UI.ShowPopup("CHECKPOINT",ErrorCodes::info, 2);
+      if(cs.GetFloor() == TileType::checkpoint) UI.ShowPopup("CHECKPOINT",ErrorCodes::info, 4);
       cs.resetCheckpoint();
 
 			currentRunState = RunState::GET_INSTRUCTIONS;

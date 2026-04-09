@@ -179,7 +179,6 @@ ErrorCodes ColorSensing::Update(){
 TileType ColorSensing::GetFloor(){
     if(_FREEZE_SENSOR) return TileType::obstacle;
     else if(colorFront == PoI_Type::black) return TileType::black;
-    else if(_checkpoint) return TileType::checkpoint;
     else return colorMiddle;
 }
 
@@ -230,7 +229,6 @@ PoI_Type ColorSensing::checkFront(){
         if(colorRaw[8] <= 2500 && colorRaw[1] <= 1000)
             return PoI_Type::black;
         else return PoI_Type::undef;
-        
     }
 
     //Silver - checkpoint
@@ -263,6 +261,8 @@ TileType ColorSensing::checkMiddle(){
     //Only prints values when debugPort is set, otherwise does nothing
     printDebugData(colorRaw, 'M');
     
+    if(_checkpoint && colorRaw[8] > 61000) return TileType::checkpoint;
+
     //Blau:
     if(colorRaw[8] < 40000){
         return TileType::blue;
