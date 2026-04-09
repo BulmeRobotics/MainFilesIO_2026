@@ -269,11 +269,13 @@ ErrorCodes Vcameras::Update(bool onRed, bool wallL, bool wallR){
     }
     char buffer[20];
     sprintf(buffer,"VICTIM Detected: %c", victim);
-    _ui->ShowPopup(buffer, ErrorCodes::info, 7);
+    _ui->ShowPopup(buffer, ErrorCodes::info, 5);
+    _ui->LED_BUZZER_Signal(500,500,1);
     _ui->Update();
+    _ui->LED_BUZZER_Signal(500,500,4);
     _ejector->Eject(side, amount, _robot);
     _ui->Update();
-    _ui->LED_BUZZER_Signal(500,500,5);
+    
     _ui->Update();
     _robot->integralError = 0;
     _robot->derivativeError = 0;
