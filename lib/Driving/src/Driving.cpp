@@ -242,7 +242,7 @@ ErrorCodes Driving::rampHandler(void){
 				finishRamp(75);
 				_STAIR = true;
 			}
-			else finishRamp(70);
+			else finishRamp(60);
 			
 			
 			for (uint16_t i = 0; i < INCLINE_ARRAY_SIZE; i++) {

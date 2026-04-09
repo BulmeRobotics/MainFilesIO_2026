@@ -46,9 +46,9 @@ private:
     const uint8_t rampSpeedDown = 25;
     const uint8_t rampSubDistance = 30;
     const float rampStairsThreshold = 60;
-    const float rampUp_K = 0.95;
+    const float rampUp_K = 0.9;
     const float rampUp_d = 30; 
-    const float rampDown_K = 1.4;
+    const float rampDown_K = 1.25;
     const float rampDown_d = 20;
     const float stairUp_K = 0.7;
     const float stairUp_d = 0;
