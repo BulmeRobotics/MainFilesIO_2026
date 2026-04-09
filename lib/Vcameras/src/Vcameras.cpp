@@ -98,7 +98,7 @@ ErrorCodes Vcameras::EnableNonBlockingStep(ErrorCodes side){
             enState = target;
             return ErrorCodes::OK;
         }
-        _ui->ShowPopup("cams enable error", ErrorCodes::ERROR);
+        //_ui->ShowPopup("cams enable error", ErrorCodes::ERROR);
         return ErrorCodes::invalid;
     }
 

@@ -288,7 +288,7 @@ while (true) {
       cs.Freeze(false);
       cs.Update();
       delay(200);
-      mapper.Reset();
+      mapper.RestartCheckpoint();
       robot.robotTargetAngle = Orientations::North;
       UI.UpdateResetProgress("Reset Map   ",4,4);
       _CHECKPOINT = ErrorCodes::OK;
