@@ -19,7 +19,7 @@ class Cameras; // Forward declaration of the Cameras class
 class Driving {
 protected:
 
-    #define DEBUG_RAMP
+    //#define DEBUG_RAMP
     //#define DEBUG_RAMP_ARRAY
     //#define DEBUG_X64
     //#define DEBUG_DRIVING

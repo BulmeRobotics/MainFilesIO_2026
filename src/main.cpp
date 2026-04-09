@@ -365,7 +365,7 @@ while (true) {
 				robot._ON_RAMP = false;
 				robot.maxRampIncline = 0;					
 				//pass RampInfos to Mapping
-        Serial.println("Ramp D: " + String(rampDirection));
+        // Serial.println("Ramp D: " + String(rampDirection));
         if (rampDirection == 1)
           mapper.Ramp(ErrorCodes::up, rampLenght);
         else if (rampDirection == -1)
